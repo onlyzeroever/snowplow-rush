@@ -1,2 +1,5 @@
+# Playtest build. Search engines are kept out by the noindex tag and the
+# X-Robots-Tag header, which only work if bots can read the page.
+# Link-preview bots (WhatsApp, iMessage, Slack, Discord) need access too.
 User-agent: *
-Disallow: /
+Allow: /
