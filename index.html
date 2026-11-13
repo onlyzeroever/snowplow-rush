@@ -1372,7 +1372,7 @@ function drawTitle(){
   drawRig(b,'shovel',30+prog-4,226,1,14,2,Math.floor(tNow*6)%2,0,false);drawFlakes(0,H);
   if(!logoReady){text(b,'SNOWPLOW',W/2,40,'#ffffff',{align:'center',scale:3,outline:'#1d4f9a'});text(b,'RUSH',W/2,62,'#ffc727',{align:'center',scale:4,outline:'#8e3a10'});}
   if(Math.floor(tNow*2)%2===0)text(b,'TAP TO PLAY',W/2,258,'#ffffff',{align:'center',scale:2});
-  text(b,'PROTOTYPE V0.6.7',W/2,300,'#4f6fa0',{align:'center',outline:null});
+  text(b,'PROTOTYPE V0.6.8',W/2,300,'#4f6fa0',{align:'center',outline:null});
   if(offlineGain>0){panel(18,110,144,64,'#13306b','#ffd23f');text(b,'WELCOME BACK!',W/2,118,'#ffd23f',{align:'center'});
     text(b,'YOUR HELPERS EARNED',W/2,130,'#ffffff',{align:'center'});b.drawImage(SPR.coin,W/2-30,141);text(b,'+'+fmt(offlineGain),W/2-20,142,'#ffd23f',{scale:2});
     button('collect',22,156,66,14,'green','COLLECT',()=>{offlineGain=0;sfx('buy');goMap();});
@@ -2344,7 +2344,7 @@ let last=performance.now();
 function frame(now){const dt=Math.min(0.05,(now-last)/1000);last=now;
   try{update(dt);draw();}catch(err){console.error(err);}
   ctx.imageSmoothingEnabled=false;ctx.drawImage(buf,0,0,W*KS,H*KS);
-  if(state==='title'&&logoReady&&!settingsOpen){ctx.imageSmoothingEnabled=true;const lw=168,lh=Math.round(lw*logoImg.height/logoImg.width);const bob=Math.round(Math.sin(tNow*2)*1.5);ctx.drawImage(logoImg,(W-lw)/2*KS,(26+bob)*KS,lw*KS,lh*KS);}
+  if(state==='title'&&logoReady&&!settingsOpen){ctx.imageSmoothingEnabled=true;const lw=168,lh=Math.round(lw*logoImg.height/logoImg.width);const bob=0;ctx.drawImage(logoImg,(W-lw)/2*KS,(26+bob)*KS,lw*KS,lh*KS);}
   requestAnimationFrame(frame);}
 requestAnimationFrame(frame);
 window.__SR={get mapView(){return save.mapView;},mapInit,ensureMapArt,get mapArt(){return mapArt;},get mapMs(){return mapInit.ms;},mapEdges,get plowAnim(){return plowAnim;},get ridePeek(){return ridePeek;},set ridePeek(v){ridePeek=v;},get rideReveal(){return rideReveal;},set rideReveal(v){rideReveal=v;},equip,useIdx,get trophyTab(){return trophyTab;},set trophyTab(v){trophyTab=v;},set trophiesOpen(v){trophiesOpen=v;},_t:{buildLevel,footprint,bladeRect,isKidTool,get VSPEC(){return VSPEC;},T_BLOCK,CLEAR_T},get weeklyOpen(){return weeklyOpen;},set weeklyOpen(v){weeklyOpen=v;},weeklyDef,get scrollY(){return scrollY;},get jobInfo(){return jobInfo;},set jobInfo(v){jobInfo=v;},startNewWinter,levelOpen,LEVELS,TOOLS,get audio(){return {ctx:!!AC,state:AC&&AC.state,bufs:Object.keys(BUF).length,music:curMusic,loops:Object.keys(loopNodes)};},audioInit,openShop,dailyAdd,award,get shopOpen(){return shopOpen;},get dailyOpen(){return dailyOpen;},set dailyOpen(v){dailyOpen=v;},get winterOpen(){return winterOpen;},get state(){return state;},get G(){return G;},get run(){return run;},get P(){return P;},save,startLevel,goMap,goUpgrades,goGarage,endRound:()=>endRound(false),keys,hit};
