@@ -568,10 +568,13 @@ function sfxStar(i){if(!playBuf('star'+(i+1)))tone(880*Math.pow(1.26,i),0.2,'tri
 function buzz(ms){try{navigator.vibrate&&navigator.vibrate(ms);}catch(e){}}
 
 // ---------------- SAVE ----------------
-const TEST_MODE=/[?&]test=1/.test(location.search);const SAVE_KEY=TEST_MODE?'snowplowRush.test':'snowplowRush.proto.v2';
+const TEST_MODE=/[?&]test=1/.test(location.search),REVIEW_MODE=/[?&]review=1/.test(location.search);const SAVE_KEY=TEST_MODE?'snowplowRush.test':REVIEW_MODE?'snowplowRush.review':'snowplowRush.proto.v2';
 const NL=LEVELS.length;
 const save={coins:0,tool:0,mlv:{},lv:{speed:0,size:0,value:0,bumper:0,helpers:0},stars:Array(NL).fill(0),best:Array(NL).fill(0),muted:false,last:Date.now(),ctrl:'joy',tut:false,ach:{},stats:{cells:0,gifts:0,dodges:0,gnome:0,neighbours:0},hat:'yellow',hats:{yellow:true},daily:null,frost:0,winters:0,winterCoins:0,fails:Array(NL).fill(0),boostNext:false,gems:0,pro:false,adGems:null,dailySeen:'',winterSeen:false,musicOff:false,v:6,gold:-1,tolls:{},outfit:'classic',outfits:{classic:true},skin:{},skins:{},trail:'classic',trails:{classic:true},treasures:{}};
-function loadSave(){try{const s=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');if(s){
+function loadSave(){try{let s=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');
+  if(!s&&REVIEW_MODE){s={v:6,tut:true,story:{suburbs:true},coins:4000,tool:2,use:2,gems:20,mlv:{shovel:{speed:3,size:3,bumper:1},pusher:{speed:6,size:6,bumper:2},blower:{speed:1,size:1,bumper:0}},lv:{speed:0,size:0,value:6,bumper:0,helpers:3},stars:[],best:[]};
+    for(const id of ['driveway','gardens','culdesac','park','school','maple']){const i=LEVELS.findIndex(L=>L.id===id);s.stars[i]=2;s.best[i]=70;}}
+  if(s){
   if(!s.v||s.v<6){const oldIds=(!s.v)?['driveway','maple','lot','street','airport']:['driveway','culdesac','maple','lot','street','airport'];
     for(const k of ['stars','best','fails'])if(Array.isArray(s[k])){const o=s[k],n=Array(NL).fill(0);oldIds.forEach((id,j)=>{const ni=LEVELS.findIndex(l=>l.id===id);if(ni>=0)n[ni]=o[j]||0;});s[k]=n;}
     s.v=6;if(s.tool>=0){/* tools unchanged */}}
