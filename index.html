@@ -104,6 +104,16 @@ const LEVELS=[
   {id:'site',    name:'BUILDING SITE',area:'secret',h:3900,time:90,value:15, stars:[40,65,85],tool:'mech',   winter:4,snowfall:800, presents:14,squall:8, from:[],mx:30, my:1060},
   {id:'castle',  name:'MOUNTAIN CASTLE',area:'secret',h:4300,time:90,value:20,stars:[40,65,85],tool:'dragon',winter:5,snowfall:900, presents:15,squall:7, from:[],mx:90, my:690},
   {id:'ranch',   name:'MOONLIT RANCH',area:'secret',h:4700,time:90,value:27, stars:[40,65,85],tool:'ufo',    winter:6,snowfall:1000,presents:16,squall:7,night:true,from:[],mx:40,my:1460},
+  // ---- Suburbs, part 2 (Nov 2026): 7 main jobs, 1 side job, 1 boss ----
+  {id:'cornershop',name:'CORNER SHOP', area:'suburbs',h:600, time:70,value:1.65,stars:[35,60,85],snowfall:100,presents:5,squall:0,from:['maple'],     mx:0,my:0,data:{}},
+  {id:'playground',name:'PLAYGROUND',  area:'suburbs',h:640, time:70,value:1.7, stars:[35,60,85],snowfall:105,presents:5,squall:0,from:['cornershop'],mx:0,my:0,data:{}},
+  {id:'allotments',name:'ALLOTMENTS',  area:'suburbs',h:700, time:75,value:1.75,stars:[35,60,85],snowfall:110,presents:5,squall:0,from:['playground'],mx:0,my:0,data:{}},
+  {id:'dogpark',   name:'DOG PARK',    area:'suburbs',h:720, time:75,value:1.8, stars:[35,60,85],snowfall:115,presents:6,squall:0,from:['allotments'],mx:0,my:0,data:{}},
+  {id:'tennis',    name:'TENNIS CLUB', area:'suburbs',h:760, time:75,value:1.85,stars:[35,60,85],snowfall:120,presents:6,squall:0,from:['dogpark'],   mx:0,my:0,data:{}},
+  {id:'highst',    name:'HIGH STREET', area:'suburbs',h:820, time:75,value:1.9, stars:[35,60,85],snowfall:125,presents:6,squall:0,from:['tennis'],    mx:0,my:0,data:{}},
+  {id:'sledhill',  name:'SLEDGING HILL',area:'suburbs',h:700,time:70,value:1.9, stars:[35,60,85],snowfall:120,presents:7,squall:0,from:['highst'],    mx:0,my:0,data:{},bonus:true},
+  {id:'fountainsq',name:'FOUNTAIN SQUARE',area:'suburbs',h:860,time:80,value:1.95,stars:[35,60,85],snowfall:130,presents:6,squall:0,from:['highst'],mx:0,my:0,data:{}},
+  {id:'blockparty',name:'BLOCK PARTY', area:'suburbs',h:1000,time:85,value:2.0, stars:[35,60,85],snowfall:140,presents:8,squall:0,from:['fountainsq'],mx:0,my:0,data:{},boss:true},
 ];
 const BASE_LEVELS=18;
 const AREAS={suburbs:{name:'SUBURBS'},farm:{name:'FARMLAND'},city:{name:'THE CITY'},north:{name:'THE FROZEN NORTH'},secret:{name:'WILD RIDES'}};
@@ -571,7 +581,7 @@ function goldFor(w){return w>=2?Math.min(4,w-2):-1;}
 const levelAvail=i=>(LEVELS[i].winter||1)<=winterNo();
 function baseStars(){let s=0;for(let i=0;i<BASE_LEVELS;i++)s+=save.stars[i];return s;}
 const lvIdx=id=>LEVELS.findIndex(l=>l.id===id);
-function levelReach(i){const L=LEVELS[i];if(!levelAvail(i))return false;if(L.tool)return save.tool>=toolIdx(L.tool);if(!L.from.length)return true;return L.from.some(id=>save.stars[lvIdx(id)]>0);}
+function levelReach(i){const L=LEVELS[i];if(!levelAvail(i))return false;if(L.tool)return save.tool>=toolIdx(L.tool);if(!L.from.length)return true;const i2=LEVELS.indexOf(L);if(save.stars[i2]>0||save.best[i2]>0)return true;return L.from.some(id=>save.stars[lvIdx(id)]>0);}
 function levelGateOK(i){const L=LEVELS[i];return !L.gate||save.tool>=toolIdx(L.gate);}
 function levelPaid(i){const L=LEVELS[i];return !L.toll||!!(save.tolls||{})[L.id];}
 function levelOpen(i){return levelReach(i)&&levelGateOK(i)&&levelPaid(i);}
@@ -1634,7 +1644,8 @@ function jobLockReason(i){const L=LEVELS[i];if(!levelAvail(i))return 'NEW WINTER
 // ---------------- WORLD MAP ----------------
 // The map is a tall hand-laid world (180 x MAP_H) baked once into canvases in the game's own pixel style,
 // with roads that wind left/right between jobs. Live bits (smoke, cows, traffic, snowfall, nodes) draw on top each frame.
-const MAP_H=2436,MAP_VY=23,MAP_VH=NAV_Y-2-MAP_VY;
+const MAP_OLD_H=2436,MAP_SPLIT=1992,SUB_EXT=560,MAP_H=MAP_OLD_H+SUB_EXT,MAP_VY=23,MAP_VH=NAV_Y-2-MAP_VY;
+const SY=y=>y>=MAP_SPLIT?y+SUB_EXT:y;
 const BIOMES=[{id:'north',name:'THE FROZEN NORTH',y0:0,y1:846,snow:1,ground:'#eaf0fc'},{id:'city',name:'THE CITY',y0:846,y1:1462,snow:0.62,ground:'#e8eef7'},
   {id:'farm',name:'FARMLAND',y0:1462,y1:1992,snow:0.36,ground:'#f3f7fc'},{id:'suburbs',name:'SUBURBS',y0:1992,y1:MAP_H,snow:0.16,ground:'#f4f8ff'}];
 function biomeAt(y){for(const B of BIOMES)if(y<B.y1)return B;return BIOMES[BIOMES.length-1];}
@@ -1655,7 +1666,17 @@ const RIV_Y=1964,RIV_HW=11;function rivY(x){return RIV_Y+Math.round(Math.sin(x*0
 const MW_Y0=1416,MW_Y1=1446,RUNWAY={x0:6,x1:132,y0:870,y1:886};
 const MC={snow:'#f4f8ff',snowB:'#e9f0fa',sh:'#c6d9f3',sh2:'#a6c2ea',sh3:'#8fb0dc',ice:'#d4f0ff',ice2:'#a8dcfa',ice3:'#7dbfe8',lit:'#ffd77a',litH:'#fff1c2',
   wood:'#a8673a',woodD:'#7a4a2a',woodL:'#c98d4a',rock:'#8793a8',rockD:'#66728e',rockL:'#b3c1d8',stone:'#c6d0e0',green:'#2f8a4a',greenL:'#3fa85a',brick:'#b8433f'};
+// the old map is drawn from the old positions and links; everything else uses the stretched map
+const MAPPOS_OLD=JSON.parse(JSON.stringify(MAPPOS)),EDGE_VIA_OLD=JSON.parse(JSON.stringify(EDGE_VIA));
+const OLD_LINKS=[];LEVELS.forEach(L=>{if(!MAPPOS_OLD[L.id])return;for(const f2 of L.from)if(MAPPOS_OLD[f2])OLD_LINKS.push([f2,L.id,false]);});for(const k in WILD_LINK)OLD_LINKS.push([WILD_LINK[k],k,true]);
+for(const k in MAPPOS)MAPPOS[k][1]=SY(MAPPOS[k][1]);for(const k in EDGE_VIA)for(const p of EDGE_VIA[k])p[1]=SY(p[1]);for(const k in LANDMARK)LANDMARK[k][1]=SY(LANDMARK[k][1]);
+// new Suburbs jobs, bottom to top, in the band between the river (1984) and the old Suburbs
+Object.assign(MAPPOS,{cornershop:[92,2504],playground:[36,2444],allotments:[128,2396],dogpark:[44,2334],tennis:[132,2276],highst:[88,2208],sledhill:[22,2150],fountainsq:[142,2146],blockparty:[86,2066]});
+Object.assign(LANDMARK,{cornershop:[118,2480],playground:[28,2420],allotments:[140,2372],dogpark:[44,2310],tennis:[150,2256],highst:[88,2186],sledhill:[28,2122],fountainsq:[150,2122],blockparty:[86,2040]});
+Object.assign(EDGE_VIA,{'maple>cornershop':[[93,2600],[93,2552]],'blockparty>lane':[[90,2030],[94,1996],[94,1980],[94,1948]]});
+{const ln=LEVELS.find(L=>L.id==='lane');if(ln)ln.from=['blockparty'];}
 for(const L of LEVELS){const p=MAPPOS[L.id];if(p){L.mx=p[0];L.my=p[1];}}
+function mapEdgesOld(){const out=[];for(const [a,b2,wild] of OLD_LINKS){const A=MAPPOS_OLD[a],B=MAPPOS_OLD[b2];if(!A||!B)continue;const key=a+'>'+b2,via=EDGE_VIA_OLD[key];out.push({a,b:b2,key,wild,pts:pixPath(via?crPts([A,...via,B]):bezPts(A,B))});}return out;}
 // ---- curves ----
 function bezPts(A,B){const dy=A[1]-B[1],c1=[A[0],A[1]-dy*0.55],c2=[B[0],B[1]+dy*0.55],o=[];
   for(let i=0;i<=240;i++){const t=i/240,u=1-t;o.push([u*u*u*A[0]+3*u*u*t*c1[0]+3*u*t*t*c2[0]+t*t*t*B[0],u*u*u*A[1]+3*u*u*t*c1[1]+3*u*t*t*c2[1]+t*t*t*B[1]]);}return o;}
@@ -1668,12 +1689,13 @@ let MAPE=null;
 function mapEdges(){if(MAPE)return MAPE;MAPE=[];
   const add=(a,b,wild)=>{const A=MAPPOS[a],B=MAPPOS[b];if(!A||!B)return;const key=a+'>'+b,via=EDGE_VIA[key];MAPE.push({a,b,key,wild,pts:pixPath(via?crPts([A,...via,B]):bezPts(A,B))});};
   LEVELS.forEach(L=>{for(const f of L.from)add(f,L.id,false);});for(const k in WILD_LINK)add(WILD_LINK[k],k,true);return MAPE;}
-function edgeOpen(e){return e.wild?levelOpen(lvIdx(e.b)):save.stars[lvIdx(e.a)]>0;}
+function edgeOpen(e){return e.wild?levelOpen(lvIdx(e.b)):save.stars[lvIdx(e.a)]>0||save.stars[lvIdx(e.b)]>0;}
 // ---- placement mask ----
 let MASK=null;const MK_ROAD=1,MK_OBJ=2,MK_RES=4;
-function mMark(x,y,w,h,bit){x=Math.floor(x);y=Math.floor(y);for(let yy=Math.max(0,y);yy<Math.min(MAP_H,y+h);yy++)for(let xx=Math.max(0,x);xx<Math.min(W,x+w);xx++)MASK[yy*W+xx]|=bit;}
-function mFree(x,y,w,h,bits){x=Math.floor(x);y=Math.floor(y);if(x<-4||x+w>W+4||y<0||y+h>MAP_H)return false;
-  for(let yy=Math.max(0,y);yy<Math.min(MAP_H,y+h);yy+=2)for(let xx=Math.max(0,x);xx<Math.min(W,x+w);xx+=2)if(MASK[yy*W+xx]&bits)return false;return true;}
+let MASK_H=0;
+function mMark(x,y,w,h,bit){x=Math.floor(x);y=Math.floor(y);for(let yy=Math.max(0,y);yy<Math.min(MASK_H,y+h);yy++)for(let xx=Math.max(0,x);xx<Math.min(W,x+w);xx++)MASK[yy*W+xx]|=bit;}
+function mFree(x,y,w,h,bits){x=Math.floor(x);y=Math.floor(y);if(x<-4||x+w>W+4||y<0||y+h>MASK_H)return false;
+  for(let yy=Math.max(0,y);yy<Math.min(MASK_H,y+h);yy+=2)for(let xx=Math.max(0,x);xx<Math.min(W,x+w);xx+=2)if(MASK[yy*W+xx]&bits)return false;return true;}
 // ---- mini sprites, drawn straight into a canvas context, same outline + palette as the jobs ----
 function mRoof(g,x,y,w,rh,inset){for(let r=0;r<rh;r++){const ins=Math.round(inset*(rh-1-r)/Math.max(1,rh-1)),xx=x+ins,ww=w-ins*2;R(g,xx,y+r,ww,1,K);
     if(r>0&&ww>2)R(g,xx+1,y+r,ww-2,1,r===1?'#ffffff':r>=rh-1?MC.sh:r>=rh-2?MC.snowB:MC.snow);}
@@ -1788,13 +1810,54 @@ function mGnome(g,x,y){R(g,x,y,3,1,K);R(g,x,y+1,3,2,'#e03a4e');R(g,x+1,y-1,1,1,'
 function mStone(g,x,y,len){R(g,x,y,len,4,K);R(g,x+1,y+1,len-2,2,'#9aa6bc');for(let xx=x+2;xx<x+len-1;xx+=4)R(g,xx,y+1,1,2,'#7d8aa0');R(g,x+1,y,len-2,1,MC.snow);}
 let mapBase=null,mapObj=null,mapArt=null,mapArtKey='',MAPDYN=null;
 const HOUSE_COLS=[['#3f86d6','#2a5fa8','#d8364b'],['#e8b04a','#c98a2a','#2a5fa8'],['#4fae6a','#2f8a4a','#7a4a2a'],['#e07a8a','#b85a6a','#2a5fa8'],['#9b7fd6','#7a5fae','#ffc727'],['#dfe5ef','#c6d0e0','#d8364b']];
-function mapInit(){if(mapBase)return;const t0=performance.now();MASK=new Uint8Array(W*MAP_H);mapBase=mk(W,MAP_H);mapObj=mk(W,MAP_H);mapArt=mk(W,MAP_H);
+function genSuburbsBand(g,og){const y0=MAP_SPLIT,y1=MAP_SPLIT+SUB_EXT,objs=[],put=(by,fn)=>objs.push({by,fn});
+  R(g,0,y0,W,SUB_EXT,BIOMES[3].ground);
+  for(let i=0;i<620;i++){const x=hash(i,311)%W,y=y0+hash(313,i)%SUB_EXT,v=hash(i,317)%10;if(v<5)R(g,x,y,2,1,MC.snowB);else if(v<8)R(g,x,y,1,1,MC.sh);else R(g,x,y,1,1,'#ffffff');}
+  for(const e of mapEdges())for(const [x,y] of e.pts)if(y>y0-8&&y<y1+8)mMark(x-6,y-6,13,13,MK_ROAD);
+  for(const id of ['cornershop','playground','allotments','dogpark','tennis','highst','sledhill','fountainsq','blockparty']){const p=MAPPOS[id];mMark(p[0]-14,p[1]-16,29,32,MK_RES);}
+  const res=(x,y,w,h)=>mMark(x,y,w,h,MK_RES);
+  // corner shop: a little shop, a stall and a parked car
+  put(2486,G=>{mShop(G,104,2462,30,'#d8364b',7);});res(102,2456,36,32);
+  put(2500,G=>{mStall(G,140,2488,'#3f86d6');});res(138,2482,22,20);
+  put(2520,G=>{mCarTop(G,64,2506,'#f2c94c','#c49a2a',true);});res(62,2504,12,18);
+  // playground: swings, slide, a snowman
+  put(2426,G=>{mSwing(G,8,2410);});put(2432,G=>{mSlide(G,52,2418);});res(4,2404,70,30);
+  MAPDYN.snowmen.push({x:62,y:2470,wob:0});res(56,2456,14,16);
+  // allotments: small hedged plots with gnomes
+  for(const [x,y] of [[96,2356],[150,2356],[150,2410]]){put(y+18,G=>{mBush(G,x,y,22,4);mBush(G,x,y+14,22,4);mBush(G,x,y,4,18);mBush(G,x+18,y,4,18);mGnome(G,x+9,y+7);});res(x-2,y-2,26,24);}
+  // dog park: fenced field with a kennel
+  put(2312,G=>{mFenceH(G,4,2296,40,MC.woodD);mFenceH(G,4,2318,40,MC.woodD);mFenceV(G,4,2296,22,MC.woodD);});res(2,2290,44,32);
+  put(2316,G=>{mHouse(G,16,2302,12,12,'#a8673a','#7a4a2a','#3a2a20',0,3);});
+  // tennis club: two courts painted on the ground, a clubhouse
+  for(const cx of [98,140]){R(g,cx,2232,30,40,K);R(g,cx+1,2233,28,38,'#4f8f5a');R(g,cx+2,2234,26,36,'#5aa36a');R(g,cx+2,2251,26,1,'#ffffff');R(g,cx+14,2234,1,36,'#ffffff');R(g,cx+2,2234,26,1,'#ffffff');R(g,cx+2,2269,26,1,'#ffffff');}res(96,2230,76,44);
+  put(2300,G=>{mHouse(G,150,2284,22,16,'#e8eef8','#c6d0e0','#3f86d6',0,11);});res(148,2278,26,24);
+  // high street: shops both sides of the road, lamps
+  put(2196,G=>{mShop(G,108,2174,30,'#3f86d6',3);});put(2198,G=>{mShop(G,140,2176,30,'#e07a8a',5);});res(106,2168,74,32);
+  put(2232,G=>{mShop(G,40,2210,30,'#5aa35a',9);});res(38,2204,34,30);
+  for(const [x,y] of [[76,2222],[104,2214]]){put(y,G=>mLamp(G,x,y,false));}
+  // sledging hill: a white mound with sled tracks
+  {const cx=30,cy=2118;for(let dy=-14;dy<=14;dy++){const hw=Math.round(Math.sqrt(1-(dy/14)**2)*26);R(g,cx-hw,cy+dy,hw*2,1,dy<-8?'#ffffff':dy<4?MC.snowB:MC.sh);}
+   for(let i=0;i<10;i++){R(g,cx-6+i*2,cy-10+i*3,1,2,MC.sh2);R(g,cx+4+i,cy-12+i*3,1,2,MC.sh2);}res(2,2100,58,34);}
+  // fountain square: paved square, fountain, benches
+  R(g,124,2096,52,36,K);R(g,125,2097,50,34,MC.stone);for(let x=125;x<175;x+=6)R(g,x,2097,1,34,'#b6c0d2');res(122,2094,56,40);
+  put(2118,G=>{mFountain(G,150,2112);});
+  // block party: bunting between houses, a stall
+  put(2050,G=>{mHouse(G,32,2032,22,18,'#e07a8a','#b04a5a','#6b3f22',1,21);});put(2050,G=>{mHouse(G,126,2032,22,18,'#8fbf5a','#5e8a3a','#a8673a',1,23);});res(30,2026,26,26);res(124,2026,26,26);
+  put(2054,G=>{for(let x=54;x<126;x++){const y=2036+Math.round(Math.sin((x-54)/72*Math.PI)*6);R(G,x,y,1,1,K);if(x%6===0){const c=['#d8364b','#ffd23f','#3f86d6','#5aa35a'][(x/6)%4|0];R(G,x,y+1,3,1,c);R(G,x+1,y+2,1,1,c);}}});
+  put(2060,G=>{mStall(G,110,2046,'#ffc727');});res(108,2040,22,22);
+  // filler: houses, pines and bushes, like the old Suburbs
+  const tryPut=(x,y,w,h,fx)=>{if(y<y0+20||y+h>y1-2)return false;if(!mFree(x,y,w,h,MK_ROAD|MK_RES))return false;const fy=y+Math.floor(h*0.25);if(!mFree(x,fy,w,h-Math.floor(h*0.25),MK_OBJ))return false;mMark(x,fy,w,h-Math.floor(h*0.25),MK_OBJ);put(y+h,fx);return true;};
+  for(let y=y0+22;y<y1-4;y+=5){for(let x=-6;x<W;x+=7){const hv=hash(x+731,y+1291),jx=x+(hv%5),jy=y+((hv>>>4)%4),r=(hv>>>8)%100;if(r>58)continue;
+    if(r<12){const w=16+((hv>>>12)%3)*2,h=16+((hv>>>14)%2)*2,c=HOUSE_COLS[(hv>>>16)%6];tryPut(jx,jy-h,w,h+2,G2=>{const cp=mHouse(G2,jx,jy-h,w,h,c[0],c[1],c[2],(hv>>>18)%3?1:0,hv);if(cp)MAPDYN.smoke.push(cp);});}
+    else if(r<44){const h=12+((hv>>>12)%4)*2;tryPut(jx-5,jy-h,10,h,G2=>mPine(G2,jx,jy,h));}else if(r<48)tryPut(jx,jy-5,10,6,G2=>mBush(G2,jx,jy-5,10,6));}}
+  objs.sort((a,b)=>a.by-b.by);for(const o of objs)o.fn(og);}
+function mapInit(){if(mapBase)return;const t0=performance.now();MASK=new Uint8Array(W*MAP_OLD_H);MASK_H=MAP_OLD_H;mapBase=mk(W,MAP_OLD_H);mapObj=mk(W,MAP_OLD_H);mapArt=mk(W,MAP_H);
   MAPDYN={smoke:[],cows:[],snowmen:[],skaters:[],steam:[],glints:[],rlights:[],taps:[],plane:{st:0,t:0},eyesT:3};
   const g=mapBase.getContext('2d'),og=mapObj.getContext('2d');const objs=[];const put=(by,fn)=>objs.push({by,fn});
   // ---- ground bands ----
   for(const B of BIOMES){R(g,0,B.y0,W,B.y1-B.y0,B.ground);}
   for(let i=0;i<BIOMES.length-1;i++){const e=BIOMES[i].y1,A=BIOMES[i].ground,C=BIOMES[i+1].ground;for(let yy=e-6;yy<e+6;yy++)for(let xx=0;xx<W;xx++){const p=(yy-(e-6))/12;if((hash(xx,yy)%100)/100<p)R(g,xx,yy,1,1,C);else R(g,xx,yy,1,1,A);}}
-  for(let i=0;i<2600;i++){const x=hash(i,11)%W,y=hash(13,i)%MAP_H,B=biomeAt(y);if(B.id==='north'&&y<200)continue;const v=hash(i,17)%10;
+  for(let i=0;i<2600;i++){const x=hash(i,11)%W,y=hash(13,i)%MAP_OLD_H,B=biomeAt(y);if(B.id==='north'&&y<200)continue;const v=hash(i,17)%10;
     if(v<5)R(g,x,y,2,1,B.id==='city'?'#dbe3ee':MC.snowB);else if(v<8)R(g,x,y,1,1,MC.sh);else R(g,x,y,1,1,'#ffffff');}
   // ---- north sky + far peaks ----
   for(let y=0;y<210;y++){const t=y/210,c1=[22,34,74],c2=[96,118,184],c=c1.map((v,k)=>Math.round(v+(c2[k]-v)*t));R(g,0,y,W,1,'rgb('+c+')');if(y%3===0&&y>120)for(let x=(y/3)%2;x<W;x+=2)R(g,x,y,1,1,'rgb('+c1.map((v,k)=>Math.round(v+(c2[k]-v)*(t+0.03)))+')');}
@@ -1804,8 +1867,8 @@ function mapInit(){if(mapBase)return;const t0=performance.now();MASK=new Uint8Ar
   for(let x=0;x<W;x++){const hgt=Math.round(26+Math.sin(x*0.11+3)*10+Math.sin(x*0.05)*8),top=228-hgt;R(g,x,top,1,hgt+8,'#9aa8d4');R(g,x,top,1,1,K);if(hgt>28)R(g,x,top+1,1,Math.round((hgt-28)*0.7)+1,'#f0f4ff');}
   R(g,0,226,W,10,BIOMES[0].ground);
   // ---- reserve: roads, nodes ----
-  const E=mapEdges();for(const e of E)for(const [x,y] of e.pts)mMark(x-6,y-6,13,13,MK_ROAD);
-  for(const L of LEVELS)mMark(L.mx-14,L.my-16,29,32,MK_RES);
+  const E=mapEdgesOld();for(const e of E)for(const [x,y] of e.pts)mMark(x-6,y-6,13,13,MK_ROAD);
+  for(const id in MAPPOS_OLD){const p=MAPPOS_OLD[id];mMark(p[0]-14,p[1]-16,29,32,MK_RES);}
   // ---- river ----
   for(let x=0;x<W;x++){const c=rivY(x);for(let y=c-RIV_HW-3;y<=c+RIV_HW+3;y++){let col;const d=y-c;if(Math.abs(d)>RIV_HW+1)col=MC.sh;else if(Math.abs(d)===RIV_HW+1)col=K;else col=d>RIV_HW-4?MC.ice2:MC.ice;R(g,x,y,1,1,col);}
     if(hash(x,5)%7===0)R(g,x,c-RIV_HW+3+(hash(x,9)%(RIV_HW*2-6)),3,1,'#ffffff');if(hash(x,6)%11===0)R(g,x,c-2+(hash(x,8)%6),2,1,MC.ice3);}
@@ -1902,7 +1965,7 @@ function mapInit(){if(mapBase)return;const t0=performance.now();MASK=new Uint8Ar
   // ---- filler scenery ----
   const tryPut=(x,y,w,h,fx)=>{if(!mFree(x,y,w,h,MK_ROAD|MK_RES))return false;const fy=y+Math.floor(h*0.25);if(!mFree(x,fy,w,h-Math.floor(h*0.25),MK_OBJ))return false;mMark(x,fy,w,h-Math.floor(h*0.25),MK_OBJ);put(y+h,fx);return true;};
   const CITYC=[['#8793a8','#6a7896'],['#c7a07a','#a8805a'],['#7aa0c8','#5a80a8'],['#b07a8a','#906070'],['#c9573f','#a8432f'],['#d8c8a8','#b8a888']];
-  for(let y=236;y<MAP_H-6;y+=5){for(let x=-6;x<W;x+=7){const hv=hash(x+400,y+900),jx=x+(hv%5),jy=y+((hv>>>4)%4),B=biomeAt(jy),r=(hv>>>8)%100;if(r>58)continue;
+  for(let y=236;y<MAP_OLD_H-6;y+=5){for(let x=-6;x<W;x+=7){const hv=hash(x+400,y+900),jx=x+(hv%5),jy=y+((hv>>>4)%4),B=biomeAt(jy),r=(hv>>>8)%100;if(r>58)continue;
     const edge=jx<26||jx>150;
     if(B.id==='suburbs'){if(r<14){const w=16+((hv>>>12)%3)*2,h=16+((hv>>>14)%2)*2,c=HOUSE_COLS[(hv>>>16)%6];tryPut(jx,jy-h,w,h+2,G2=>{const cp=mHouse(G2,jx,jy-h,w,h,c[0],c[1],c[2],(hv>>>18)%3?1:0,hv);if(cp)MAPDYN.smoke.push(cp);});}
       else if(r<44){const h=12+((hv>>>12)%4)*2;tryPut(jx-5,jy-h,10,h,G2=>mPine(G2,jx,jy,h));}else if(r<47)tryPut(jx,jy-5,10,6,G2=>mBush(G2,jx,jy-5,10,6));}
@@ -1915,7 +1978,15 @@ function mapInit(){if(mapBase)return;const t0=performance.now();MASK=new Uint8Ar
       else if(r<22)tryPut(jx-4,jy-12,8,12,G2=>mPine(G2,jx,jy,12));else if(r<24)tryPut(jx,jy-13,3,13,G2=>mLamp(G2,jx,jy,true));}
     else{if(jy<230)continue;if(r<26){const h=14+((hv>>>12)%4)*3;tryPut(jx-6,jy-h,12,h,G2=>mPine(G2,jx,jy,h));}else if(r<29){const w=9+((hv>>>12)%3)*3;tryPut(jx,jy-6,w,7,G2=>mRock(G2,jx,jy-6,w,7));}
       else if(r<33&&jy>260){const hw=12+((hv>>>12)%3)*5,h=hw*2;tryPut(jx-hw,jy-h,hw*2,h,G2=>mMountain(G2,jx,jy,hw,h,hv));}}}}
-  objs.sort((a,b)=>a.by-b.by);for(const o of objs)o.fn(og);
+  objs.sort((a,b)=>a.by-b.by);const objLow=mk(W,MAP_OLD_H),ogLow=objLow.getContext('2d');for(const o of objs)o.fn(o.by>=MAP_SPLIT?ogLow:og);
+  // ======== stretch: top part stays, the old Suburbs move down, the new band goes in between ========
+  {const nb=mk(W,MAP_H),no=mk(W,MAP_H),nbg=nb.getContext('2d'),nog=no.getContext('2d');
+   nbg.drawImage(mapBase,0,0,W,MAP_SPLIT,0,0,W,MAP_SPLIT);nbg.drawImage(mapBase,0,MAP_SPLIT,W,MAP_OLD_H-MAP_SPLIT,0,MAP_SPLIT+SUB_EXT,W,MAP_OLD_H-MAP_SPLIT);
+   nog.drawImage(mapObj,0,0);nog.drawImage(objLow,0,SUB_EXT);
+   mapBase=nb;mapObj=no;
+   for(const k in MAPDYN){const v=MAPDYN[k];if(!Array.isArray(v))continue;for(const o of v){if(!o)continue;
+     const mid=o.h!=null&&o.y!=null?o.y+o.h/2:o.y!=null?o.y:o.cy;if(mid==null||mid<MAP_SPLIT)continue;for(const kk of ['y','cy','y0','y1'])if(typeof o[kk]==='number')o[kk]+=SUB_EXT;}}
+   MASK=new Uint8Array(W*MAP_H);MASK_H=MAP_H;genSuburbsBand(nbg,nog);}
   // dynamic lists that live in map space get sorted for quick culling
   MAPDYN.smoke=MAPDYN.smoke.filter(Boolean);mapInit.ms=Math.round(performance.now()-t0);}
 // ---- roads (redrawn when a road gets plowed) ----
@@ -1932,7 +2003,7 @@ function drawRoads(g,isOpen){const E=mapEdges();const shut=E.filter(e=>!isOpen(e
   // cul-de-sac court
   const ce=E.find(e=>e.b==='culdesac'),cOpen=ce&&isOpen(ce),[cx,cy]=MAPPOS.culdesac;g.fillStyle=cOpen?K:MC.sh;pixCircle(g,cx,cy,12);g.fillStyle=cOpen?'#ffffff':MC.snowB;pixCircle(g,cx,cy,11);if(cOpen){g.fillStyle='#5a6580';pixCircle(g,cx,cy,10);g.fillStyle=MC.snow;pixCircle(g,cx,cy,3);}
   // river bridge (maple > lane) and motorway overpass (village > shops)
-  {const bx=94,c=rivY(bx),y0=c-RIV_HW-4,y1=c+RIV_HW+4,e=E.find(e=>e.key==='maple>lane'),o=e&&isOpen(e);R(g,bx-7,y0,15,y1-y0,K);R(g,bx-6,y0,13,y1-y0,o?MC.woodL:MC.snowB);
+  {const bx=94,c=rivY(bx),y0=c-RIV_HW-4,y1=c+RIV_HW+4,e=E.find(e=>e.key==='blockparty>lane'),o=e&&isOpen(e);R(g,bx-7,y0,15,y1-y0,K);R(g,bx-6,y0,13,y1-y0,o?MC.woodL:MC.snowB);
     for(let y=y0+1;y<y1;y+=3)R(g,bx-6,y,13,1,o?MC.wood:MC.sh);for(const sx of [bx-9,bx+7]){R(g,sx,y0-2,3,y1-y0+4,K);R(g,sx+1,y0-1,1,y1-y0+2,MC.woodD);for(let y=y0;y<y1;y+=5)R(g,sx,y,3,2,MC.snow);}}
   {const bx=92,y0=MW_Y0-7,y1=MW_Y1+7,e=E.find(e=>e.key==='village>shops'),o=e&&isOpen(e);R(g,bx-8,y1,17,3,'rgba(27,31,59,0.35)');R(g,bx-7,y0,15,y1-y0,K);R(g,bx-6,y0,13,y1-y0,'#c6d0e0');R(g,bx-4,y0,9,y1-y0,o?'#4a5470':MC.snowB);
     if(o)for(let y=y0+2;y<y1;y+=6)R(g,bx,y,1,3,'#ffc727');R(g,bx-7,y0,1,y1-y0,'#9aa6bc');R(g,bx+7,y0,1,y1-y0,'#9aa6bc');}}
@@ -1951,19 +2022,19 @@ function mapFocusY(){const lj=save.lastJob?lvIdx(save.lastJob):-1,ref=lj>=0?LEVE
 function nodeState(i){if(!levelAvail(i))return 'mystery';if(levelOpen(i))return save.best[i]===0?'fresh':'open';if(!levelReach(i))return 'far';return 'locked';}
 const _rideMini={};function rideMini(tid,sil){const k=tid+(sil||'');if(_rideMini[k])return _rideMini[k];const c=mk(12,12),g=c.getContext('2d');drawToolIconTo(g,tid,0,0,12,0);if(sil){g.globalCompositeOperation='source-in';R(g,0,0,12,12,sil);}return _rideMini[k]=c;}
 function ringPix(cx,cy,r,col){b.fillStyle=col;const n=Math.max(12,Math.round(r*6));for(let a=0;a<n;a++){const t=a/n*Math.PI*2;b.fillRect(Math.round(cx+Math.cos(t)*r),Math.round(cy+Math.sin(t)*r),1,1);}}
-function drawNode(i,x,y,st){const L=LEVELS[i],wild=L.area==='secret',stars=save.stars[i],small=st==='far'||st==='mystery',r=small?7:9;
+function drawNode(i,x,y,st){const L=LEVELS[i],wild=L.area==='secret',stars=save.stars[i],small=st==='far'||st==='mystery'||st==='fog',r=small?7:9;
   R(b,x-r+1,y+r-1,r*2-1,3,'rgba(27,31,59,0.22)');
   let fill,ring='#ffffff',ink='#ffffff';
-  if(st==='mystery'){fill='#2a2140';ring='#8a6fd6';}else if(st==='far'){fill='#9aa1b5';ring='#e6ebf3';}else if(st==='locked'){fill=wild?'#6b4fa8':'#7d8aa0';}
+  if(st==='fog'){fill='#9fb0cf';ring='#e6ebf3';}else if(st==='mystery'){fill='#2a2140';ring='#8a6fd6';}else if(st==='far'){fill='#9aa1b5';ring='#e6ebf3';}else if(st==='locked'){fill=wild?'#6b4fa8':'#7d8aa0';}
   else if(stars===3){fill='#ffd23f';ink='#7a4a00';}else fill=wild?'#8346d6':L.bonus?'#b07aff':'#3f86d6';
   if(st==='fresh'){const ph=(tNow*0.9)%1;ringPix(x,y,r+2+ph*8,hexA('#ffd23f',1-ph));}
   if(st==='mystery'){const ph=(tNow*0.5+i*0.3)%1;ringPix(x,y,r+1+ph*5,hexA('#c4a0f5',0.7*(1-ph)));}
   b.fillStyle=K;pixCircle(b,x,y,r+1);b.fillStyle=ring;pixCircle(b,x,y,r);b.fillStyle=fill;pixCircle(b,x,y,r-2);
   R(b,x-r+3,y-r+3,2,1,'rgba(255,255,255,0.55)');R(b,x-r+3,y-r+4,1,1,'rgba(255,255,255,0.55)');
-  if(st==='mystery')text(b,'?',x,y-2,'#c4a0f5',{align:'center'});
+  if(st==='mystery')text(b,'?',x,y-2,'#c4a0f5',{align:'center'});else if(st==='fog')text(b,'?',x,y-2,'#ffffff',{align:'center'});
   else if(st==='far'||st==='locked'){if(wild)b.drawImage(rideMini(L.tool,'#1b1530'),x-6,y-6);else b.drawImage(SPR.lock,x-3,y-4);}
   else if(wild)b.drawImage(rideMini(L.tool),x-6,y-6);
-  else text(b,''+(i+1),x,y-2,ink,{align:'center',outline:stars===3?null:K});
+  else text(b,''+jobNo(i),x,y-2,ink,{align:'center',outline:stars===3?null:K});
   if(!small&&(st!=='locked'||stars>0)){R(b,x-10,y+r,21,7,K);R(b,x-9,y+r+1,19,5,'#13306b');for(let s=0;s<3;s++)b.drawImage(stars>s?SPR.star:SPR.starOff,x-8+s*6,y+r+1);}}
 function nodeLabel(x,y,s,col,bg){const w=textW(s)+6,lx=clamp(Math.round(x-w/2),1,W-w-4);R(b,lx,y,w,9,K);R(b,lx+1,y+1,w-2,7,bg||'#13306b');text(b,s,lx+3,y+2,col||'#ffffff',{outline:null});}
 function gatePos(id){if(id==='lane')return {x:94,y:rivY(94)-RIV_HW-8};if(id==='shops')return {x:92,y:MW_Y0-14};const e=mapEdges().find(e=>e.b===id);if(!e)return null;const p=e.pts[Math.max(0,e.pts.length-30)];return {x:p[0],y:p[1]};}
@@ -1971,7 +2042,7 @@ const TOLLPOS={retreat:{x:146,y:1752,bx:154},stadium:{x:100,y:1122,bx:110}};
 function drawBoom(x,y,down,col){R(b,x-11,y-5,3,8,K);R(b,x-10,y-4,1,6,'#dfe5ef');if(down){R(b,x-10,y-2,22,4,K);for(let k=0;k<5;k++)R(b,x-9+k*4,y-1,2,2,k%2?'#ffffff':(col||'#e03a4e'));R(b,x-9+20,y-1,1,2,'#ffffff');}
   else{R(b,x-10,y-20,4,18,K);for(let k=0;k<4;k++)R(b,x-9,y-19+k*4,2,2,k%2?'#ffffff':(col||'#e03a4e'));}}
 // ---- your helpers, out working round your house: one per Helpers level, up to six ----
-const YARD_SPOTS=[[70,84,2377],[104,116,2365],[66,88,2388],[64,73,2349],[100,116,2383],[78,94,2396]],HOME_Y=2366;
+const YARD_SPOTS=[[70,84,SY(2377)],[104,116,SY(2365)],[66,88,SY(2388)],[64,73,SY(2349)],[100,116,SY(2383)],[78,94,SY(2396)]],HOME_Y=SY(2366);
 let yard=[],yardFx=[],yardTick=0,yardTurn=0;
 function goHome(){if(save.mapView!=='map')save.mapView='map';mapPan={to:clamp(HOME_Y-MAP_VH*0.5,0,MAP_H-MAP_VH)};}
 function yardCrew(){const n=Math.min(6,save.lv.helpers|0);while(yard.length<n){const i=yard.length,[a,z,y]=YARD_SPOTS[i];yard.push({i,a,z,y,x:a+(i*5)%(z-a),f:i%2?-1:1,st:'walk',t:0,tx:i%2?a:z,n:0,hop:0,tossed:false});}if(yard.length>n)yard.length=n;return yard;}
@@ -1985,7 +2056,7 @@ const KID=[KID_TOP.concat(["KrrrrsKw.....","KrrrrrK.w....","KdrrrdK..w...",".KlK
 const KIDL=KID.map(flipH);
 function drawHelperKid(x,y,f,pose,hop){R(b,x-3,y+1,8,1,'rgba(27,31,59,0.22)');b.drawImage(f>0?KID[pose]:KIDL[pose],f>0?x-3:x-9,y-10-hop);}
 function drawYard(oy,sy,vis,dt){if(!vis(HOME_Y,60))return;const crew=yardCrew();
-  if(!crew.length){const x=100,s=sy(2378);R(b,x-1,s-9,2,10,K);R(b,x,s-8,1,9,'#8a5a2b');R(b,x-12,s-17,25,9,K);R(b,x-11,s-16,23,7,'#f2e3c2');text(b,'HIRE',x+1,s-15,'#7a4a2a',{align:'center',outline:null});
+  if(!crew.length){const x=100,s=sy(SY(2378));R(b,x-1,s-9,2,10,K);R(b,x,s-8,1,9,'#8a5a2b');R(b,x-12,s-17,25,9,K);R(b,x-11,s-16,23,7,'#f2e3c2');text(b,'HIRE',x+1,s-15,'#7a4a2a',{align:'center',outline:null});
     btn('yardsign',x-13,s-18,27,20,()=>{sfx('click');goUpgrades();});return;}
   const inc=helperIncome(),T=Math.max(1.6,6/crew.length,inc>0?1/inc:9);yardTick+=dt;
   if(yardTick>=T){yardTick=0;const h=crew[yardTurn++%crew.length];addMapPop(h.x,h.y-13,'+'+fmt(Math.max(1,inc*T)),'#ffd23f');}
@@ -2071,29 +2142,72 @@ function drawUfoFly(dt){if(overlayOpen())return;if(!ufoFly){ufoNext-=dt;if(ufoNe
 let mapDrawT=null,weeklyTab=0,ridePeek=null,rideReveal=null;
 function drawMap(){const dt=mapDrawT==null?0:Math.min(0.05,Math.max(0,tNow-mapDrawT));mapDrawT=tNow;ensureMapArt();
   if(save.mapView==='list')drawJobList(dt);else drawWorld(dt);drawMapChrome();}
+// ---------------- FOG OF WAR ----------------
+const AREA_SEQ=['suburbs','farm','city','north'];
+function areaReached(a){if(a===AREA_SEQ[0])return true;return LEVELS.some((L,i)=>L.area===a&&levelReach(i));}
+function fogCur(){let c=0;for(let k=0;k<AREA_SEQ.length;k++)if(areaReached(AREA_SEQ[k]))c=k;return c;}
+function biomeById(id){return BIOMES.find(B=>B.id===id);}
+let fogAnim=null,fogStormY=-1,fogHaze=null;
+// job numbers in play order: by area, then bottom to top
+let JOB_NO=null;function jobNo(i){if(!JOB_NO){JOB_NO={};let n=1;const ord=LEVELS.map((L,k)=>k).filter(k=>LEVELS[k].area!=='secret').sort((a,c)=>{const A=AREA_SEQ.indexOf(LEVELS[a].area),C=AREA_SEQ.indexOf(LEVELS[c].area);return A!==C?A-C:LEVELS[c].my-LEVELS[a].my;});for(const k of ord)JOB_NO[k]=n++;}return JOB_NO[i]||i+1;}
+function fogUpdate(dt){const cur=fogCur();if(save.areaSeen==null){save.areaSeen=cur;persist();}
+  if(!fogAnim&&cur>save.areaSeen&&!overlayOpen()&&!plowAnim&&state==='map'){fogAnim={s:save.areaSeen,t:0};const B=biomeById(AREA_SEQ[save.areaSeen+1]);if(B)mapPan={to:clamp(B.y1-MAP_VH*0.75,0,MAP_H-MAP_VH)};sfx('squall');buzz(30);}
+  let s2=save.areaSeen,p=0;if(fogAnim){fogAnim.t+=dt;p=clamp((fogAnim.t-0.7)/2.4,0,1);s2=fogAnim.s;if(fogAnim.t>3.4){save.areaSeen=fogAnim.s+1;fogAnim=null;persist();sfx('fanfare');}}
+  const e=p*p*(3-2*p),hz=s2+1<AREA_SEQ.length?biomeById(AREA_SEQ[s2+1]):null,hz2=s2+2<AREA_SEQ.length?biomeById(AREA_SEQ[s2+2]):null;
+  fogHaze={a:hz,aAlpha:1-e,b:fogAnim?hz2:null,bAlpha:e,banner:fogAnim?null:hz};
+  fogStormY=hz?Math.round(hz.y0+((hz2?hz2.y0:0)-hz.y0)*e):-1;if(fogStormY<=0)fogStormY=-1;}
+function fogMinScroll(){return fogStormY>0?Math.max(0,fogStormY-70):0;}
+function fogged(y){return fogHaze&&fogHaze.a&&fogHaze.aAlpha>0.5&&y>=fogHaze.a.y0&&y<fogHaze.a.y1;}
+function drawHaze(B,a,oy,sy){if(!B||a<=0.01)return;const top=Math.max(MAP_VY,sy(B.y0)),bot=Math.min(MAP_VY+MAP_VH,sy(B.y1));if(bot<=top)return;
+  b.save();b.globalAlpha=a;b.fillStyle='rgba(150,168,204,0.5)';b.fillRect(0,top,W,bot-top);b.fillStyle='rgba(236,242,252,0.32)';b.fillRect(0,top,W,bot-top);
+  // soft lower edge so it melts into the area you're in
+  for(let k=0;k<18;k++){const y=sy(B.y1)-18+k;if(y<top||y>=bot)continue;b.fillStyle='rgba(236,242,252,'+(0.04*(18-k)/18*8).toFixed(3)+')';b.fillRect(0,y,W,1);}
+  // blowing snow
+  for(let k=0;k<90;k++){const span=B.y1-B.y0,yy=B.y0+((hash(k,71)%span)+tNow*(18+k%7*4))%span,xx=((hash(71,k)%W)+tNow*(30+k%5*9))%W,y=sy(yy);if(y<top||y>=bot)continue;
+    R(b,Math.round(xx),y,k%3?2:3,1,'#ffffff');}
+  b.restore();}
+function drawStorm(oy,sy){if(fogStormY<=0)return;const edge=sy(fogStormY);if(edge<=MAP_VY)return;const bot=Math.min(MAP_VY+MAP_VH,edge);
+  R(b,0,MAP_VY,W,bot-MAP_VY,'#3d4b74');
+  // rolling cloud banks
+  const cols=['#4a5a85','#56688f','#62749b','#4f5f8a'];
+  for(let k=0;k<70;k++){const yy=fogStormY-6-(hash(k,23)%560),y=sy(yy);if(y<MAP_VY-30||y>bot+20)continue;const r=10+hash(23,k)%16,x=Math.round(((hash(k,29)%(W+80))+tNow*(5+k%6*2))%(W+80))-40;
+    b.fillStyle=cols[k%4];pixCircle(b,x,y,r);}
+  // a faint aurora above the storm: the Frozen North is up there somewhere
+  for(let x=0;x<W;x+=2){const yy=MAP_VY+18+Math.sin(x*0.045+tNow*0.5)*8+Math.sin(x*0.13+tNow*0.8)*3,a=0.10+0.06*Math.sin(x*0.08+tNow*1.3);if(yy+10>bot-40)continue;
+    R(b,x,Math.round(yy),2,8,'rgba(90,240,170,'+a.toFixed(2)+')');R(b,x,Math.round(yy)+8,2,6,'rgba(170,110,255,'+(a*0.8).toFixed(2)+')');}
+  // the storm's edge: billowing white-grey puffs
+  for(let x=-8;x<W+8;x+=9){const r=8+(hash(x+400,7)%5),y=edge-3+Math.round(Math.sin(x*0.21+tNow*1.4)*2);b.fillStyle='#8a9bc2';pixCircle(b,x,y,r+1);b.fillStyle='#b9c6e0';pixCircle(b,x,y-1,r);b.fillStyle='#dbe3f2';pixCircle(b,x-2,y-3,Math.max(2,r-4));}
+  for(let k=0;k<50;k++){const x=((hash(k,41)%W)+tNow*(40+k%5*12))%W,y=MAP_VY+((hash(41,k)%Math.max(1,bot-MAP_VY))+tNow*(30+k%4*10))%Math.max(1,bot-MAP_VY);R(b,Math.round(x),Math.round(y),2,1,'rgba(255,255,255,0.6)');}}
+function drawFogBanner(oy,sy){const B=fogHaze&&fogHaze.banner;if(!B)return;const y=sy(B.y1)-40;if(y<MAP_VY-30||y>MAP_VY+MAP_VH)return;
+  const entry=LEVELS.filter(L=>L.area===B.id&&L.from.some(id=>{const F=LEVELS[lvIdx(id)];return F&&F.area!==B.id&&F.area!=='secret';}));
+  let need='THE FINAL AREA - COMING SOON';if(entry.length){const F=LEVELS[lvIdx(entry[0].from[0])];need='FINISH '+F.name+' TO BREAK THROUGH';}
+  const w=Math.max(textW(B.name,2)+16,textW(need)+12),x=Math.round(W/2-w/2);R(b,x,y,w,28,K);R(b,x+1,y+1,w-2,26,'#13306b');R(b,x+1,y+1,w-2,1,'#4f8fdc');
+  text(b,B.name,W/2,y+4,'#ffffff',{align:'center',scale:2});text(b,need,W/2,y+19,'#9fd8ff',{align:'center',outline:null});}
 function drawWorld(dt){
   if(scrollY.map==null)scrollY.map=clamp(mapFocusY()-MAP_VH*0.55,0,MAP_H-MAP_VH);
   if(!overlayOpen())mapCheckPlow();
   if(mapPan){const cur=scrollY.map,d=mapPan.to-cur;scrollY.map=cur+d*Math.min(1,dt*4);if(Math.abs(d)<1){scrollY.map=mapPan.to;mapPan=null;}}
-  const oy=Math.round(scrollArea('map',0,MAP_VY,W,MAP_VH,MAP_H)),uiFrom=ui.length;
+  fogUpdate(dt);{const mn=fogMinScroll();if(scrollY.map!=null&&scrollY.map<mn)scrollY.map=mn;if(mapPan&&mapPan.to<mn)mapPan.to=mn;}
+  const oy=Math.round(Math.max(fogMinScroll(),scrollArea('map',0,MAP_VY,W,MAP_VH,MAP_H))),uiFrom=ui.length;
   b.save();b.beginPath();b.rect(0,MAP_VY,W,MAP_VH);b.clip();b.drawImage(mapArt,0,oy,W,MAP_VH,0,MAP_VY,W,MAP_VH);
   const sy=y=>Math.round(y-oy+MAP_VY),vis=(y,m)=>y>oy-m&&y<oy+MAP_VH+m;
   drawMapLive(oy,sy,vis,dt);drawPlowAnim(oy,sy,dt);
+  if(fogHaze){drawHaze(fogHaze.a,fogHaze.aAlpha,oy,sy);drawHaze(fogHaze.b,fogHaze.bAlpha,oy,sy);}drawStorm(oy,sy);
   // tool gates
-  for(const [gid,tid2] of [['lane','tractor'],['shops','truck'],['airport','super']]){const li=lvIdx(gid);if(levelGateOK(li))continue;const p=gatePos(gid);if(!p||!vis(p.y,30))continue;
+  for(const [gid,tid2] of [['lane','tractor'],['shops','truck'],['airport','super']]){const li=lvIdx(gid);if(levelGateOK(li))continue;const p=gatePos(gid);if(!p||!vis(p.y,30)||p.y<fogStormY)continue;
     const x=p.x,y=sy(p.y);drawBoom(x,y,true);const t2=TOOLS[toolIdx(tid2)],lbl='NEED '+t2.name,w=textW(lbl)+20,lx=clamp(x-Math.round(w/2),2,W-w-6),ly=y-24;
     R(b,lx,ly,w,15,K);R(b,lx+1,ly+1,w-2,13,'#5c0e1e');b.drawImage(rideMini(tid2),lx+2,ly+2);text(b,lbl,lx+16,ly+5,'#ffffff',{outline:null});btn('gate'+gid,lx,ly,w,30,()=>{jobInfo=li;sfx('click');});}
   // road tolls
-  for(const id in TOLLPOS){const li=lvIdx(id),L=LEVELS[li],T2=TOLLPOS[id];if(!vis(T2.y,30))continue;const paid=levelPaid(li),x=T2.x,y=sy(T2.y);if(id==='stadium')mTollbooth(b,T2.bx,y-10);drawBoom(x,y,!paid,'#ffc727');
+  for(const id in TOLLPOS){const li=lvIdx(id),L=LEVELS[li],T2=TOLLPOS[id];if(!vis(T2.y,30)||T2.y<fogStormY||fogged(T2.y))continue;const paid=levelPaid(li),x=T2.x,y=sy(T2.y);if(id==='stadium')mTollbooth(b,T2.bx,y-10);drawBoom(x,y,!paid,'#ffc727');
     if(!paid){const s2=fmt(L.toll),w=textW(s2)+15,lx=clamp(x-Math.round(w/2),2,W-w-6),ly=y+5;R(b,lx,ly,w,11,K);R(b,lx+1,ly+1,w-2,9,'#7a4a00');b.drawImage(SPR.coinS,lx+3,ly+3);text(b,s2,lx+11,ly+3,'#ffd23f',{outline:null});btn('toll'+id,lx,ly-12,w,24,()=>{jobInfo=li;sfx('click');});}}
   // job nodes (always on top of the scenery)
   const labels=[];let kidAt=null;
-  LEVELS.forEach((L,i)=>{if(!vis(L.my,30))return;const st=nodeState(i),x=L.mx,y=sy(L.my);drawNode(i,x,y,st);btn('node'+i,x-13,y-13,26,32,()=>{jobInfo=i;sfx('click');});
+  LEVELS.forEach((L,i)=>{if(!vis(L.my,30))return;if(L.my<fogStormY)return;const st=fogged(L.my)&&!levelReach(i)?'fog':nodeState(i),x=L.mx,y=sy(L.my);drawNode(i,x,y,st);btn('node'+i,x-13,y-13,26,32,()=>{jobInfo=i;sfx('click');});
     if(st==='fresh')labels.push([x,y,L.name,true]);if(save.lastJob===L.id)kidAt=[x,y];});
   for(const [x,y,nm,fresh] of labels){const bob=Math.round(Math.abs(Math.sin(tNow*4))*3);R(b,x-3,y-19-bob,7,2,K);R(b,x-2,y-17-bob,5,2,K);R(b,x-1,y-15-bob,3,2,K);R(b,x-2,y-19-bob,5,1,'#ffd23f');R(b,x-1,y-17-bob,3,1,'#ffd23f');R(b,x,y-16-bob,1,1,'#ffd23f');
     nodeLabel(x,y+17,nm,'#ffffff','#e0397a');}
   if(kidAt){const [x,y]=kidAt,ks=kidSet().down,bob=Math.floor(tNow*2.5)%2;R(b,x+8,y+5,10,2,'rgba(27,31,59,0.25)');b.drawImage(ks,x+6,y-ks.height+6-bob);}
-  drawMapSnow(oy,dt);drawUfoFly(dt);
+  drawFogBanner(oy,sy);drawMapSnow(oy,dt);drawUfoFly(dt);
   // area title card as you scroll into a new biome
   const B=biomeAt(oy+MAP_VH*0.5);if(mapBiomeSeen!==B.id){if(mapBiomeSeen)mapBanner={s:B.name,t:0};mapBiomeSeen=B.id;}
   if(mapBanner){mapBanner.t+=dt;const t=mapBanner.t,k=t<0.25?t/0.25:t>1.6?Math.max(0,1-(t-1.6)/0.25):1;if(t>1.85)mapBanner=null;else{const w=textW(mapBanner.s,2)+20,x=Math.round(W/2-w/2),y=MAP_VY-24+Math.round(30*k);
@@ -2101,7 +2215,7 @@ function drawWorld(dt){
   b.restore();clipUI(uiFrom,MAP_VY,MAP_VY+MAP_VH);drawBiomeRail(oy);}
 // ---- list view: every job as a card, grouped by area, with a thumbnail cut from the world map ----
 function drawJobList(dt){const VY=MAP_VY,VH=NAV_Y-26-VY;R(b,0,VY,W,NAV_Y-2-VY,'#16326e');for(let y=VY;y<NAV_Y-2;y+=4)R(b,0,y,W,1,'#183775');
-  const rows=[];for(const B of BIOMES.slice().reverse()){const ids=LEVELS.map((L,i)=>i).filter(i=>biomeAt(LEVELS[i].my).id===B.id).sort((a,c)=>LEVELS[c].my-LEVELS[a].my);rows.push({B,ids});for(const i of ids)rows.push({i});}
+  const rows=[];const fogMax=Math.min(AREA_SEQ.length-1,(save.areaSeen==null?fogCur():save.areaSeen)+1);for(const B of BIOMES.slice().reverse()){if(AREA_SEQ.indexOf(B.id)>fogMax)continue;const ids=LEVELS.map((L,i)=>i).filter(i=>biomeAt(LEVELS[i].my).id===B.id).sort((a,c)=>LEVELS[c].my-LEVELS[a].my);rows.push({B,ids});for(const i of ids)rows.push({i});}
   const hOf=r=>r.B?18:36;const content=rows.reduce((s,r)=>s+hOf(r),4);const sy0=scrollArea('jlist',0,VY,W,VH,content),uiFrom=ui.length;
   b.save();b.beginPath();b.rect(0,VY,W,VH);b.clip();let y=VY+4-sy0;
   for(const r of rows){const h=hOf(r);if(y+h<VY||y>VY+VH){y+=h;continue;}
@@ -2632,7 +2746,7 @@ function frame(now){const dt=Math.min(0.05,(now-last)/1000);last=now;
   drawLogo();
   requestAnimationFrame(frame);}
 requestAnimationFrame(frame);
-window.__SR={pineSprite,checkJob,CHECK_EFF,loadTestDef,testLevel,buildLevel,PROPS,HAZ,GROUND_T,TEST_MODE,streakTick,dayIdx,goHome,yard:()=>yard,upg:{buyUpg,moveSpeed,bladeCells,valueMult,bumperRed,helperIncome,upgCost,get offlineGain(){return offlineGain;},OFFLINE_CAP_S,OFFLINE_RATE},setLook,setCorners,setShadow,get LOOK(){return LOOK;},get CORNERS(){return CORNERS;},get camY(){return camY;},get VIEW_Y(){return VIEW_Y;},clearLookToast(){lookToast=0;},get mapView(){return save.mapView;},mapInit,ensureMapArt,get mapArt(){return mapArt;},get mapMs(){return mapInit.ms;},mapEdges,get plowAnim(){return plowAnim;},get ridePeek(){return ridePeek;},set ridePeek(v){ridePeek=v;},get rideReveal(){return rideReveal;},set rideReveal(v){rideReveal=v;},equip,useIdx,get trophyTab(){return trophyTab;},set trophyTab(v){trophyTab=v;},set trophiesOpen(v){trophiesOpen=v;},_t:{buildLevel,footprint,bladeRect,isKidTool,get VSPEC(){return VSPEC;},T_BLOCK,CLEAR_T},get weeklyOpen(){return weeklyOpen;},set weeklyOpen(v){weeklyOpen=v;},weeklyDef,get scrollY(){return scrollY;},get jobInfo(){return jobInfo;},set jobInfo(v){jobInfo=v;},startNewWinter,levelOpen,LEVELS,TOOLS,get audio(){return {ctx:!!AC,state:AC&&AC.state,bufs:Object.keys(BUF).length,music:curMusic,lp:musicFilter?Math.round(musicFilter.frequency.value):null,loop:musicNode?[musicNode.loopStart,musicNode.loopEnd,musicNode.buffer.duration]:null,loops:Object.keys(loopNodes)};},audioInit,openShop,dailyAdd,award,get shopOpen(){return shopOpen;},get dailyOpen(){return dailyOpen;},set dailyOpen(v){dailyOpen=v;},get winterOpen(){return winterOpen;},get state(){return state;},get G(){return G;},get run(){return run;},get P(){return P;},save,startLevel,goMap,goUpgrades,goGarage,endRound:()=>endRound(false),keys,hit};
+window.__SR={pineSprite,fogCur,get fogStormY(){return fogStormY;},jobNo,get mapArt2(){return mapArt;},MAP_H,MAPPOS,checkJob,CHECK_EFF,loadTestDef,testLevel,buildLevel,PROPS,HAZ,GROUND_T,TEST_MODE,streakTick,dayIdx,goHome,yard:()=>yard,upg:{buyUpg,moveSpeed,bladeCells,valueMult,bumperRed,helperIncome,upgCost,get offlineGain(){return offlineGain;},OFFLINE_CAP_S,OFFLINE_RATE},setLook,setCorners,setShadow,get LOOK(){return LOOK;},get CORNERS(){return CORNERS;},get camY(){return camY;},get VIEW_Y(){return VIEW_Y;},clearLookToast(){lookToast=0;},get mapView(){return save.mapView;},mapInit,ensureMapArt,get mapArt(){return mapArt;},get mapMs(){return mapInit.ms;},mapEdges,get plowAnim(){return plowAnim;},get ridePeek(){return ridePeek;},set ridePeek(v){ridePeek=v;},get rideReveal(){return rideReveal;},set rideReveal(v){rideReveal=v;},equip,useIdx,get trophyTab(){return trophyTab;},set trophyTab(v){trophyTab=v;},set trophiesOpen(v){trophiesOpen=v;},_t:{buildLevel,footprint,bladeRect,isKidTool,get VSPEC(){return VSPEC;},T_BLOCK,CLEAR_T},get weeklyOpen(){return weeklyOpen;},set weeklyOpen(v){weeklyOpen=v;},weeklyDef,get scrollY(){return scrollY;},get jobInfo(){return jobInfo;},set jobInfo(v){jobInfo=v;},startNewWinter,levelOpen,LEVELS,TOOLS,get audio(){return {ctx:!!AC,state:AC&&AC.state,bufs:Object.keys(BUF).length,music:curMusic,lp:musicFilter?Math.round(musicFilter.frequency.value):null,loop:musicNode?[musicNode.loopStart,musicNode.loopEnd,musicNode.buffer.duration]:null,loops:Object.keys(loopNodes)};},audioInit,openShop,dailyAdd,award,get shopOpen(){return shopOpen;},get dailyOpen(){return dailyOpen;},set dailyOpen(v){dailyOpen=v;},get winterOpen(){return winterOpen;},get state(){return state;},get G(){return G;},get run(){return run;},get P(){return P;},save,startLevel,goMap,goUpgrades,goGarage,endRound:()=>endRound(false),keys,hit};
 })();
 </script>
 </body>
