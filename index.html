@@ -1452,7 +1452,7 @@ function drawTitle(){
   drawRig(b,'shovel',30+prog-4,226,1,14,2,Math.floor(tNow*6)%2,0,false);drawFlakes(0,H);
   if(!logoReady){text(b,'SNOWPLOW',W/2,40,'#ffffff',{align:'center',scale:3,outline:'#1d4f9a'});text(b,'RUSH',W/2,62,'#ffc727',{align:'center',scale:4,outline:'#8e3a10'});}
   if(Math.floor(tNow*2)%2===0)text(b,'TAP TO PLAY',W/2,258,'#ffffff',{align:'center',scale:2});
-  text(b,'PROTOTYPE V0.7.3',W/2,300,'#4f6fa0',{align:'center',outline:null});
+  text(b,'PROTOTYPE V0.7.4',W/2,300,'#4f6fa0',{align:'center',outline:null});
   if(offlineGain>0){panel(14,98,152,90,'#13306b','#ffd23f');text(b,'WELCOME BACK!',W/2,105,'#ffd23f',{align:'center'});
     text(b,'AWAY '+fmtDur(offlineAway)+' - YOUR HELPERS EARNED',W/2,116,'#ffffff',{align:'center'});
     const gw=textW('+'+fmt(offlineGain),2)+12;b.drawImage(SPR.coin,W/2-gw/2,127);text(b,'+'+fmt(offlineGain),W/2-gw/2+12,128,'#ffd23f',{scale:2});
@@ -1490,20 +1490,38 @@ function drawUpgrades(){
     if(max)button('u'+k,x+w-46,y+7,42,30,'grey','MAX',()=>sfx('deny'));
     else{button('u'+k,x+w-46,y+7,42,30,afford?'green':'grey',null,()=>buyUpg(k));text(b,'BUY',x+w-25,y+12,'#ffffff',{align:'center'});
       b.drawImage(SPR.coinS,x+w-42,y+24);text(b,fmt(cost),x+w-35,y+24,afford?'#ffffff':'#ffd0d6');}});}
-function drawDaily(){b.fillStyle='rgba(11,24,56,0.78)';b.fillRect(0,0,W,H);panel(10,46,160,208,'#13306b','#ffd23f');
+const STREAK_GEMS=[5,5,10,10,15,20,50];
+function dayIdx(){const d=new Date();return Math.floor(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/86400000);}
+function streakNow(){const s=save.streak;if(!s)return 0;const gap=dayIdx()-s.last;return gap<=1||(gap===2&&s.savers>0)?s.n:0;}
+function streakTick(){save.streak=save.streak||{n:0,last:-9,savers:1,best:0};const s=save.streak,t=dayIdx();if(s.last===t)return null;
+  const gap=t-s.last;let kept=false;if(gap===1)s.n++;else if(gap===2&&s.savers>0){s.savers--;s.n++;kept=true;}else s.n=1;s.last=t;s.best=Math.max(s.best||0,s.n);
+  const day=(s.n-1)%7,gems=STREAK_GEMS[day];save.gems=(save.gems||0)+gems;streakPop=1;
+  if(day===6){const bag=dailyReward()*3;save.coins+=bag;if(s.savers<1)s.savers=1;sfx('fanfare');return 'DAY 7! +'+gems+' GEMS +'+fmt(bag)+' COINS';}
+  return (kept?'SAVER USED! ':'STREAK ')+'DAY '+s.n+': +'+gems+' GEMS';}
+let streakPop=0;
+function drawStreakRow(y){const sn=streakNow(),s=save.streak,done=!!(s&&s.last===dayIdx()&&sn>0),filled=sn?(done?((sn-1)%7)+1:sn%7):0,today=done?filled-1:filled;
+  if(streakPop>0)streakPop=Math.max(0,streakPop-1/60);
+  text(b,'STREAK',18,y+2,'#9fc0e8',{outline:null});text(b,sn+(sn===1?' DAY':' DAYS'),18,y+10,sn?'#ffd23f':'#6a7896',{outline:null});
+  for(let i=0;i<7;i++){const big=i===6,x=60+i*15,yy=big?y-1:y,w=big?15:13,on=i<filled,isT=i===today;
+    const pop=isT&&done&&streakPop>0?Math.round(streakPop*2):0;
+    R(b,x-pop,yy-pop,w+pop*2,w+pop*2,K);R(b,x+1-pop,yy+1-pop,w-2+pop*2,w-2+pop*2,on?(big?'#ffd23f':'#7fe08a'):big?'#a05ad8':'#24406f');
+    text(b,''+STREAK_GEMS[i],x+Math.floor(w/2)+1,yy+Math.floor(w/2)-2,on?'#13306b':big?'#ffd23f':'#9fc0e8',{align:'center',outline:null});
+    if(isT&&!done&&Math.floor(tNow*3)%2===0){R(b,x-1,yy-1,w+2,1,'#ffd23f');R(b,x-1,yy+w,w+2,1,'#ffd23f');R(b,x-1,yy-1,1,w+2,'#ffd23f');R(b,x+w,yy-1,1,w+2,'#ffd23f');}}
+  if(s&&s.savers>0)text(b,'STREAK SAVER x'+s.savers,W-14,y+17,'#9fd8ff',{align:'right',outline:null});}
+function drawDaily(){b.fillStyle='rgba(11,24,56,0.78)';b.fillRect(0,0,W,H);panel(10,30,160,224,'#13306b','#ffd23f');
   if(dailyNew()){save.dailySeen=todayKey();persist();}
-  const sub=dailyOpen==='new'?['NEW JOBS FOR TODAY!','#ffd23f']:dailyOpen==='claim'?['YOU FINISHED ONE! TAP CLAIM','#7fe08a']:['NEW JOBS EVERY DAY','#9fc0e8'];
-  b.drawImage(SPR.cal,38,59);text(b,'DAILY JOBS',W/2+6,58,'#ffffff',{align:'center',scale:2});text(b,sub[0],W/2,76,sub[1],{align:'center',outline:null});
+  const sr=streakNow(),risk=sr>0&&!(save.streak&&save.streak.last===dayIdx());const sub=dailyOpen==='claim'?['YOU FINISHED ONE! TAP CLAIM','#7fe08a']:risk?['CLAIM ONE TODAY TO KEEP YOUR STREAK','#ffd23f']:dailyOpen==='new'?['NEW JOBS FOR TODAY!','#ffd23f']:['CLAIM ONE A DAY FOR A STREAK','#9fc0e8'];
+  b.drawImage(SPR.cal,38,41);text(b,'DAILY JOBS',W/2+6,40,'#ffffff',{align:'center',scale:2});text(b,sub[0],W/2,56,sub[1],{align:'center',outline:null});drawStreakRow(66);
   const rw=dailyReward();
-  (save.daily?save.daily.goals:[]).forEach((g,i)=>{const y=88+i*42,d=DAILY_POOL.find(p=>p.type===g.type),done=g.prog>=g.target;
+  (save.daily?save.daily.goals:[]).forEach((g,i)=>{const y=94+i*41,d=DAILY_POOL.find(p=>p.type===g.type),done=g.prog>=g.target;
     card(16,y,148,38,g.claimed?'#c9d3e2':'#eef3fb','#9fc0e8');text(b,d.txt(g.target),22,y+5,'#13306b',{outline:null});
     R(b,22,y+16,84,7,K);R(b,23,y+17,82,5,'#b8c2d4');R(b,23,y+17,Math.round(82*Math.min(1,g.prog/g.target)),5,'#33b24a');
     text(b,fmt(Math.min(g.prog,g.target))+'/'+fmt(g.target),22,y+27,'#4f6fa0',{outline:null});
     if(g.claimed)text(b,'DONE',136,y+16,'#1f7a33',{align:'center',outline:null});
-    else{button('dclaim'+i,110,y+12,50,20,done?'green':'grey',null,()=>{if(g.prog>=g.target&&!g.claimed){g.claimed=true;save.stats.dailyClaims=(save.stats.dailyClaims||0)+1;save.coins+=rw;save.gems=(save.gems||0)+SHOP.dailyGems;sfx('buy');buzz(15);showToast('+'+fmt(rw)+' COINS +'+SHOP.dailyGems+' GEMS','#ffd23f');persist();}else{sfx('deny');showToast('NOT DONE YET','#ff9aa8');}});
+    else{button('dclaim'+i,110,y+12,50,20,done?'green':'grey',null,()=>{if(g.prog>=g.target&&!g.claimed){g.claimed=true;save.stats.dailyClaims=(save.stats.dailyClaims||0)+1;save.coins+=rw;save.gems=(save.gems||0)+SHOP.dailyGems;sfx('buy');buzz(15);const st=streakTick();showToast(st||('+'+fmt(rw)+' COINS +'+SHOP.dailyGems+' GEMS'),'#ffd23f');persist();}else{sfx('deny');showToast('NOT DONE YET','#ff9aa8');}});
       text(b,'CLAIM',135,y+15,'#ffffff',{align:'center'});b.drawImage(SPR.coinS,114,y+23);text(b,fmt(rw),121,y+23,'#ffffff',{outline:null});}});
-  {const t2='EACH ONE ALSO GIVES +'+SHOP.dailyGems,tw=textW(t2)+8;text(b,t2,W/2-tw/2,215,'#ff8fc8',{outline:null});b.drawImage(SPR.gemS,W/2-tw/2+tw-6,215);}
-  button('dclose',54,228,72,18,'orange','DONE',()=>{dailyOpen=false;sfx('click');});}
+  {const t2='EACH ONE ALSO GIVES +'+SHOP.dailyGems,tw=textW(t2)+8;text(b,t2,W/2-tw/2,219,'#ff8fc8',{outline:null});b.drawImage(SPR.gemS,W/2-tw/2+tw-6,219);}
+  button('dclose',54,232,72,18,'orange','DONE',()=>{dailyOpen=false;sfx('click');});}
 // ---------------- SCROLLING ----------------
 const scrollY={map:null,garage:0,trophies:0};let scrollAreas=[],drag=null;
 function scrollArea(key,x,y,w,h,content){const max=Math.max(0,content-h);let v=scrollY[key];if(v==null)v=0;v=clamp(v,0,max);scrollY[key]=v;scrollAreas.push({key,x,y,w,h,max});return v;}
@@ -2413,13 +2431,20 @@ function drawPause(){ui=[];b.fillStyle='rgba(11,24,56,0.7)';b.fillRect(0,0,W,H);
   button('restart',45,135,90,20,'orange','RESTART',()=>startLevel(G.idx));
   button('psettings',45,160,90,20,'navy','SETTINGS',()=>{settingsOpen=true;sfx('click');});
   button('quit',45,185,90,20,'blue','JOBS',goMap);}
+function nextGoal(){const c=save.coins,opts=[];
+  for(const k in UPG){const lv=save.lv[k];if(lv>=UPG[k].max)continue;opts.push({need:upgCost(k)-c,label:UPG[k].name+' LV'+(lv+1),go:goUpgrades});}
+  const n=save.tool+1;if(n<TOOLS.length&&toolAvail(n))opts.push({need:TOOLS[n].cost-c,label:'THE '+TOOLS[n].name,go:goGarage,tool:true});
+  if(!opts.length)return null;opts.sort((a,z)=>a.need-z.need);const can=opts.filter(o=>o.need<=0);
+  if(can.length){const p=can.find(o=>o.tool)||can[can.length-1];return {s:'YOU CAN BUY '+p.label+'!',col:'#7fe08a',go:p.go};}
+  return {s:fmt(opts[0].need)+' COINS TO '+opts[0].label,col:'#ffffff',go:opts[0].go};}
 function drawResults(){
   ui=[];const r=run.res,t=r.t;b.fillStyle='rgba(11,24,56,0.72)';b.fillRect(0,0,W,H);
   const py=Math.max(44,Math.round(44+(1-Math.min(1,t*4))*60));panel(12,py,156,208,'#13306b','#ffd23f');
-  text(b,r.allClear?'ALL CLEAR!':"TIME'S UP!",W/2,py+10,r.allClear?'#7fe08a':'#ffffff',{align:'center',scale:2});
+  const nextT=r.stars<3?G.def.stars[r.stars]:null,gap=nextT!=null?Math.ceil(nextT-r.pct):0,close=!r.challenge&&!r.allClear&&nextT!=null&&gap>0&&gap<=10;
+  text(b,r.allClear?'ALL CLEAR!':close?'SO CLOSE!':"TIME'S UP!",W/2,py+10,r.allClear?'#7fe08a':close?'#ffd23f':'#ffffff',{align:'center',scale:2});
   text(b,G.def.name,W/2,py+26,'#9fc0e8',{align:'center',outline:null});
   const shown=Math.min(r.pct,r.pct*Math.min(1,t/0.8));text(b,Math.floor(shown)+'%',W/2,py+38,'#ffffff',{align:'center',scale:4,shadow:'#0b1838'});
-  text(b,'CLEARED',W/2,py+62,'#9fc0e8',{align:'center',outline:null});
+  text(b,close?gap+'% OFF '+(r.stars===0?'YOUR FIRST STAR':(r.stars+1)+' STARS'):'CLEARED',W/2,py+62,close?'#ffd23f':'#9fc0e8',{align:'center',outline:null});
   for(let s=0;s<3;s++){const appear=0.9+s*0.35,on=r.stars>s&&t>appear;if(on&&r.starsPlayed<=s){r.starsPlayed=s+1;sfxStar(s);buzz(20);}
     const pop=on?Math.max(0,2-Math.floor((t-appear)*12)):0,img=on?SPR.bigStar:SPR.bigStarOff,sc=2+(pop>0?1:0),sz=9*sc;
     b.drawImage(img,Math.round(W/2-36+s*27-sz/2+9),py+74-(sc-2)*4,sz,sz);text(b,G.def.stars[s]+'%',W/2-27+s*27,py+96,on?'#ffd23f':'#6a7896',{align:'center',outline:null});}
@@ -2431,7 +2456,8 @@ function drawResults(){
   else if(r.stars===0)text(b,'GET '+G.def.stars[0]+'% FOR A STAR',W/2,ly,'#ff9aa8',{align:'center'});
   else if(kids.length)text(b,LEVELS[kids[0]].name+' UNLOCKED!',W/2,ly,'#ffd23f',{align:'center'});
   else if(gated.length)text(b,'NEXT AREA NEEDS A '+TOOLS[toolIdx(LEVELS[gated[0]].gate)].name,W/2,ly,'#9fd8ff',{align:'center'});
-  else text(b,'UPGRADE AND GO AGAIN!',W/2,ly,'#ffffff',{align:'center'});
+  else{const ng=nextGoal();if(ng){text(b,ng.s,W/2,ly,ng.col,{align:'center'});btn('rgoal',14,ly-2,152,10,()=>{sfx('click');ng.go();});}else text(b,'UPGRADE AND GO AGAIN!',W/2,ly,'#ffffff',{align:'center'});}
+  if(!r.challenge&&(r.stars===0||kids.length||gated.length)&&ly+10<=py+132){const ng=nextGoal();if(ng){text(b,ng.s,W/2,ly+10,ng.col,{align:'center',outline:null});btn('rgoal',14,ly+8,152,10,()=>{sfx('click');ng.go();});}}
   if(t>0.6){const canAd=!r.challenge&&!run.adUsed&&run.earned>=1,canBoost=!r.challenge&&(save.fails[G.idx]||0)>=BOOST_AFTER_FAILS&&!save.boostNext&&r.stars<3;
     const adBtn=(x,w)=>save.pro?button('rad',x,py+148,w,16,'gold',w>80?'PRO: x2 COINS':'PRO: x2',()=>{run.adUsed=true;const rw=Math.floor(run.earned);save.coins+=rw;sfx('buy');showToast('+'+fmt(rw)+' COINS','#ffd23f');persist();})
       :button('rad',x,py+148,w,16,'purple',w>80?'WATCH AD: x2 COINS':'AD: x2 COINS',()=>{run.adUsed=true;adScreen={t:2.5,reward:Math.floor(run.earned)};sfx('click');});
@@ -2439,7 +2465,7 @@ function drawResults(){
     if(canAd&&canBoost){adBtn(18,70);boostBtn(92,70);}else if(canAd)adBtn(18,144);else if(canBoost)boostBtn(18,144);
     if(canBoost)text(b,'STUCK? A BOOST IS ON US',W/2,py+140,'#9fd8ff',{align:'center',outline:null});
     if(run.dailyDone&&dailyReadyCount()>0){b.drawImage(SPR.cal,26,py+166);text(b,'DAILY DONE! CLAIM ON JOBS',38,py+168,'#7fe08a',{outline:null});}
-    button('retry',18,py+176,46,22,'orange','RETRY',()=>startLevel(G.idx,run.challenge?{challenge:run.challenge}:null));button('rmap',67,py+176,46,22,'blue','JOBS',goMap);button('rupg',116,py+176,46,22,'green','UPGRADE',goUpgrades);}}
+    button('retry',18,py+176,46,22,'orange','RETRY',()=>startLevel(G.idx,run.challenge?{challenge:run.challenge}:null));if(close){const a=0.45+0.55*Math.abs(Math.sin(tNow*4));b.globalAlpha=a;R(b,15,py+173,52,2,'#ffd23f');R(b,15,py+199,52,2,'#ffd23f');R(b,15,py+173,2,28,'#ffd23f');R(b,65,py+173,2,28,'#ffd23f');b.globalAlpha=1;}button('rmap',67,py+176,46,22,'blue','JOBS',goMap);button('rupg',116,py+176,46,22,'green','UPGRADE',goUpgrades);}}
 
 // ---------------- MAIN LOOP / IO ----------------
 const cv=document.getElementById('c'),ctx=cv.getContext('2d'),wrap=document.getElementById('wrap');let KS=3;
@@ -2516,7 +2542,7 @@ function frame(now){const dt=Math.min(0.05,(now-last)/1000);last=now;
   drawLogo();
   requestAnimationFrame(frame);}
 requestAnimationFrame(frame);
-window.__SR={pineSprite,goHome,yard:()=>yard,upg:{buyUpg,moveSpeed,bladeCells,valueMult,bumperRed,helperIncome,upgCost,get offlineGain(){return offlineGain;},OFFLINE_CAP_S,OFFLINE_RATE},setLook,setCorners,setShadow,get LOOK(){return LOOK;},get CORNERS(){return CORNERS;},get camY(){return camY;},get VIEW_Y(){return VIEW_Y;},clearLookToast(){lookToast=0;},get mapView(){return save.mapView;},mapInit,ensureMapArt,get mapArt(){return mapArt;},get mapMs(){return mapInit.ms;},mapEdges,get plowAnim(){return plowAnim;},get ridePeek(){return ridePeek;},set ridePeek(v){ridePeek=v;},get rideReveal(){return rideReveal;},set rideReveal(v){rideReveal=v;},equip,useIdx,get trophyTab(){return trophyTab;},set trophyTab(v){trophyTab=v;},set trophiesOpen(v){trophiesOpen=v;},_t:{buildLevel,footprint,bladeRect,isKidTool,get VSPEC(){return VSPEC;},T_BLOCK,CLEAR_T},get weeklyOpen(){return weeklyOpen;},set weeklyOpen(v){weeklyOpen=v;},weeklyDef,get scrollY(){return scrollY;},get jobInfo(){return jobInfo;},set jobInfo(v){jobInfo=v;},startNewWinter,levelOpen,LEVELS,TOOLS,get audio(){return {ctx:!!AC,state:AC&&AC.state,bufs:Object.keys(BUF).length,music:curMusic,loops:Object.keys(loopNodes)};},audioInit,openShop,dailyAdd,award,get shopOpen(){return shopOpen;},get dailyOpen(){return dailyOpen;},set dailyOpen(v){dailyOpen=v;},get winterOpen(){return winterOpen;},get state(){return state;},get G(){return G;},get run(){return run;},get P(){return P;},save,startLevel,goMap,goUpgrades,goGarage,endRound:()=>endRound(false),keys,hit};
+window.__SR={pineSprite,streakTick,dayIdx,goHome,yard:()=>yard,upg:{buyUpg,moveSpeed,bladeCells,valueMult,bumperRed,helperIncome,upgCost,get offlineGain(){return offlineGain;},OFFLINE_CAP_S,OFFLINE_RATE},setLook,setCorners,setShadow,get LOOK(){return LOOK;},get CORNERS(){return CORNERS;},get camY(){return camY;},get VIEW_Y(){return VIEW_Y;},clearLookToast(){lookToast=0;},get mapView(){return save.mapView;},mapInit,ensureMapArt,get mapArt(){return mapArt;},get mapMs(){return mapInit.ms;},mapEdges,get plowAnim(){return plowAnim;},get ridePeek(){return ridePeek;},set ridePeek(v){ridePeek=v;},get rideReveal(){return rideReveal;},set rideReveal(v){rideReveal=v;},equip,useIdx,get trophyTab(){return trophyTab;},set trophyTab(v){trophyTab=v;},set trophiesOpen(v){trophiesOpen=v;},_t:{buildLevel,footprint,bladeRect,isKidTool,get VSPEC(){return VSPEC;},T_BLOCK,CLEAR_T},get weeklyOpen(){return weeklyOpen;},set weeklyOpen(v){weeklyOpen=v;},weeklyDef,get scrollY(){return scrollY;},get jobInfo(){return jobInfo;},set jobInfo(v){jobInfo=v;},startNewWinter,levelOpen,LEVELS,TOOLS,get audio(){return {ctx:!!AC,state:AC&&AC.state,bufs:Object.keys(BUF).length,music:curMusic,loops:Object.keys(loopNodes)};},audioInit,openShop,dailyAdd,award,get shopOpen(){return shopOpen;},get dailyOpen(){return dailyOpen;},set dailyOpen(v){dailyOpen=v;},get winterOpen(){return winterOpen;},get state(){return state;},get G(){return G;},get run(){return run;},get P(){return P;},save,startLevel,goMap,goUpgrades,goGarage,endRound:()=>endRound(false),keys,hit};
 })();
 </script>
 </body>
