@@ -4,6 +4,21 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>Snowplow Rush | Prototype</title>
+<script>
+(function(){var K='snowplowRush.proto.v2',NEW='https://snowplowrush.app/';
+function enc(t){return btoa(unescape(encodeURIComponent(t))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
+function dec(t){t=t.replace(/-/g,'+').replace(/_/g,'/');while(t.length%4)t+='=';return decodeURIComponent(escape(atob(t)));}
+function rank(o){if(!o||typeof o!=='object')return[-1];var st=0;(o.stars||[]).forEach(function(v){st+=v||0;});return[o.w||0,o.tool||0,st,o.winterCoins||0,o.coins||0];}
+function better(a,b){for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y;}return false;}
+try{
+  if(location.hostname==='snowplow-rush.vercel.app'){var sv=null;try{sv=localStorage.getItem(K);}catch(e){}
+    document.documentElement.style.background='#0b1838';location.replace(NEW+(sv?'#import='+enc(sv):''));window.__SR_MOVING=true;return;}
+  var h=location.hash;if(h.indexOf('#import=')===0){var raw=dec(h.slice(8)),inc=JSON.parse(raw),cur=null;try{cur=JSON.parse(localStorage.getItem(K)||'null');}catch(e){}
+    if(inc&&typeof inc==='object'&&inc.lv&&(!cur||better(rank(inc),rank(cur))))localStorage.setItem(K,raw);
+    history.replaceState(null,'',location.pathname+location.search);}
+}catch(e){try{history.replaceState(null,'',location.pathname+location.search);}catch(_){}}
+})();
+</script>
 <meta name="robots" content="noindex, nofollow">
 <meta name="description" content="Clear the snow, build your fleet. A pixel-art snowplow game - playtest build, plays in your browser.">
 <meta name="theme-color" content="#0b1838">
@@ -11,7 +26,7 @@
 <meta property="og:site_name" content="Snowplow Rush">
 <meta property="og:title" content="Snowplow Rush | Playtest">
 <meta property="og:description" content="Clear the snow. Build your fleet. A pixel-art snowplow game you can play right in your browser.">
-<meta property="og:image" content="https://snowplow-rush.vercel.app/og.png">
+<meta property="og:image" content="https://snowplowrush.app/og.png">
 <meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -19,7 +34,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Snowplow Rush | Playtest">
 <meta name="twitter:description" content="Clear the snow. Build your fleet. Plays in your browser.">
-<meta name="twitter:image" content="https://snowplow-rush.vercel.app/og.png">
+<meta name="twitter:image" content="https://snowplowrush.app/og.png">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>
@@ -339,6 +354,7 @@ function pineSprite(hh){
   R(g,Math.round(cx)-2,hh-trunkH-1,5,trunkH+1,K);R(g,Math.round(cx)-1,hh-trunkH,3,trunkH-1,PAL.l);
   for(let t=tiers-1;t>=0;t--){const top=t*(tierH-2),maxHalf=Math.round((w/2-1)*(0.55+0.45*t/(tiers-1)));
     for(let r=0;r<tierH;r++){const half=Math.max(1,Math.round(maxHalf*(r+1)/tierH));const y=top+r;
+      if(t===0&&r<2){if(r===0)R(g,Math.round(cx),y,1,1,K);else{R(g,Math.round(cx)-1,y,3,1,K);R(g,Math.round(cx),y,1,1,PAL.W);}continue;} // pointed tip
       R(g,Math.round(cx-half)-1,y,half*2+3,1,K);R(g,Math.round(cx-half),y,half*2+1,1,r<2?PAL.W:(r===tierH-1?PAL.g:PAL.G));
       if(r>=2&&r<tierH-1){R(g,Math.round(cx-half),y,1,1,PAL.W);if(r%2===0)R(g,Math.round(cx-half)+1,y,1,1,PAL.w);}}
     R(g,Math.round(cx-maxHalf)-1,top+tierH-1,maxHalf*2+3,1,K);}
@@ -1426,7 +1442,7 @@ function drawTitle(){
   drawRig(b,'shovel',30+prog-4,226,1,14,2,Math.floor(tNow*6)%2,0,false);drawFlakes(0,H);
   if(!logoReady){text(b,'SNOWPLOW',W/2,40,'#ffffff',{align:'center',scale:3,outline:'#1d4f9a'});text(b,'RUSH',W/2,62,'#ffc727',{align:'center',scale:4,outline:'#8e3a10'});}
   if(Math.floor(tNow*2)%2===0)text(b,'TAP TO PLAY',W/2,258,'#ffffff',{align:'center',scale:2});
-  text(b,'PROTOTYPE V0.7.0',W/2,300,'#4f6fa0',{align:'center',outline:null});
+  text(b,'PROTOTYPE V0.7.1',W/2,300,'#4f6fa0',{align:'center',outline:null});
   if(offlineGain>0){panel(18,110,144,64,'#13306b','#ffd23f');text(b,'WELCOME BACK!',W/2,118,'#ffd23f',{align:'center'});
     text(b,'YOUR HELPERS EARNED',W/2,130,'#ffffff',{align:'center'});b.drawImage(SPR.coin,W/2-30,141);text(b,'+'+fmt(offlineGain),W/2-20,142,'#ffd23f',{scale:2});
     button('collect',22,156,66,14,'green','COLLECT',()=>{offlineGain=0;sfx('buy');goMap();});
