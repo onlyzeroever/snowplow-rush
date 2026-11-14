@@ -203,7 +203,7 @@ const SHOP={ // TEST MODE: prices are shown but nothing is charged
   dailyGems:5,trophyGems:10,    // free gems from daily jobs and trophies
 };
 const BASE_CELL_VALUE=0.03;   // coins for one fully-snowed cell before multipliers
-const COMBO_MAX=20;           // combo steps; each adds +0.1x (max x3.0)
+const COMBO_MAX=20,COMBO_KEEP=0.75;           // combo steps; each adds +0.1x (max x3.0)
 const STAR_BONUS=50;          // first-time star bonus x job value x star number
 const SPILL_HAZARD=0.10, SPILL_BIG=0.15; // share of this run's coins knocked out by a hit
 const STUN_OB=0.45, STUN_HZ=0.6, INVULN=1.0, SPILL_LIFE=2.5;
@@ -481,7 +481,7 @@ function edgeLight(){const c=mk(5,5),g=c.getContext('2d');R(g,1,1,3,3,K);R(g,2,2
 // ---------------- AUDIO ----------------
 // Real music loops + sampled sound effects, loaded from the artifact's own audio/ folder.
 // Every effect has a tiny synth fallback so the game still beeps before files load.
-const MUSIC={menu:{f:'audio/music_lofi.mp3',a:0.5,b:47.33714,vol:0.62,lp:1100},job:{f:'audio/music_lofi.mp3',a:0.5,b:47.33714,vol:0.5,lp:20000}};let musicFilter=null;
+const MUSIC={menu:{f:'audio/music_lofi.mp3',a:0.5,b:47.33714,vol:0.58,lp:2200},job:{f:'audio/music_lofi.mp3',a:0.5,b:47.33714,vol:0.5,lp:20000}};let musicFilter=null;
 const SFX_FILES=['click','deny','buy','coin','grab','combo','spill','bump','hit','gift','gold','time','tick','star1','star2','star3','fanfare','trophy','end','win','go','neighbour','daily','warn','squall','flump','throw','splat','whoosh','horn','moo','crunch','stomp','scrape_s','scrape_l','engine','jet','fire','beam'];
 const SFX_LOOPS={scrape_s:[1.2,2.4],scrape_l:[1.2,2.4],engine:[1,2],jet:[1,2],fire:[1.2,2.4],beam:[1,2]};
 const SFX_VOL={click:0.5,deny:0.55,buy:0.7,coin:0.32,grab:0.4,combo:0.4,spill:0.6,bump:0.7,hit:0.8,gift:0.75,gold:0.8,time:0.7,tick:0.45,star1:0.8,star2:0.8,star3:0.85,
@@ -506,7 +506,7 @@ function playMusic(which,force){musicWant=which;if(!AC)return;if(curMusic===whic
   if(musicNode&&musicFilter&&!force&&curMusic&&MUSIC[curMusic].f===MUSIC[which].f){const m2=MUSIC[which];musicFilter.frequency.cancelScheduledValues(now);musicFilter.frequency.setTargetAtTime(m2.lp,now,which==='job'?0.25:0.6);musicGainNode.gain.setTargetAtTime(m2.vol,now,0.3);curMusic=which;return;}
   if(musicNode){const old=musicNode,og=musicGainNode;og.gain.setTargetAtTime(0,now,0.25);setTimeout(()=>{try{old.stop();}catch(e){}},1500);}
   const m=MUSIC[which],src=AC.createBufferSource(),g=AC.createGain();src.buffer=buf;src.loop=true;src.loopStart=m.a;src.loopEnd=Math.min(m.b,buf.duration);
-  g.gain.value=0;g.gain.setTargetAtTime(m.vol,now,0.3);const lpf=AC.createBiquadFilter();lpf.type='lowpass';lpf.Q.value=0.5;lpf.frequency.value=m.lp||20000;src.connect(lpf);lpf.connect(g);g.connect(musicBus);src.start(now,m.a);musicNode=src;musicGainNode=g;musicFilter=lpf;curMusic=which;}
+  g.gain.value=0;g.gain.setTargetAtTime(m.vol,now,musicNode?0.3:1.1);const lpf=AC.createBiquadFilter();lpf.type='lowpass';lpf.Q.value=0.5;lpf.frequency.value=m.lp||20000;src.connect(lpf);lpf.connect(g);g.connect(musicBus);src.start(now,m.a);musicNode=src;musicGainNode=g;musicFilter=lpf;curMusic=which;}
 function musicDuck(level){if(musicGainNode&&curMusic)musicGainNode.gain.setTargetAtTime(MUSIC[curMusic].vol*level,AC.currentTime,0.15);}
 function musicRate(r){if(musicNode)musicNode.playbackRate.setTargetAtTime(r,AC.currentTime,0.2);}
 function playBuf(name,vol,rate,pan){if(!AC||save.muted)return false;const buf=BUF[name];if(!buf)return false;
@@ -523,13 +523,13 @@ function tone(f,dur,type,vol,slide,delay){if(!AC||save.muted)return;const t=AC.c
   o.type=type||'square';o.frequency.setValueAtTime(f,t);if(slide)o.frequency.exponentialRampToValueAtTime(slide,t+dur);
   g.gain.setValueAtTime(vol||0.1,t);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);o.connect(g);g.connect(sfxBus);o.start(t);o.stop(t+dur+0.02);}
 const lastSfx={};
-const SCALE=[0,2,4,5,7,9,11,12,14,16,17,19,21,23,24];
+const SCALE=[0,2,4,7,9,12,14,16,19,21];
 function sfx(name,minGap,opt){const now=performance.now();if(minGap&&lastSfx[name]&&now-lastSfx[name]<minGap)return;lastSfx[name]=now;opt=opt||{};
   if(name==='scrape')return; // handled by the scrape loop
   let rate=opt.rate||1;
-  if(name==='coin'||name==='grab')rate*=0.94+Math.random()*0.14;
+  if(name==='coin'||name==='grab')rate*=[1,1.122462,0.840896][Math.floor(Math.random()*3)];
   if(name==='combo')rate=Math.pow(2,SCALE[Math.min(SCALE.length-1,Math.max(0,(opt.step||0)))]/12);
-  if(name==='click'||name==='bump')rate*=0.95+Math.random()*0.1;
+  if(name==='bump')rate*=0.95+Math.random()*0.1;
   if(playBuf(name,opt.vol,rate,opt.pan))return;
   switch(name){ // fallbacks while files load
     case 'coin':tone(1320,0.05,'triangle',0.05,1760);break;
@@ -1234,7 +1234,7 @@ function updatePlay(dt){
   const br=bladeRect(tid,P.x,P.y,P.f,bwPx);
   const cx0=Math.max(0,Math.floor(br.x/2)),cx1=Math.min(G.cols-1,Math.floor((br.x+br.w-1)/2)),cy0=Math.max(0,Math.floor(br.y/2)),cy1=Math.min(G.rows-1,Math.floor((br.y+br.h-1)/2));
   const cellVal=BASE_CELL_VALUE*G.def.value*valueMult()*(run.gold>0?2:1),comboMult=1+0.1*run.combo;
-  const acc={got:0,cnt:0};
+  const acc={got:0,cnt:0,fresh:0};
   if(tid==='ufo'){const rB=bwPx/2,r2=rB*rB;for(let cy=Math.max(0,Math.floor((P.y-rB)/2));cy<=Math.min(G.rows-1,Math.floor((P.y+rB)/2));cy++)for(let cx=Math.max(0,Math.floor((P.x-rB)/2));cx<=Math.min(G.cols-1,Math.floor((P.x+rB)/2));cx++){const dx=cx*2+1-P.x,dy=cy*2+1-P.y;if(dx*dx+dy*dy<=r2)clearCell(cy*G.cols+cx,acc);}
     br.x=P.x-rB;br.y=P.y-rB;br.w=rB*2;br.h=rB*2;}
   else for(let cy=cy0;cy<=cy1;cy++)for(let cx=cx0;cx<=cx1;cx++)clearCell(cy*G.cols+cx,acc);
@@ -1248,18 +1248,18 @@ function updatePlay(dt){
   const got=acc.got,cnt=acc.cnt;
   if(cnt){save.stats.cells+=cnt;if(save.stats.cells>=100000)award('snowday');dailyAdd('cells',cnt);}
   if(got>0){const coins=got*cellVal*comboMult;if(!run.challenge){save.coins+=coins;run.earned+=coins;run.pending+=coins;}P.load=Math.min(1,P.load+got/(bladeCells()*2.5));
-    if(cnt>0){run.comboT=0.6;run.comboProg+=cnt;const step=Math.max(60,bladeCells()*10);while(run.comboProg>=step){run.comboProg-=step;if(run.combo<COMBO_MAX){run.combo++;if(run.combo>=2)sfx('combo',60,{step:run.combo-2});if(run.combo>=COMBO_MAX)award('combo');if(run.combo>=10)dailyAdd('combo',1,true);}}}
+    if(cnt>0){if(acc.fresh>=2)run.comboT=COMBO_KEEP;run.comboProg+=cnt;const step=Math.max(60,bladeCells()*10);while(run.comboProg>=step){run.comboProg-=step;if(run.combo<COMBO_MAX){run.combo++;if(run.combo>=2)sfx('combo',60,{step:run.combo-2});if(run.combo>=COMBO_MAX)award('combo');if(run.combo>=10)dailyAdd('combo',1,true);}}}
     sfx('scrape',90);run.sprayAcc+=got;const n=Math.min(6,Math.floor(run.sprayAcc/3));run.sprayAcc-=n*3;for(let k=0;k<n;k++)spray(br,P.f,tid);}
   P.load=Math.max(0,P.load-dt*(moving?0.7:1.4));
   // scrape / engine loops follow what you're doing
   run.scrapeLvl=(run.scrapeLvl||0)+(Math.min(1,got*(isKidTool(tid)?0.5:0.18))-(run.scrapeLvl||0))*Math.min(1,dt*12);
   loopSet(isKidTool(tid)?'scrape_s':'scrape_l',run.scrapeLvl*0.55,0.9+0.2*Math.min(1,Math.hypot(P.vx,P.vy)/full));
   if(!isKidTool(tid)){const sr=Math.min(1,Math.hypot(P.vx,P.vy)/full);loopSet('engine',0.16+0.22*sr,(tid==='tractor'?1.1:tid==='truck'?0.85:0.75)+0.45*sr);}
-  if(run.time<10&&!run.hurry){run.hurry=true;musicRate(1.06);}
+  if(run.time<10&&!run.hurry){run.hurry=true;}
   if(run.time<=5.5){const s2=Math.ceil(run.time);if(s2!==run.lastTick&&s2>0){run.lastTick=s2;sfx('tick');}}
-  run.comboT-=dt;if(run.comboT<=0&&run.combo>0){run.combo=0;run.comboProg=0;}
-  run.pendT+=dt;if(run.pendT>0.28){run.pendT=0;if(run.pending>=0.5){const cxp=br.x+br.w/2,cyp=br.y+br.h/2;
-    addFloat(cxp+rnd(-6,6),cyp-6,'+'+fmt(Math.max(1,run.pending)),run.gold>0?'#ffef7a':'#ffd23f');run.pending=0;
+  run.comboT-=dt;if(run.comboT<=0&&run.combo>0){if(run.combo>=5)addFloat(P.x,P.y-24,'COMBO OVER','#9fd8ff',0.9);run.combo=0;run.comboProg=0;}
+  run.pendT+=dt;if(run.pendT>0.36){run.pendT=0;if(run.pending>=0.5){const cm=1+0.1*run.combo;const cxp=br.x+br.w/2,cyp=br.y+br.h/2;
+    addFloat(cxp+rnd(-6,6),cyp-6,'+'+fmt(Math.max(1,Math.round(run.pending))),run.gold>0?'#ffef7a':cm>=2.5?'#ff6fb5':cm>=2?'#ff9a3c':cm>=1.5?'#ffc43a':'#ffe48a');run.pending=0;
     particles.push({x:cxp,y:cyp,vx:rnd(-20,20),vy:rnd(-10,10),z:0,vz:rnd(40,60),life:0.7,t:0,kind:'coin'});sfx('coin',120);}}
   updateCows(dt,tid,bwPx);updateTrail(dt,tid,moving);checkTreasure(br);
   // presents
@@ -1290,7 +1290,7 @@ function updatePlay(dt){
   updateFx(dt);flushLevel(G);
   run.time-=dt;const pct=G.cleared/G.clearable*100;if(pct>=99.5)endRound(true);else if(run.time<=0){run.time=0;const st=G.def.stars.filter(q=>pct>=q).length;
     if(!run.contUsed&&!run.challenge&&st<3){run.contUsed=true;run.offer=true;joy=null;dpad=null;stopLoops();musicDuck(0.4);}else endRound(false);}}
-function clearCell(i,acc){if(G.type[i]===T_BLOCK)return;const d=G.depth[i];if(d>0.03){acc.got+=d;if(d>0.3)acc.cnt++;setDepth(G,i,0);}}
+function clearCell(i,acc){if(G.type[i]===T_BLOCK)return;const d=G.depth[i];if(d>0.03){acc.got+=d;if(d>0.3)acc.cnt++;if(d>0.6)acc.fresh++;setDepth(G,i,0);}}
 function groundTypeNear(x,y,w,h){for(const [px,py] of [[x+w/2,y+h+3],[x+w/2,y-3],[x-3,y+h/2],[x+w+3,y+h/2]]){const cx=px>>1,cy=py>>1;if(cx>=0&&cy>=0&&cx<G.cols&&cy<G.rows){const t=G.type[cy*G.cols+cx];if(t!==T_BLOCK)return t;}}return T_ASPH;}
 function setCellBlock(i,block,t){const old=G.type[i]===T_BLOCK;if(old===block)return;const cy=(i/G.cols)|0,b=Math.floor(cy*2/G.bandH);
   if(block){if(G.depth[i]<CLEAR_T){G.cleared--;G.bandClr[b]--;}G.clearable--;G.bandTot[b]--;G.type[i]=T_BLOCK;}
@@ -1453,7 +1453,7 @@ function drawTitle(){
   drawRig(b,'shovel',30+prog-4,226,1,14,2,Math.floor(tNow*6)%2,0,false);drawFlakes(0,H);
   if(!logoReady){text(b,'SNOWPLOW',W/2,40,'#ffffff',{align:'center',scale:3,outline:'#1d4f9a'});text(b,'RUSH',W/2,62,'#ffc727',{align:'center',scale:4,outline:'#8e3a10'});}
   if(Math.floor(tNow*2)%2===0)text(b,'TAP TO PLAY',W/2,258,'#ffffff',{align:'center',scale:2});
-  text(b,'PROTOTYPE V0.7.5',W/2,300,'#4f6fa0',{align:'center',outline:null});
+  text(b,'PROTOTYPE V0.7.6',W/2,300,'#4f6fa0',{align:'center',outline:null});
   if(offlineGain>0){panel(14,98,152,90,'#13306b','#ffd23f');text(b,'WELCOME BACK!',W/2,105,'#ffd23f',{align:'center'});
     text(b,'AWAY '+fmtDur(offlineAway)+' - YOUR HELPERS EARNED',W/2,116,'#ffffff',{align:'center'});
     const gw=textW('+'+fmt(offlineGain),2)+12;b.drawImage(SPR.coin,W/2-gw/2,127);text(b,'+'+fmt(offlineGain),W/2-gw/2+12,128,'#ffd23f',{scale:2});
@@ -2383,7 +2383,7 @@ function drawPlay(){
   if(run.boost&&!run.ended)text(b,'BOOST',4,VIEW_Y+VIEW_H-10,'#9fd8ff');
   if(run.challenge&&!run.ended)text(b,'WEEKLY',4,VIEW_Y+VIEW_H-20,'#ffd23f');
   if(run.combo>=2&&!run.ended){const m=(1+0.1*run.combo).toFixed(1);const bounce=Math.max(0,3-Math.floor((0.6-run.comboT)*20));
-    text(b,'x'+m+' COMBO!',W/2,VIEW_Y+10-Math.min(2,bounce),run.combo>=10?'#ffd23f':'#ff4fa3',{align:'center',scale:2});}
+    text(b,'x'+m+' COMBO!',W/2,VIEW_Y+10-Math.min(2,bounce),run.combo>=10?'#ffd23f':'#ff4fa3',{align:'center',scale:2});{const k=clamp(run.comboT/COMBO_KEEP,0,1),bw2=60;R(b,W/2-bw2/2-1,VIEW_Y+24,bw2+2,4,K);R(b,W/2-bw2/2,VIEW_Y+25,Math.round(bw2*k),2,k<0.35?'#ff6a7a':run.combo>=10?'#ffd23f':'#ff4fa3');}}
   if(!run.moved&&!run.ended){panel(20,VIEW_Y+VIEW_H-110,140,36,'#13306b','#ffd23f');
     text(b,save.ctrl==='joy'?'DRAG ANYWHERE':'USE THE D-PAD',W/2,VIEW_Y+VIEW_H-103,'#ffffff',{align:'center',scale:2});text(b,'TO PUSH THE SNOW',W/2,VIEW_Y+VIEW_H-88,'#ffd23f',{align:'center'});if(!('ontouchstart' in window)&&!navigator.maxTouchPoints)text(b,'OR USE ARROW KEYS / WASD',W/2,VIEW_Y+VIEW_H-76,'#9fd8ff',{align:'center'});}
   if(joy){const ox=Math.round(joy.ox),oy=Math.round(joy.oy);b.fillStyle='rgba(255,255,255,0.35)';for(let a=0;a<24;a++){const an=a/24*Math.PI*2;b.fillRect(Math.round(ox+Math.cos(an)*16),Math.round(oy+Math.sin(an)*16),1,1);}R(b,Math.round(joy.x)-3,Math.round(joy.y)-3,7,7,'rgba(255,255,255,0.45)');}
