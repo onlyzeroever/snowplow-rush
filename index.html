@@ -349,15 +349,20 @@ SPR.check=spr(["......K",".....KQ","K...KQK","QK.KQK.",".KQQK..","..KK..."]);
 SPR.gear=spr(["..K.K.K..",".KZKZKZK.","KZZZZZZZK",".KZKKKZK.","KZZK.KZZK",".KZKKKZK.","KZZZZZZZK",".KZKZKZK.","..K.K.K.."]);
 
 function pineSprite(hh){
-  const w=Math.round(hh*0.72)|1,c=mk(w,hh),g=c.getContext('2d'),cx=(w-1)/2;
-  const trunkH=Math.max(3,Math.round(hh*0.14)),tiers=3,tierH=Math.floor((hh-trunkH)/tiers)+2;
-  R(g,Math.round(cx)-2,hh-trunkH-1,5,trunkH+1,K);R(g,Math.round(cx)-1,hh-trunkH,3,trunkH-1,PAL.l);
-  for(let t=tiers-1;t>=0;t--){const top=t*(tierH-2),maxHalf=Math.round((w/2-1)*(0.55+0.45*t/(tiers-1)));
-    for(let r=0;r<tierH;r++){const half=Math.max(1,Math.round(maxHalf*(r+1)/tierH));const y=top+r;
-      if(t===0&&r<2){if(r===0)R(g,Math.round(cx),y,1,1,K);else{R(g,Math.round(cx)-1,y,3,1,K);R(g,Math.round(cx),y,1,1,PAL.W);}continue;} // pointed tip
-      R(g,Math.round(cx-half)-1,y,half*2+3,1,K);R(g,Math.round(cx-half),y,half*2+1,1,r<2?PAL.W:(r===tierH-1?PAL.g:PAL.G));
-      if(r>=2&&r<tierH-1){R(g,Math.round(cx-half),y,1,1,PAL.W);if(r%2===0)R(g,Math.round(cx-half)+1,y,1,1,PAL.w);}}
-    R(g,Math.round(cx-maxHalf)-1,top+tierH-1,maxHalf*2+3,1,K);}
+  // a proper pine at every size: pointed top, 1-3 layered tiers that widen downward, snow on each tier, full outline inside the canvas
+  const tiers=hh<14?1:hh<20?2:3,trunkH=Math.max(2,Math.round(hh*0.13)),halfMax=Math.max(3,Math.round(hh*0.3)),w=halfMax*2+3,cx=halfMax+1;
+  const c=mk(w,hh),g=c.getContext('2d'),crownBot=hh-trunkH-1;
+  R(g,cx-2,crownBot,5,trunkH+1,K);R(g,cx-1,crownBot+1,3,trunkH-1,PAL.l);
+  const ov=2,tierH=Math.max(4,Math.round((crownBot-1+(tiers-1)*ov)/tiers));
+  for(let t=tiers-1;t>=0;t--){
+    const top=1+t*(tierH-ov),bot=t===tiers-1?crownBot-1:Math.min(crownBot-1,top+tierH-1),rows=bot-top+1;
+    const aBot=tiers===1?halfMax:Math.round(halfMax*(0.58+0.42*t/(tiers-1))),aTop=t===0?0:Math.round(aBot*0.42);
+    for(let r=0;r<rows;r++){const y=top+r,half=Math.round(aTop+(aBot-aTop)*r/Math.max(1,rows-1));
+      R(g,cx-half-1,y,half*2+3,1,K);
+      R(g,cx-half,y,half*2+1,1,r<(t===0?2:1)?PAL.W:(r===rows-1?PAL.g:PAL.G));
+      if(r>0&&r<rows-1){R(g,cx-half,y,1,1,PAL.W);if(r%2===0&&half>1)R(g,cx-half+1,y,1,1,PAL.w);}}
+    R(g,cx-aBot-1,bot+1,aBot*2+3,1,K);}
+  R(g,cx,0,1,1,K);
   return c;}
 function carSprite(body,dark,taxi,snowy=true){
   const c=mk(24,32),g=c.getContext('2d');
@@ -1442,7 +1447,7 @@ function drawTitle(){
   drawRig(b,'shovel',30+prog-4,226,1,14,2,Math.floor(tNow*6)%2,0,false);drawFlakes(0,H);
   if(!logoReady){text(b,'SNOWPLOW',W/2,40,'#ffffff',{align:'center',scale:3,outline:'#1d4f9a'});text(b,'RUSH',W/2,62,'#ffc727',{align:'center',scale:4,outline:'#8e3a10'});}
   if(Math.floor(tNow*2)%2===0)text(b,'TAP TO PLAY',W/2,258,'#ffffff',{align:'center',scale:2});
-  text(b,'PROTOTYPE V0.7.1',W/2,300,'#4f6fa0',{align:'center',outline:null});
+  text(b,'PROTOTYPE V0.7.2',W/2,300,'#4f6fa0',{align:'center',outline:null});
   if(offlineGain>0){panel(18,110,144,64,'#13306b','#ffd23f');text(b,'WELCOME BACK!',W/2,118,'#ffd23f',{align:'center'});
     text(b,'YOUR HELPERS EARNED',W/2,130,'#ffffff',{align:'center'});b.drawImage(SPR.coin,W/2-30,141);text(b,'+'+fmt(offlineGain),W/2-20,142,'#ffd23f',{scale:2});
     button('collect',22,156,66,14,'green','COLLECT',()=>{offlineGain=0;sfx('buy');goMap();});
@@ -1523,7 +1528,7 @@ const EDGE_VIA={'airport>castle':[[160,884],[156,808],[70,770],[30,700],[52,626]
 // a landmark for each job (used for the list view thumbnails)
 const LANDMARK={driveway:[78,2354],gardens:[64,2232],culdesac:[150,2286],park:[36,2108],school:[118,2210],maple:[92,2068],junkyard:[154,2004],lane:[94,1932],
   farmyard:[64,1786],orchard:[118,1776],pond:[28,1666],retreat:[160,1676],village:[66,1584],ranch:[140,1480],motorway:[40,1432],shops:[92,1378],street:[22,1240],
-  lot:[158,1252],mansion:[54,1132],site:[156,1110],stadium:[58,1036],airport:[78,904],castle:[92,416]};
+  lot:[158,1252],mansion:[54,1132],site:[156,1110],stadium:[64,1067],airport:[78,904],castle:[92,416]};
 const RIV_Y=1964,RIV_HW=11;function rivY(x){return RIV_Y+Math.round(Math.sin(x*0.04+0.6)*7);}
 const MW_Y0=1416,MW_Y1=1446,RUNWAY={x0:6,x1:132,y0:870,y1:886};
 const MC={snow:'#f4f8ff',snowB:'#e9f0fa',sh:'#c6d9f3',sh2:'#a6c2ea',sh3:'#8fb0dc',ice:'#d4f0ff',ice2:'#a8dcfa',ice3:'#7dbfe8',lit:'#ffd77a',litH:'#fff1c2',
@@ -1558,14 +1563,18 @@ function mHouse(g,x,y,w,h,wall,dark,door,chim,seed){const rh=Math.max(5,Math.rou
   const dx=x+Math.round(w*0.6)-2;R(g,dx,y+h-7,5,7,K);R(g,dx+1,y+h-6,3,6,door);R(g,dx+3,y+h-4,1,1,'#ffd23f');
   mWin(g,x+3,wy+2,hash(seed,1)%4!==0);if(w>=20)mWin(g,x+w-8,wy+2,hash(seed,2)%3!==0);
   R(g,x,y+h-1,w,1,K);mRoof(g,x,y,w,rh,Math.round(w*0.2));return cp;}
-function mBush(g,x,y,w,h){R(g,x+1,y,w-2,h,K);R(g,x,y+1,w,h-2,K);R(g,x+1,y+1,w-2,h-2,MC.green);for(let i=0;i<w;i+=3)R(g,x+1+((i*5)%(w-2)),y+2+(i%(h-3||1)),1,1,MC.greenL);R(g,x+1,y+1,w-2,2,MC.snow);R(g,x+2,y+3,w-4,1,MC.sh);}
+function mBush(g,x,y,w,h){if(w>12||h>8){R(g,x+1,y,w-2,h,K);R(g,x,y+1,w,h-2,K);R(g,x+1,y+1,w-2,h-2,MC.green);for(let i=0;i<w;i+=3)R(g,x+1+((i*5)%(w-2)),y+2+(i%(h-3||1)),1,1,MC.greenL);R(g,x+1,y+1,w-2,2,MC.snow);R(g,x+2,y+3,w-4,1,MC.sh);return;}
+  const cx=x+w/2;g.fillStyle=K;pixCircle(g,Math.round(cx-2),y+h-3,3);pixCircle(g,Math.round(cx+2),y+h-3,3);pixCircle(g,Math.round(cx),y+h-4,3);
+  g.fillStyle=MC.green;pixCircle(g,Math.round(cx-2),y+h-3,2);pixCircle(g,Math.round(cx+2),y+h-3,2);pixCircle(g,Math.round(cx),y+h-4,2);
+  R(g,Math.round(cx)-1,y+h-6,3,1,MC.snow);R(g,Math.round(cx)-3,y+h-5,2,1,MC.snow);R(g,Math.round(cx)+2,y+h-5,2,1,MC.snow);R(g,Math.round(cx)-1,y+h-3,1,1,MC.greenL);R(g,Math.round(cx)+2,y+h-2,1,1,MC.greenL);}
 function mFenceH(g,x,y,len,col){col=col||MC.wood;R(g,x,y+1,len,3,K);R(g,x,y+2,len,1,col);for(let xx=x;xx<x+len;xx+=4){R(g,xx,y-1,2,6,K);R(g,xx,y,1,4,col);R(g,xx,y-1,2,1,MC.snow);}}
 function mFenceV(g,x,y,len,col){col=col||MC.wood;R(g,x+1,y,2,len,K);for(let yy=y;yy<y+len;yy+=4){R(g,x,yy,4,3,K);R(g,x+1,yy,2,1,MC.snow);R(g,x+1,yy+1,2,1,col);}}
-function mBare(g,x,y,h){R(g,x-1,y-h,3,h,K);R(g,x,y-h+1,1,h-1,MC.woodD);for(let k=0;k<3;k++){const by=y-h+2+k*3,d=k%2?1:-1;for(let i=1;i<=3;i++){R(g,x+d*i,by-i,1,1,K);if(i===3)R(g,x+d*i,by-i-1,1,1,MC.snow);}}R(g,x-1,y-h-1,3,1,MC.snow);}
+function mBare(g,x,y,h){const P=["..s...s..","s.b.s.b.s","b.b.b.b.b",".b.bbb.b.","..b.b.b..","...bbb...","....t....","....t....","...ktk..."];
+  const C={s:MC.snow,b:'#5a4234',t:'#6b4a32',k:K};for(let r=0;r<P.length;r++)for(let c=0;c<9;c++){const ch=P[r][c];if(ch!=='.')R(g,x-4+c,y-P.length+r,1,1,C[ch]);}}
 function mApple(g,x,y){R(g,x+3,y+6,2,4,K);g.fillStyle=K;pixCircle(g,x+4,y+4,4);g.fillStyle=MC.green;pixCircle(g,x+4,y+4,3);R(g,x+2,y+1,4,2,MC.snow);R(g,x+1,y+3,1,1,MC.snow);
   R(g,x+2,y+5,1,1,'#e03a4e');R(g,x+6,y+4,1,1,'#e03a4e');R(g,x+4,y+7,1,1,'#e03a4e');}
 function mLamp(g,x,y,glow){if(glow){g.fillStyle='rgba(255,230,140,0.22)';pixCircle(g,x+1,y-10,5);}R(g,x,y-9,2,9,K);R(g,x-1,y-12,4,3,K);R(g,x,y-11,2,1,'#ffef7a');R(g,x-1,y-13,4,1,MC.snow);}
-function mHay(g,x,y){R(g,x,y,9,6,K);R(g,x+1,y+1,7,4,'#e8c25a');R(g,x+1,y+3,7,1,'#c99a2a');R(g,x+1,y+1,7,1,MC.snow);}
+function mHay(g,x,y){g.fillStyle=K;pixCircle(g,x+4,y+3,4);g.fillStyle='#e8c25a';pixCircle(g,x+4,y+3,3);R(g,x+3,y+2,3,3,'#c99a2a');R(g,x+4,y+3,1,1,'#e8c25a');R(g,x+2,y,5,2,MC.snow);R(g,x+1,y+1,1,1,MC.snow);}
 function mRock(g,x,y,w,h){R(g,x+2,y,w-4,1,K);R(g,x+1,y+1,w-2,h-1,K);R(g,x,y+2,w,h-3,K);R(g,x+1,y+2,w-2,h-3,MC.rock);R(g,x+2,y+1,w-4,1,MC.rock);R(g,x+1,y+h-2,w-2,1,MC.rockD);R(g,x+Math.floor(w/2),y+2,1,h-4,MC.rockD);R(g,x+2,y+1,w-5,2,MC.snow);R(g,x+1,y+2,2,1,MC.snow);}
 function mPine(g,x,y,h){const p=pineCache(h);g.drawImage(p,Math.round(x-p.width/2),y-h);}
 const _pc={};function pineCache(h){return _pc[h]||(_pc[h]=pineSprite(h));}
@@ -1629,7 +1638,7 @@ function mCrane(g,x,y){// mast x..x+4 from y to y+56, jib left
   R(g,x-30,y-2,46,5,K);R(g,x-29,y-1,44,3,'#ffc727');for(let xx=x-28;xx<x+14;xx+=4)R(g,xx,y,2,1,'#c98a12');R(g,x+10,y-4,6,9,K);R(g,x+11,y-3,4,7,'#8793a8');
   R(g,x-1,y-6,7,5,K);R(g,x,y-5,5,3,'#8fd3ff');R(g,x-29,y-3,44,1,MC.snow);R(g,x-24,y+3,1,18,K);}
 function mCrate(g,x,y,w,h,label){R(g,x,y,w,h,K);R(g,x+1,y+1,w-2,h-2,'#c98d4a');R(g,x+1,y+1,w-2,2,MC.snow);for(let i=0;i<Math.min(w,h)-4;i++){R(g,x+2+i,y+3+i*(h-5)/(w-4),1,1,'#8a5a2c');}
-  R(g,x+1,y+Math.round(h/2),w-2,1,'#8a5a2c');R(g,x+2,y+3,1,h-4,'#8a5a2c');R(g,x+w-3,y+3,1,h-4,'#8a5a2c');if(label)text(g,label,x+Math.round(w/2),y+Math.round(h/2)-6,'#ffffff',{align:'center',outline:K});}
+  R(g,x+1,y+Math.round(h/2),w-2,1,'#8a5a2c');R(g,x+2,y+3,1,h-4,'#8a5a2c');R(g,x+w-3,y+3,1,h-4,'#8a5a2c');if(label)text(g,label,x+Math.round(w/2)-1,y+Math.round(h/2)-6,'#ffffff',{align:'center',outline:K});}
 function mTerminal(g,x,y,w){R(g,x,y,w,16,K);R(g,x+1,y+1,w-2,14,'#dfe5ef');R(g,x+1,y+5,w-2,6,'#5fb4e8');for(let xx=x+3;xx<x+w-2;xx+=5)R(g,xx,y+5,1,6,'#3f86d6');R(g,x+2,y+6,w-4,1,'#a8dcfa');R(g,x-1,y,w+2,3,K);R(g,x,y,w,2,MC.snow);}
 function mCtrlTower(g,x,y){R(g,x+3,y+10,6,24,K);R(g,x+4,y+10,4,23,'#dfe5ef');R(g,x,y+3,12,8,K);R(g,x+1,y+4,10,5,'#5fb4e8');R(g,x+2,y+5,8,1,'#a8dcfa');R(g,x-1,y+1,14,3,K);R(g,x,y+1,12,1,MC.snow);R(g,x+5,y-3,1,4,K);R(g,x+4,y+33,4,1,K);}
 function mTollbooth(g,x,y){R(g,x,y,8,10,K);R(g,x+1,y+3,6,6,'#dfe5ef');R(g,x+2,y+4,4,2,'#8fd3ff');R(g,x-1,y,10,3,K);R(g,x,y+1,8,1,'#ffc727');R(g,x,y,8,1,MC.snow);}
@@ -1700,7 +1709,7 @@ function mapInit(){if(mapBase)return;const t0=performance.now();MASK=new Uint8Ar
   {const x=146,y=1238,w=32,h=44;R(g,x-1,y-1,w+2,h+2,K);R(g,x,y,w,h,'#5a6580');for(let yy=y+3;yy<y+h-2;yy+=11){R(g,x+2,yy,w-4,1,'#ffffff');for(let xx=x+2;xx<x+w-2;xx+=9)R(g,xx,yy,1,9,'#ffffff');}
     for(let i=0;i<7;i++){const col=HOUSE_COLS[i%6];if(hash(i,4)%4===0)continue;const cx=x+4+(i%3)*9,cy=y+5+Math.floor(i/3)*11;mCarTop(g,cx,cy,col[0],col[1],true);}mMark(x-4,y-4,w+8,h+8,MK_RES);}
   // stadium
-  mStadium(g,30,1004,60,46);mMark(26,996,68,58,MK_RES);
+  mStadium(g,34,1044,60,46);mMark(30,1036,66,58,MK_RES);
   // cul-de-sac court reserved (drawn with roads)
   mMark(124,2276,34,30,MK_RES);
   // ---- landmarks (objects) ----
@@ -1769,13 +1778,13 @@ function mapInit(){if(mapBase)return;const t0=performance.now();MASK=new Uint8Ar
   // biome signs
   put(848,G2=>mSign(G2,92,834,'THE FROZEN NORTH','#6b3fa8'));mMark(40,828,104,24,MK_RES);
   // ---- filler scenery ----
-  const tryPut=(x,y,w,h,fx)=>{if(!mFree(x,y,w,h,MK_ROAD|MK_RES))return false;const fy=y+Math.floor(h*0.55);if(!mFree(x,fy,w,h-Math.floor(h*0.55),MK_OBJ))return false;mMark(x,fy,w,h-Math.floor(h*0.55),MK_OBJ);put(y+h,fx);return true;};
+  const tryPut=(x,y,w,h,fx)=>{if(!mFree(x,y,w,h,MK_ROAD|MK_RES))return false;const fy=y+Math.floor(h*0.25);if(!mFree(x,fy,w,h-Math.floor(h*0.25),MK_OBJ))return false;mMark(x,fy,w,h-Math.floor(h*0.25),MK_OBJ);put(y+h,fx);return true;};
   const CITYC=[['#8793a8','#6a7896'],['#c7a07a','#a8805a'],['#7aa0c8','#5a80a8'],['#b07a8a','#906070'],['#c9573f','#a8432f'],['#d8c8a8','#b8a888']];
   for(let y=236;y<MAP_H-6;y+=5){for(let x=-6;x<W;x+=7){const hv=hash(x+400,y+900),jx=x+(hv%5),jy=y+((hv>>>4)%4),B=biomeAt(jy),r=(hv>>>8)%100;if(r>58)continue;
     const edge=jx<26||jx>150;
     if(B.id==='suburbs'){if(r<14){const w=16+((hv>>>12)%3)*2,h=16+((hv>>>14)%2)*2,c=HOUSE_COLS[(hv>>>16)%6];tryPut(jx,jy-h,w,h+2,G2=>{const cp=mHouse(G2,jx,jy-h,w,h,c[0],c[1],c[2],(hv>>>18)%3?1:0,hv);if(cp)MAPDYN.smoke.push(cp);});}
       else if(r<44){const h=12+((hv>>>12)%4)*2;tryPut(jx-5,jy-h,10,h,G2=>mPine(G2,jx,jy,h));}else if(r<47)tryPut(jx,jy-5,10,6,G2=>mBush(G2,jx,jy-5,10,6));}
-    else if(B.id==='farm'){if(r<34){const h=12+((hv>>>12)%4)*2;tryPut(jx-5,jy-h,10,h,G2=>mPine(G2,jx,jy,h));}else if(r<40)tryPut(jx-3,jy-10,7,10,G2=>mBare(G2,jx,jy,9));
+    else if(B.id==='farm'){if(r<34){const h=12+((hv>>>12)%4)*2;tryPut(jx-5,jy-h,10,h,G2=>mPine(G2,jx,jy,h));}else if(r<40)tryPut(jx-4,jy-10,9,10,G2=>mBare(G2,jx,jy,9));
       else if(r<41)tryPut(jx,jy-6,9,7,G2=>mHay(G2,jx,jy-6));else if(r<45&&!edge){tryPut(jx,jy-16,16,18,G2=>{const cp=mHouse(G2,jx,jy-16,16,16,'#f0e6d6','#d8ccb8','#7a4a2a',1,hv);MAPDYN.smoke.push(cp);});}}
     else if(B.id==='city'){const c=CITYC[(hv>>>16)%6];if(edge&&r<40){const w=14+((hv>>>12)%3)*4,h=26+((hv>>>14)%5)*7;tryPut(jx,jy-h,w,h,G2=>mTower(G2,jx,jy-h,w,h,c[0],c[1],hv));}
       else if(jy<900){if(r<20){const h=12+((hv>>>12)%3)*2;tryPut(jx-5,jy-h,10,h,G2=>mPine(G2,jx,jy,h));}}
@@ -2464,7 +2473,7 @@ function frame(now){const dt=Math.min(0.05,(now-last)/1000);last=now;
   drawLogo();
   requestAnimationFrame(frame);}
 requestAnimationFrame(frame);
-window.__SR={setLook,setCorners,setShadow,get LOOK(){return LOOK;},get CORNERS(){return CORNERS;},get camY(){return camY;},get VIEW_Y(){return VIEW_Y;},clearLookToast(){lookToast=0;},get mapView(){return save.mapView;},mapInit,ensureMapArt,get mapArt(){return mapArt;},get mapMs(){return mapInit.ms;},mapEdges,get plowAnim(){return plowAnim;},get ridePeek(){return ridePeek;},set ridePeek(v){ridePeek=v;},get rideReveal(){return rideReveal;},set rideReveal(v){rideReveal=v;},equip,useIdx,get trophyTab(){return trophyTab;},set trophyTab(v){trophyTab=v;},set trophiesOpen(v){trophiesOpen=v;},_t:{buildLevel,footprint,bladeRect,isKidTool,get VSPEC(){return VSPEC;},T_BLOCK,CLEAR_T},get weeklyOpen(){return weeklyOpen;},set weeklyOpen(v){weeklyOpen=v;},weeklyDef,get scrollY(){return scrollY;},get jobInfo(){return jobInfo;},set jobInfo(v){jobInfo=v;},startNewWinter,levelOpen,LEVELS,TOOLS,get audio(){return {ctx:!!AC,state:AC&&AC.state,bufs:Object.keys(BUF).length,music:curMusic,loops:Object.keys(loopNodes)};},audioInit,openShop,dailyAdd,award,get shopOpen(){return shopOpen;},get dailyOpen(){return dailyOpen;},set dailyOpen(v){dailyOpen=v;},get winterOpen(){return winterOpen;},get state(){return state;},get G(){return G;},get run(){return run;},get P(){return P;},save,startLevel,goMap,goUpgrades,goGarage,endRound:()=>endRound(false),keys,hit};
+window.__SR={pineSprite,upg:{buyUpg,moveSpeed,bladeCells,valueMult,bumperRed,helperIncome,upgCost,get offlineGain(){return offlineGain;},OFFLINE_CAP_S,OFFLINE_RATE},setLook,setCorners,setShadow,get LOOK(){return LOOK;},get CORNERS(){return CORNERS;},get camY(){return camY;},get VIEW_Y(){return VIEW_Y;},clearLookToast(){lookToast=0;},get mapView(){return save.mapView;},mapInit,ensureMapArt,get mapArt(){return mapArt;},get mapMs(){return mapInit.ms;},mapEdges,get plowAnim(){return plowAnim;},get ridePeek(){return ridePeek;},set ridePeek(v){ridePeek=v;},get rideReveal(){return rideReveal;},set rideReveal(v){rideReveal=v;},equip,useIdx,get trophyTab(){return trophyTab;},set trophyTab(v){trophyTab=v;},set trophiesOpen(v){trophiesOpen=v;},_t:{buildLevel,footprint,bladeRect,isKidTool,get VSPEC(){return VSPEC;},T_BLOCK,CLEAR_T},get weeklyOpen(){return weeklyOpen;},set weeklyOpen(v){weeklyOpen=v;},weeklyDef,get scrollY(){return scrollY;},get jobInfo(){return jobInfo;},set jobInfo(v){jobInfo=v;},startNewWinter,levelOpen,LEVELS,TOOLS,get audio(){return {ctx:!!AC,state:AC&&AC.state,bufs:Object.keys(BUF).length,music:curMusic,loops:Object.keys(loopNodes)};},audioInit,openShop,dailyAdd,award,get shopOpen(){return shopOpen;},get dailyOpen(){return dailyOpen;},set dailyOpen(v){dailyOpen=v;},get winterOpen(){return winterOpen;},get state(){return state;},get G(){return G;},get run(){return run;},get P(){return P;},save,startLevel,goMap,goUpgrades,goGarage,endRound:()=>endRound(false),keys,hit};
 })();
 </script>
 </body>
