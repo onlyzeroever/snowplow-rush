@@ -2072,7 +2072,7 @@ function overlayOpen(){return !!(ridePeek||rideReveal||settingsOpen||trophiesOpe
 let privT=0;
 function drawPrivacyCard(dt){privT=Math.min(1,privT+(dt||0.016)*3.5);const e=1-Math.pow(1-privT,3),x=6,w=W-12,h=50,y=Math.round(NAV_Y-h-6+(1-e)*70);
   btn('privbg',x,y,w,h,()=>{});panel(x,y,w,h,'#13306b','#ffd23f');b.drawImage(SPR.frost,x+6,y+5);text(b,'ANONYMOUS PLAY DATA',x+18,y+6,'#ffd23f',{outline:null});
-  text(b,'WE COUNT HOW THE GAME IS PLAYED,',W/2,y+17,'#ffffff',{align:'center',outline:null});text(b,'NEVER WHO YOU ARE. NO NAMES, NO ADS.',W/2,y+25,'#9fc0e8',{align:'center',outline:null});
+  text(b,'WE COUNT HOW THE GAME IS PLAYED,',W/2,y+17,'#ffffff',{align:'center',outline:null});text(b,'NEVER WHO YOU ARE. NEVER SOLD.',W/2,y+25,'#9fc0e8',{align:'center',outline:null});
   button('privok',x+w/2-56,y+34,52,13,'green','GOT IT',()=>{save.privSeen=true;track('privacy_notice',{choice:'got_it'});persist();sfx('click');});
   button('privset',x+w/2+4,y+34,52,13,'navy','SETTINGS',()=>{save.privSeen=true;track('privacy_notice',{choice:'settings'});persist();settingsOpen=true;sfx('click');});}
 function openShop(){shopOpen=true;sfx('click');}
@@ -3677,7 +3677,7 @@ function drawSettings(){b.fillStyle='rgba(11,24,56,0.75)';b.fillRect(0,0,W,H);pa
   text(b,'AUDIO',26,144,'#9fc0e8',{outline:null});button('mus',24,152,64,16,save.musicOff?'grey':'blue',save.musicOff?'MUSIC OFF':'MUSIC ON',()=>{setMusicOff(!save.musicOff);sfx('click');});
   button('snd',92,152,64,16,save.muted?'grey':'blue',save.muted?'SFX OFF':'SFX ON',()=>{setMuted(!save.muted);sfx('click');});
   button('trk',24,176,132,16,save.noTrack?'grey':'blue',save.noTrack?'SHARE PLAY DATA: OFF':'SHARE PLAY DATA: ON',()=>{if(save.noTrack){save.noTrack=false;track('analytics_on');}else{track('analytics_off');phFlush(true);save.noTrack=true;}persist();sfx('click');});
-  text(b,'ANONYMOUS: NO NAMES, NO ADS',W/2,195,'#9fc0e8',{align:'center',outline:null});
+  text(b,'ANONYMOUS AND NEVER SOLD',W/2,195,'#9fc0e8',{align:'center',outline:null});
   button('rst',24,204,132,16,confirmReset>0?'red':'grey',confirmReset>0?'TAP AGAIN TO RESET':'RESET PROGRESS',()=>{if(confirmReset>0){resetSave();confirmReset=0;showToast('PROGRESS RESET');}else confirmReset=2.5;});
   button('close',54,234,72,18,'orange','DONE',()=>{settingsOpen=false;sfx('click');});}
 function drawPlay(){
