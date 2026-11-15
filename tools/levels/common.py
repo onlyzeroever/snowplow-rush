@@ -44,6 +44,12 @@ def finish(jobs, path, **extra):
         T = json.load(open(tf))
         for j in jobs:
             if j['id'] in T: j['time'] = T[j['id']]
+    df = path + '.drops.json'
+    if os.path.exists(df):
+        DR = json.load(open(df))
+        for j in jobs:
+            gone = [(k, x, y) for i, k, x, y in DR if i == j['id']]
+            if gone: j['data']['props'] = [p for p in j['data']['props'] if (p[0], p[1], p[2]) not in gone]
     out = dict(jobs=jobs, **extra)
     json.dump(out, open(path, 'w'))
     print('wrote', path, [j['id'] for j in jobs])

@@ -265,5 +265,15 @@ for k, v in J.items():
     h, t, val, pr = META[k]; v.update(h=h, time=t, value=val, presents=pr, stars=v.get('stars', [35, 60, 85]), area='suburbs', name=k.upper())
     for f in ('circles', 'paint', 'decor', 'neighbours', 'pull'):
         if not v[f]: v.pop(f)
+import os, suburbs_pro
+suburbs_pro.apply(J)
+_tf = '/home/claude/levels/suburbs.json.times.json'
+if os.path.exists(_tf):
+    for k, t in json.load(open(_tf)).items():
+        if k in J: J[k]['time'] = t
+_df = '/home/claude/levels/suburbs.json.drops.json'
+if os.path.exists(_df):
+    for i, k, x, y in json.load(open(_df)):
+        if i in J: J[i]['props'] = [p for p in J[i]['props'] if (p[0], p[1], p[2]) != (k, x, y)]
 json.dump(J, open('/home/claude/levels/suburbs.json', 'w'))
 print('jobs', list(J))

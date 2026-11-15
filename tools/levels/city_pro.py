@@ -271,3 +271,266 @@ def junction():
     over(d, 'gantry', 0, 70, 180, 0)
     H(d, 'taxi', 140, 100, 0, 0, 380); H(d, 'taxi', 20, 300, 1, 0, 380)
     return d
+
+
+def tramway(d, h, x=138):
+    """a street tramway down the right-hand side, the whole length of the job (the tram runs it end to end)"""
+    G(d, 'asph', x, 0, 180 - x, h); dec(d, 'kerb', x - 2, 0, h); dec(d, 'rails', x + 8, 0, h)
+    for y in range(140, h, 420): dec(d, 'manhole', x + 30, y)
+
+
+def station():
+    """TRAIN STATION: the evening rush. Off the taxi rank, round the station hall, down two platforms under glass
+    canopies past parked trains, over the boards of the level crossing, through the goods yard to the old engine
+    on its turntable. A tram runs the street alongside all job long."""
+    d = job('station', 'TRAIN STATION', 'city', ['cityhall'], 2800, 68, 6.4, 7, start=[100, 2754])
+    tramway(d, 2800); H(d, 'taxi', 144, 300, 4); H(d, 'taxi', 144, 1700, 5)
+    # ---- FORECOURT & TAXI RANK (2560-2800)
+    G(d, 'slab', 0, 2560, 138, 240)
+    for y in (2600, 2640, 2680, 2720): dec(d, 'bay', 0, y, 30, 38)
+    P(d, 'car', 3, 2602, 3); P(d, 'car', 3, 2682, 3); d['data']['pull'] += [[3, 2722, 3]]
+    P(d, 'bikerack', 100, 2580); P(d, 'bins', 112, 2700); P(d, 'signpost', 60, 2600); P(d, 'clock', 70, 2700)
+    d['data']['paint'] += [['TAXI', 34, 2630, 1]]
+    # ---- STATION HALL & CONCOURSE (2200-2560)
+    G(d, 'tile', 0, 2200, 138, 360)
+    scen(d, 'big', 0, 2286, 23)
+    for x in (112, 126): P(d, 'turnstile', x, 2250)
+    P(d, 'news', 116, 2380); P(d, 'kiosk', 114, 2440, 2); P(d, 'billboard', 4, 2210, 1)
+    dec(d, 'crest', 50, 2470, 14); H(d, 'ped', 120, 2300); H(d, 'pedx', 20, 2520)
+    # ---- PLATFORMS (1080-2200): two tracks, trains standing, glass canopies, timetable boards
+    G(d, 'gravel', 0, 1080, 22, 1120); G(d, 'gravel', 86, 1080, 22, 1120)
+    P(d, 'track', 0, 1080, 1120); P(d, 'track', 86, 1080, 1120)
+    G(d, 'tile', 22, 1080, 64, 1120); G(d, 'tile', 108, 1080, 30, 1120)
+    for x in (24, 82, 110): G(d, 'yel', x, 1080, 2, 1120)
+    P(d, 'train', 0, 1130, 300); P(d, 'train', 86, 1640, 236); P(d, 'train', 86, 1150, 150)
+    P(d, 'buffer', 86, 2186); P(d, 'buffer', 0, 2186)
+    over(d, 'canopy', 22, 1180, 64, 380); over(d, 'canopy', 22, 1700, 64, 420); over(d, 'canopy', 108, 1400, 30, 520)
+    for y in (1240, 1500, 1820, 2060): P(d, 'bench', 28, y)
+    P(d, 'trash', 28, 1960); P(d, 'trash', 28, 1420); P(d, 'signal', 26, 1100)
+    H(d, 'ped', 46, 1400); H(d, 'ped', 116, 1880, 1); H(d, 'cart', 110, 1700)
+    # ---- LEVEL CROSSING & FOOTBRIDGE (1000-1080)
+    G(d, 'wood', 0, 1000, 138, 80); over(d, 'fbridge', 0, 1018, 180)
+    for x in (0, 86): P(d, 'track', x, 980, 20)
+    # ---- GOODS YARD (380-1000): sidings with wagons, stacked freight, the signal box
+    G(d, 'gravel', 0, 380, 138, 620)
+    P(d, 'track', 0, 380, 620); P(d, 'track', 116, 380, 620)
+    P(d, 'wagon', 0, 420, 0); P(d, 'wagon', 0, 484, 2); P(d, 'wagon', 0, 720, 1); P(d, 'wagon', 116, 600, 3); P(d, 'wagon', 116, 664, 4)
+    for x, y in ((24, 560), (38, 560), (24, 574)): P(d, 'crate', x, y)
+    for x, y in ((96, 820), (104, 820)): P(d, 'barrel', x, y)
+    P(d, 'tires', 24, 860); P(d, 'signal', 26, 400)
+    dec(d, 'oil', 50, 700, 7, 3); H(d, 'cart', 60, 560)
+    # ---- ENGINE SHED & TURNTABLE (0-380)
+    G(d, 'conc', 0, 0, 138, 380)
+    scen(d, 'big', 14, 0, 66)
+    dec(d, 'turntable', 70 - 44, 240 - 44, 44); P(d, 'loco', 58, 200)
+    P(d, 'track', 58, 284, 96); P(d, 'buffer', 58, 366)
+    for x, y in ((6, 120), (120, 120), (6, 340)): P(d, 'lamp', x, y)
+    P(d, 'barrel', 4, 70); P(d, 'barrel', 12, 70); H(d, 'ped', 120, 260)
+    return d
+
+
+def hospital():
+    """HOSPITAL: keep the ambulance route open. From the healing garden, past the busy car park and the helipad, up the
+    ambulance drive between the wards to A&E; once the drive is clear the paramedic heads out."""
+    d = job('hospital', 'HOSPITAL', 'city', ['station'], 2600, 75, 6.6, 7, start=[90, 2556])
+    # ---- A&E (0-340)
+    G(d, 'conc', 0, 0, 180, 340)
+    scen(d, 'big', 35, 0, 24)
+    G(d, 'red', 46, 96, 88, 120); dec(d, 'hatch', 50, 100, 80, 26)
+    P(d, 'van', 48, 140, 5); P(d, 'van', 112, 150, 5)
+    over(d, 'canopy', 34, 60, 112, 40)
+    d['data']['paint'] += [['AMBULANCE', 54, 226, 1]]
+    P(d, 'planter', 4, 80); P(d, 'planter', 162, 80); P(d, 'bench', 8, 280); P(d, 'bench', 160, 280)
+    # ---- AMBULANCE DRIVE between the wards (340-1040)
+    G(d, 'slab', 0, 340, 180, 700); street_v(d, 48, 84, 340, 1040, centre='dash')
+    G(d, 'red', 90, 340, 42, 700)
+    for y in (420, 640, 860): d['data']['paint'] += [['AMBULANCE', 94, y, 1]]
+    scen(d, 'towerw', 0, 380, 1); scen(d, 'towerw', 0, 760, 2); scen(d, 'tower', 0, 470, 1)
+    scen(d, 'tower', 134, 360, 2); scen(d, 'tower', 134, 640, 4); scen(d, 'tower', 134, 920, 1)
+    d['data']['neighbours'] = [dict(rects=[[90, 360, 42, 670]], path=[[110, 1060], [110, 360], [110, 200]])]
+    H(d, 'ped', 60, 560); H(d, 'pedx', 50, 980)
+    # ---- HOSPITAL ROAD (1040-1100)
+    street_h(d, 1040, 60, centre='dyl', zebras=[(66, 48)]); crossing_corners(d, 1040, 60, 13)
+    H(d, 'cross', 0, 1046, 1, 7, 'car'); H(d, 'cross', 0, 1072, -1, 8, 'car')
+    # ---- HELIPAD (1100-1400)
+    G(d, 'conc', 0, 1100, 180, 300); C(d, 'asph', 90, 1250, 62); dec(d, 'heli', 90 - 46, 1250 - 46, 46)
+    for k in range(4):
+        a = k * math.pi / 2 + math.pi / 4; P(d, 'bollard', int(90 + 70 * math.cos(a)) - 2, int(1250 + 70 * math.sin(a)) - 6)
+    scen(d, 'heli', 140, 1110); P(d, 'flag', 20, 1120, 1); P(d, 'flag', 160, 1370, 1)
+    # ---- CAR PARK (1400-2100): rows of bays, pay machines, trolleys, a barrier at the gate
+    G(d, 'asph', 0, 1400, 180, 700)
+    r = rng(91)
+    for row, y in enumerate(range(1440, 2060, 120)):
+        for x in range(4, 176, 30):
+            dec(d, 'bay', x, y, 28, 36)
+            if r.random() < 0.55 and not (60 < x < 120): P(d, 'car', x + 2, y + 2, r.randint(0, 4))
+        if row % 2: d['data']['pull'].append([64, y + 2, row % 5])
+    for x, y in ((150, 1416), (6, 2076)): P(d, 'meter', x, y)
+    dec(d, 'arrow', 86, 1500, 0); dec(d, 'arrow', 86, 1860, 0); H(d, 'cart', 90, 1700); H(d, 'cart', 100, 1980)
+    H(d, 'barrier', 60, 2096, 60, 6); P(d, 'rail', 0, 2096, 58); P(d, 'rail', 122, 2096, 58); P(d, 'kiosk', 130, 2104, 3)
+    # ---- HEALING GARDEN (2110-2600): winding paths, a frozen pond, bare trees and benches
+    G(d, 'grass', 0, 2110, 180, 490)
+    path(d, 'gravel', 30, [(90, 2600), (60, 2500), (110, 2400), (60, 2300), (90, 2200), (90, 2110)])
+    C(d, 'stone', 140, 2330, 26); C(d, 'ice', 140, 2330, 22)
+    for x, y, s in ((10, 2160, 30), (150, 2150, 26), (20, 2400, 28), (140, 2480, 24), (8, 2540, 26)): P(d, 'stree', x, y, s)
+    P(d, 'bench', 30, 2260); P(d, 'bench', 120, 2420); P(d, 'sculpt', 14, 2310); P(d, 'planter', 160, 2220)
+    H(d, 'ped', 40, 2350); H(d, 'ped', 120, 2200, 1)
+    return d
+
+
+def museum():
+    """MUSEUM: the dinosaur gallery opens tomorrow. Start among the food trucks of the museum quarter, wander the
+    sculpture park, sweep the formal garden's gravel walks, and finish on the forecourt under the T-rex."""
+    d = job('museum', 'MUSEUM', 'city', ['hospital'], 2600, 71, 6.8, 7, start=[90, 2556])
+    # ---- MUSEUM QUARTER (2000-2600): cobbles, galleries and food trucks
+    G(d, 'cobble', 0, 2000, 180, 600)
+    for y, k, a in ((2010, 'shopv', 61), (2082, 'shopv', 58), (2154, 'shop', 2), (2214, 'shopv', 3), (2380, 'shopv', 15), (2452, 'shop', 55)):
+        scen(d, k, 0, y, a)
+    for y, k, a in ((2030, 'shop', 59), (2090, 'shopv', 60), (2300, 'shopv', 61), (2372, 'shop', 14), (2432, 'shopv', 70)):
+        scen(d, k, 124 if k == 'shop' else 136, y, a)
+    for x, y, a in ((60, 2120, 0), (100, 2240, 1), (62, 2470, 2)): P(d, 'foodtruck', x, y, a)
+    for x, y, a in ((104, 2296, 0), (106, 2340, 3)): P(d, 'parasol', x, y, a)
+    P(d, 'table', 120, 2322); P(d, 'bikerack', 100, 2016)
+    for x, y in ((170, 2200), (6, 2300), (170, 2540)): P(d, 'lamp', x, y)
+    H(d, 'pedx', 60, 2160); H(d, 'ped', 110, 2420, 1); H(d, 'thrower', 120, 2560)
+    # ---- GALLERY STREET (1940-2000)
+    street_h(d, 1940, 60, centre='dash', zebras=[(20, 36), (124, 36)])
+    H(d, 'cross', 0, 1946, -1, 7, 'car'); H(d, 'cross', 0, 1972, 1, 9, 'car')
+    # ---- SCULPTURE PARK (1340-1940): lawns, a winding gravel walk, art and an ice sculpture
+    G(d, 'grass', 0, 1340, 180, 600)
+    path(d, 'gravel', 34, [(90, 1940), (50, 1820), (130, 1680), (60, 1520), (90, 1340)])
+    P(d, 'icesculpt', 120, 1820); P(d, 'sculpt', 20, 1640); P(d, 'statue', 150, 1560); P(d, 'statue', 30, 1420)
+    for x, y, s in ((140, 1380, 30), (8, 1500, 28), (150, 1460, 24), (10, 1860, 26)): P(d, 'stree', x, y, s)
+    P(d, 'bench', 100, 1600); P(d, 'bench', 34, 1760); C(d, 'stone', 140, 1640, 20); C(d, 'ice', 140, 1640, 16)
+    H(d, 'ped', 70, 1700); H(d, 'thrower', 150, 1700)
+    # ---- FORMAL GARDEN (620-1340): hedge parterres either side of a gravel avenue, a round fountain court between
+    G(d, 'gravel', 0, 620, 180, 720)
+    for y in (660, 1140):
+        for x in (0, 132):
+            wallbox(d, x, y, x + 48, y + 160, [], kind='hedge'); wild(d, 'bush', x + 10, y + 10, 28, 140, x + y, 0.9, 9)
+    for x, y in ((60, 636), (106, 636), (60, 1310), (106, 1310)): P(d, 'planter', x, y)
+    C(d, 'slab', 90, 980, 60); C(d, 'pave', 90, 980, 56); C(d, 'slab', 90, 980, 28); C(d, 'wht', 90, 980, 18); C(d, 'tile', 90, 980, 16); P(d, 'fountain', 77, 966)
+    for x, y in ((8, 900), (164, 900), (8, 1050), (164, 1050)): P(d, 'statue', x, y)
+    H(d, 'ped', 90, 820); H(d, 'pedx', 70, 1300)
+    # ---- FORECOURT & MUSEUM (0-620): the dinosaur, banners, flags, the grand steps
+    G(d, 'slab', 0, 0, 180, 620)
+    scen(d, 'museum', 30, 20)
+    for k in range(9): G(d, 'wht', 28, 82 + k * 6, 124, 3)
+    for x in (10, 166): P(d, 'flag', x, 120, 2); P(d, 'flag', x, 200, 0)
+    dec(d, 'compass', 90 - 30, 420 - 30, 30); P(d, 'dino', 54, 270)
+    over(d, 'banner', 0, 196, 180, 5)
+    for x, y in ((6, 470), (150, 470)): P(d, 'fountain', x, y)
+    for x, y in ((20, 560), (150, 520)): P(d, 'stree', x, y, 28)
+    P(d, 'bench', 60, 540); P(d, 'bench', 108, 540); H(d, 'ped', 60, 520); H(d, 'cart', 140, 420)
+    return d
+
+
+def icerink():
+    """ICE RINK (side job): an open-air rink under fairy lights. Two resurfacers lap the ice, skaters weave about,
+    and the whole rink is slippery once you've scraped it."""
+    d = job('icerink', 'ICE RINK', 'city', ['junction'], 2200, 64, 7.2, 9, start=[146, 2150], bonus=True)
+    # ---- ENTRANCE (1880-2200)
+    G(d, 'slab', 0, 1880, 180, 320)
+    scen(d, 'big', 0, 2096, 30)
+    P(d, 'kiosk', 4, 1900, 3); P(d, 'kiosk', 24, 1900, 1); P(d, 'parasol', 46, 1960, 0); P(d, 'table', 64, 1990); P(d, 'parasol', 8, 2010, 2)
+    P(d, 'bins', 158, 1890); P(d, 'bench', 162, 1990); P(d, 'stree', 150, 2100, 26)
+    # ---- THE RINK (300-1880): hockey markings, boards with four gates, an ice sculpture in the middle
+    G(d, 'conc', 0, 300, 180, 1580)
+    G(d, 'ice', 6, 330, 168, 1520)
+    G(d, 'red', 14, 1088, 152, 3); G(d, 'blue', 14, 820, 152, 3); G(d, 'blue', 14, 1360, 152, 3)
+    for cx, cy in ((50, 600), (130, 600), (50, 1580), (130, 1580)): C(d, 'red', cx, cy, 18); C(d, 'ice', cx, cy, 16); C(d, 'red', cx, cy, 2)
+    wallbox(d, 0, 322, 180, 1858, [('t', 60, 120), ('b', 60, 120)], kind='rail')
+    P(d, 'icesculpt', 75, 1060)
+    for x, y in ((50, 720), (126, 760), (50, 1420), (126, 1460)): P(d, 'cone', x, y)
+    H(d, 'orbit', 90, 520, 52, 0, 'zam'); H(d, 'orbit', 90, 1640, 52, 3, 'zam')
+    H(d, 'pedx', 30, 900); H(d, 'pedx', 140, 1280, 1); H(d, 'ped', 60, 1200); H(d, 'ped', 120, 980, 1)
+    for y in (500, 1100, 1700): over(d, 'lights', 0, y, 180, y % 3)
+    # ---- STANDS (0-300)
+    G(d, 'conc', 0, 0, 180, 300)
+    scen(d, 'stand', 0, 0, 180); scen(d, 'scoreboard', 65, 44)
+    P(d, 'kiosk', 10, 220, 0); P(d, 'kiosk', 150, 220, 2); H(d, 'thrower', 90, 200)
+    return d
+
+
+def skyline():
+    """SKYLINE PLAZA: the wind whips between the towers. A run of plazas zig-zags down between the glass: frozen water
+    steps, a sculpture court under a sky bridge, the lunchtime food court, a glass atrium, the wind gap."""
+    d = job('skyline', 'SKYLINE PLAZA', 'city', ['junction'], 3200, 73, 7.4, 7, start=[90, 52], squall=1)
+    G(d, 'tile', 0, 0, 180, 3200)
+    # lobby
+    P(d, 'planterl', 10, 120, 40); P(d, 'planterl', 130, 120, 40); P(d, 'sculpt', 140, 20); P(d, 'bins', 10, 20)
+    dec(d, 'crest', 72, 160, 18)
+    # towers stagger down the job, leaving a plaza on alternate sides
+    for k, y in enumerate((260, 780, 1300, 1820, 2340)):
+        if k % 2 == 0: scen(d, 'towerw', 0, y, k % 5); scen(d, 'tower', 130, y + 120, (k + 2) % 5)
+        else: scen(d, 'tower', 0, y + 110, (k + 1) % 5); scen(d, 'towerw', 110, y, (k + 3) % 5)
+    # frozen water steps (300-700)
+    for k in range(8): G(d, 'ice' if k % 2 == 0 else 'slab', 74, 360 + k * 40, 80, 40)
+    P(d, 'planter', 76, 330); P(d, 'planter', 140, 680)
+    # sculpture court under the sky bridge (800-1220)
+    over(d, 'fbridge', 0, 900, 180); C(d, 'slab', 110, 1060, 40); dec(d, 'starm', 110 - 22, 1060 - 22, 22); P(d, 'statue', 106, 1050)
+    P(d, 'bench', 60, 1000); P(d, 'bench', 150, 1120)
+    # food court (1320-1740)
+    for x, y, a in ((4, 1420, 0), (4, 1580, 2)): P(d, 'foodtruck', x, y, a)
+    for x, y, a in ((34, 1440, 1), (34, 1610, 3)): P(d, 'parasol', x, y, a)
+    P(d, 'table', 36, 1520); P(d, 'van', 150, 1640, 2); H(d, 'ped', 100, 1500); H(d, 'cart', 120, 1700)
+    # glass atrium (1840-2260)
+    over(d, 'canopy', 60, 1880, 120, 340)
+    for x, y in ((80, 1920), (140, 2000), (80, 2100), (150, 2180)): P(d, 'planter', x, y)
+    P(d, 'sculpt', 110, 2040); H(d, 'pedx', 70, 2200)
+    # the wind gap (2360-2860): narrows between the towers, warning signs
+    P(d, 'warnsign', 64, 2380); P(d, 'warnsign', 104, 2850); dec(d, 'hatch', 62, 2480, 40, 60); H(d, 'thrower', 90, 2620)
+    # observation plaza (2860-3200)
+    dec(d, 'compass', 90 - 36, 3040 - 36, 36)
+    for x in (10, 150): P(d, 'flag', x, 2900, 3); P(d, 'flag', x, 3120, 1)
+    P(d, 'bench', 30, 3160); P(d, 'bench', 140, 3160); H(d, 'ped', 40, 3000); H(d, 'ped', 140, 3080, 1)
+    for y in (240, 1280, 2320): over(d, 'lights', 0, y, 180, y % 4)
+    return d
+
+
+def parade():
+    """NEW YEAR PARADE (boss): clear the parade route before midnight with the Warden on your tail. From the float
+    assembly yard, up the avenue between the crowds and the grandstand, through the square under the giant snowman
+    balloon, over the river bridge to the clock tower for the countdown."""
+    d = job('parade', 'NEW YEAR PARADE', 'city', ['skyline'], 3400, 91, 7.6, 9, start=[90, 3354], boss=True)
+    # ---- ASSEMBLY YARD (3120-3400)
+    G(d, 'asph', 0, 3120, 180, 280)
+    for x, y, a in ((4, 3140, 0), (150, 3160, 1), (4, 3260, 2)): P(d, 'foodtruck', x, y, a)
+    P(d, 'stage', 100, 3250, 2); P(d, 'speaker', 100, 3288); P(d, 'speaker', 166, 3288)
+    H(d, 'ped', 60, 3200); H(d, 'ped', 120, 3180, 1)
+    # ---- THE AVENUE (2440-3120): red carpet, crowds behind barriers, a grandstand
+    G(d, 'asph', 0, 2440, 180, 680); G(d, 'red', 50, 2440, 80, 680)
+    for y in range(2460, 3100, 70):
+        P(d, 'rail', 22, y, 30) if y % 140 else None
+    scen(d, 'crowd', 0, 2470, 20); scen(d, 'crowd', 0, 2700, 20); scen(d, 'crowd', 0, 2900, 20)
+    scen(d, 'stand', 140, 2480, 40); scen(d, 'stand', 140, 2780, 40)
+    for y in (2520, 2700, 2880, 3060): over(d, 'lant' if y % 2 else 'lights', 0, y, 180, 1)
+    H(d, 'thrower', 40, 2820)
+    # ---- MARKET CROSS (2380-2440)
+    G(d, 'asph', 0, 2380, 180, 60); H(d, 'cross', 0, 2388, 1, 6.5, 'float')
+    # ---- THE SQUARE (1720-2380): confetti stars underfoot, the giant balloon overhead
+    G(d, 'slab', 0, 1720, 180, 660)
+    for x, y in ((30, 1800), (130, 1900), (50, 2100), (140, 2260), (70, 2300)): dec(d, 'starm', x, y, 8)
+    over(d, 'balloon', 68, 1980, 0); P(d, 'fountain', 78, 2090)
+    scen(d, 'crowd', 0, 1760, 40); scen(d, 'crowd', 140, 2200, 40)
+    for x, y in ((8, 1960), (156, 1860), (10, 2300)): P(d, 'stree', x, y, 26)
+    P(d, 'kiosk', 150, 2000, 2); P(d, 'kiosk', 6, 2140, 1); H(d, 'ped', 120, 1800); H(d, 'pedx', 30, 2240)
+    # ---- RIVER CROSS (1660-1720)
+    G(d, 'asph', 0, 1660, 180, 60); H(d, 'cross', 0, 1668, -1, 7.5, 'float')
+    # ---- THE BRIDGE (900-1660): a frozen river either side of the deck
+    G(d, 'deck', 36, 900, 108, 760)
+    wild(d, 'ice', 0, 900, 34, 760, 41, 0.5, 11); wild(d, 'ice', 146, 900, 34, 760, 42, 0.5, 11)
+    P(d, 'railv', 34, 900, 760); P(d, 'railv', 141, 900, 760)
+    for y in (960, 1160, 1360, 1560): P(d, 'lamp', 38, y); P(d, 'lamp', 134, y + 100)
+    over(d, 'lant', 36, 1120, 108); over(d, 'lant', 36, 1440, 108); H(d, 'pedx', 50, 1260)
+    # ---- CLOCK TOWER SQUARE (0-900): the countdown
+    G(d, 'cobble', 0, 0, 180, 900)
+    scen(d, 'clocktower', 64, 10)
+    P(d, 'stage', 50, 220, 4); P(d, 'speaker', 52, 258); P(d, 'speaker', 118, 258)
+    over(d, 'banner', 0, 330, 180, 7)
+    scen(d, 'crowd', 0, 120, 40); scen(d, 'crowd', 140, 120, 40); scen(d, 'crowd', 0, 520, 30); scen(d, 'crowd', 150, 600, 30)
+    for x, y in ((40, 700), (130, 760)): dec(d, 'starm', x, y, 10)
+    for y in (420, 640, 820): over(d, 'lights', 0, y, 180, y % 5)
+    H(d, 'thrower', 120, 460)
+    H(d, 'chaser', 160, 3000, 'warden', 5)
+    return d
