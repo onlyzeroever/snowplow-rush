@@ -3,7 +3,7 @@ f=sys.argv[1];s=open(f,encoding='utf-8').read()
 # Test-only hook: every character/creature sprite in one place, for the art contact sheets.
 a="window.__SR={"
 assert s.count(a)==1
-s=s.replace(a,"if(TEST_MODE)window.__AUD=()=>({OVERS,CHASERS,HAZ,PROPS,GROUND_T,wildSpr,srng,SFX_FILES:typeof SFX_FILES!=='undefined'?SFX_FILES:null});\nif(TEST_MODE)window.__CAST=()=>({kid:[SPR.kidDown,SPR.kidUp,SPR.kidSide],peds:SPR.peds,thrower:[SPR.thrower,SPR.throwerWind],granny:[SPR.granny],dog:[SPR.dog],cow:[COW],sheep:SHEEP_FR,horse:HORSE_FR,peng:PENG_FR,gull:GULL_FR,ghost:GHOST_FR,skier:SKIER_FR,sled:[SPR.sled],cart:[CART],tug:[TUG],fork:FORK_FR,bumper:BUMPER_FR,rock:[ROCK_SPR],chasers:Object.fromEntries(Object.entries(CHASERS).map(([k,v])=>[k,v.frames]))});\n"+a,1)
+s=s.replace(a,"if(TEST_MODE)window.__AUD=()=>({textW,OVERS,CHASERS,HAZ,PROPS,GROUND_T,wildSpr,srng,SFX_FILES:typeof SFX_FILES!=='undefined'?SFX_FILES:null});\nif(TEST_MODE)window.__CAST=()=>({kid:[SPR.kidDown,SPR.kidUp,SPR.kidSide],peds:SPR.peds,thrower:[SPR.thrower,SPR.throwerWind],granny:[SPR.granny],dog:[SPR.dog],cow:[COW],sheep:SHEEP_FR,horse:HORSE_FR,peng:PENG_FR,gull:GULL_FR,ghost:GHOST_FR,skier:SKIER_FR,sled:[SPR.sled],cart:[CART],tug:[TUG],fork:FORK_FR,bumper:BUMPER_FR,rock:[ROCK_SPR],chasers:Object.fromEntries(Object.entries(CHASERS).map(([k,v])=>[k,v.frames]))});\n"+a,1)
 
 # Test-only fast stepping for the audit bot: hold the real loop and step the game manually.
 b="try{update(dt);draw();}catch(err){console.error(err);}"
