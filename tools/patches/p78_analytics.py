@@ -36,7 +36,7 @@ function phFlush(final){if(!PH.q.length||!phOn()){if(!phOn())PH.q.length=0;retur
   try{fetch(PH.host+'/batch/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({api_key:PH.key,batch})}).then(r=>{if(!r.ok)throw new Error('http '+r.status);}).catch(()=>{PH.form=true;phSendForm(batch,false);});}catch(e){PH.form=true;phSendForm(batch,false);}}
 function trackErr(msg,where){if(PH.errs>=5)return;PH.errs++;track('error',{msg:String(msg||'').slice(0,200),where:String(where||'').slice(0,400),screen:state});}
 setInterval(()=>phFlush(false),15000);
-document.addEventListener('visibilitychange',()=>{if(document.hidden){track('app_hidden',{screen:state});phFlush(true);}});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){let hp={screen:state};try{if(state==='play'&&PH.jobT)Object.assign(hp,phJob(),{pct:G?Math.round(G.cleared/G.clearable*100):null,secs:Math.round((Date.now()-PH.jobT)/1000)});}catch(e){}track('app_hidden',hp);phFlush(true);}});
 window.addEventListener('pagehide',()=>phFlush(true));
 window.addEventListener('error',e=>trackErr(e.message,(e.filename||'')+':'+e.lineno));
 window.addEventListener('unhandledrejection',e=>trackErr('promise: '+(e.reason&&e.reason.message||e.reason),''));
