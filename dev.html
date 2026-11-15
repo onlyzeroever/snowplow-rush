@@ -2558,9 +2558,26 @@ function drawPreview(i,x,y,w,h){
   else{R(b,x,y,w,h,'#5a8647');R(b,x+3,y,28,h,'#4a5068');R(b,x+4,y,1,h,'#ecefe4');R(b,x+29,y,1,h,'#ecefe4');for(let k=0;k<h;k+=8)R(b,x+16,y+k,2,4,'#ecefe4');R(b,x+11,y,12,9,'#ffffff');R(b,x+7,y+3,20,3,'#d6dee9');R(b,x+3,y+h-10,28,10,'#f4f8ff');}}
 function woodBg(){R(b,0,0,W,NAV_Y,'#8a5a2c');for(let x=0;x<W;x+=12){R(b,x,0,1,NAV_Y,'#6b3f22');R(b,x+5,0,1,NAV_Y,'#9a6a3a');}for(let y=40;y<NAV_Y;y+=53)R(b,0,y,W,1,'#6b3f22');}
 function sign(label,y){const w=textW(label,2)+24,x=Math.floor(W/2-w/2);R(b,x,y,w,18,K);R(b,x+1,y+1,w-2,16,'#a8673a');R(b,x+1,y+1,w-2,1,'#c98d4a');R(b,x,y,w,3,'#f4f8ff');text(b,label,W/2,y+5,'#ffffff',{align:'center',scale:2});}
+const BLADE_ROWS=["..K..................K..", ".KK..................KK.", "KKKKKKKKKKKKKKKKKKKKKKKK", ".KK..................KK.", "..K..................K..", "........................", ".KKKKKKKKKKKKKKKKKKKKKK.", ".KEEEEEEEEEEEEEEEEEEEdK.", ".KYKYYYYYYYYYYYYYYYKYdK.", ".KYYYYYYYYYYYYYYYYYYYdK.", ".KyyyyyyyyyyyyyyyyyyydK.", ".KKKKKKKKKKKKKKKKKKKKKK.", "..WWWw...WWWWw...WWWw...", ".WWWWWw.WWWWWWw.WWWWWw.."];
+const UPICO={};function upIcon(k){if(UPICO[k])return UPICO[k];let c;
+  if(k==='speed'){c=mk(24,18);const g=c.getContext('2d');for(let y=0;y<16;y++)for(let x=0;x<24;x++){const dx=x+0.5-12,dy=y+0.5-15,d=Math.sqrt(dx*dx+dy*dy);if(dy>0.5||d>11.6)continue;let col;
+      if(d>10.5)col=K;else if(d>8.2){const a=Math.atan2(-dy,dx);col=a>2.1?'#33b24a':a>1.05?'#ffc727':'#e03a4e';if(dx<-3&&dy<-3&&d>9.6)col=a>2.1?'#6fd67f':a>1.05?'#ffe27a':'#f28b8b';}else col=(dx+dy<-6)?'#ffffff':'#f4f8ff';R(g,x,y,1,1,col);}
+    for(const a of [2.75,2.2,1.6,1.0,0.4])R(g,Math.round(12+Math.cos(a)*7.2)-1,Math.round(15-Math.sin(a)*7.2)-1,1,1,'#55607a');
+    for(let d=1;d<9;d++)R(g,Math.round(11.5+Math.cos(0.55)*d),Math.round(14.5-Math.sin(0.55)*d),1,2,'#d8364b');R(g,10,13,3,3,K);R(g,11,14,1,1,'#c6d0dc');R(g,0,15,24,3,K);R(g,1,16,22,1,'#55607a');}
+  else if(k==='size'){c=spr(BLADE_ROWS,{E:'#ffe27a',d:'#c98a12',y:'#d49a12',w:'#c6d9f3'});}
+  else if(k==='bumper'){c=mk(24,16);const g=c.getContext('2d');R(g,1,3,18,10,K);R(g,0,4,20,8,K);for(let y=4;y<12;y++)for(let x=1;x<19;x++){if((y===4||y===11)&&(x===1||x===18))continue;R(g,x,y,1,1,((x+y)%6<3)?'#ffc727':'#2a2a36');}
+    R(g,2,4,16,1,'#ffe27a');R(g,2,11,16,1,'#1b1f3b');R(g,4,13,2,3,K);R(g,13,13,2,3,K);R(g,21,3,2,1,K);R(g,21,7,3,1,K);R(g,21,11,2,1,K);R(g,20,5,1,1,K);R(g,20,9,1,1,K);}
+  else if(k==='value'){c=mk(24,20);const g=c.getContext('2d');const disk=(x,y)=>{R(g,x+1,y,7,1,K);R(g,x,y+1,9,3,K);R(g,x+1,y+4,7,1,K);R(g,x+1,y+1,7,1,'#ffe27a');R(g,x+1,y+2,7,1,'#ffd23f');R(g,x+1,y+3,7,1,'#c98a12');};disk(1,15);disk(1,12);disk(2,9);
+    g.fillStyle=K;pixCircle(g,15,12,7);for(let y=5;y<20;y++)for(let x=8;x<23;x++){const dx=x-15,dy=y-12,d=Math.sqrt(dx*dx+dy*dy);if(d<=6.3)R(g,x,y,1,1,dx+dy>4?'#c98a12':dx+dy<-5?'#ffe27a':'#ffd23f');}
+    const sf='#c98a12';R(g,15,8,1,9,sf);R(g,11,12,9,1,sf);for(let i=1;i<4;i++){R(g,15-i,12-i,1,1,sf);R(g,15+i,12-i,1,1,sf);R(g,15-i,12+i,1,1,sf);R(g,15+i,12+i,1,1,sf);}R(g,15,12,1,1,'#ffe27a');
+    R(g,4,1,1,5,'#ffffff');R(g,2,3,5,1,'#ffffff');R(g,4,0,1,1,'#8fb0dc');R(g,4,6,1,1,'#8fb0dc');R(g,1,3,1,1,'#8fb0dc');R(g,7,3,1,1,'#8fb0dc');}
+  else{c=mk(22,20);const g=c.getContext('2d');g.drawImage(spr(ROWS_DOWN,{Y:'#3f86d6',y:'#2a5fa8',R:'#33b24a',r:'#1f7a33',M:'#1f7a33'}),0,2);
+    for(let i=0;i<9;i++)R(g,13+Math.round(i*0.55),3+i,2,1,K);for(let i=0;i<8;i++)R(g,14+Math.round(i*0.55),3+i,1,1,'#c98d4a');R(g,15,12,7,6,K);R(g,16,13,5,4,'#c6d0dc');R(g,16,13,5,1,'#f4f8ff');R(g,20,14,1,3,'#8793a8');
+    R(g,17,0,3,1,'#ffd23f');R(g,18,-1,1,3,'#ffd23f');}
+  return UPICO[k]=c;}
 function drawUpgrades(){
   woodBg();drawHeaderGems(2,2,50);drawHeaderCoins(W-74,2,72);sign('UPGRADES',22);
-  const rows=[['speed',SPR.boot],['size',SPR.bladeIco],['bumper',SPR.helmet],['value',SPR.coinBig],['helpers',SPR.helper]];
+  const rows=[['speed',upIcon('speed')],['size',upIcon('size')],['bumper',upIcon('bumper')],['value',upIcon('value')],['helpers',upIcon('helpers')]];
   rows.forEach(([k,ico],i)=>{const y=44+i*47+(i>=3?4:0),x=4,w=172,h=44;const u=UPG[k],lv=lvOf(k),max=lv>=upMax(k),cost=upgCost(k),afford=save.coins>=cost;
     card(x,y,w,h);R(b,x+4,y+4,34,36,K);R(b,x+5,y+5,32,34,'#cfe3f8');b.drawImage(ico,x+21-Math.floor(ico.width/2),y+22-Math.floor(ico.height/2));
     text(b,upName(k),x+43,y+6,MACHINE_UPG.includes(k)?'#13306b':'#5a2a8a',{outline:null});R(b,x+43,y+15,22,9,'#13306b');text(b,'LV'+lv,x+54,y+17,'#ffffff',{align:'center',outline:null});
