@@ -1,12 +1,12 @@
 // usage: node lvview.js defs.json outdir [ids,comma]  -> one PNG per job: snow view | ground + footprints view
 const { chromium } = require('/opt/npm-tools/node_modules/playwright');
 const fs = require('fs');
-const defs = JSON.parse(fs.readFileSync(process.argv[2], 'utf8')); const out = process.argv[3]; const only = process.argv[4] ? process.argv[4].split(',') : null;
+let defs = JSON.parse(fs.readFileSync(process.argv[2], 'utf8')); if (defs.jobs) { const o = {}; for (const j of defs.jobs) o[j.id] = { packId: j.id }; defs = o; } const out = process.argv[3]; const only = process.argv[4] ? process.argv[4].split(',') : null;
 (async () => { const browser = await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox'] });
   const errors = []; const page = await (await browser.newContext({ viewport: { width: 360, height: 640 } })).newPage(); page.on('pageerror', e => errors.push(e.message));
   await page.goto('http://127.0.0.1:8765/index6.html?test=1'); await page.waitForTimeout(600);
   for (const id of Object.keys(defs)) { if (only && !only.includes(id)) continue;
-    const url = await page.evaluate(([def, clean]) => { const R = window.__SR; R.testLevel(def, 2); const G = R.G, pw = G.pw, ph = G.ph;
+    const url = await page.evaluate(([def, clean]) => { const R = window.__SR; if (def.packId) { R.save.tut = true; R.save.story = { suburbs: true, farm: true, city: true, themepark: true, harbour: true, ski: true, pass: true, north: true }; R.startLevel(R.LEVELS.findIndex(L => L.id === def.packId)); } else R.testLevel(def, 2); const G = R.G, pw = G.pw, ph = G.ph;
       const c = document.createElement('canvas'); c.width = pw * 2 + 8; c.height = ph; const x = c.getContext('2d'); x.fillStyle = '#ff00ff'; x.fillRect(0, 0, c.width, ph);
       x.drawImage(G.canvas, 0, 0); const im = x.createImageData(pw, ph); for (let i = 0; i < pw * ph; i++) { im.data[i * 4] = G.ground[i * 3]; im.data[i * 4 + 1] = G.ground[i * 3 + 1]; im.data[i * 4 + 2] = G.ground[i * 3 + 2]; im.data[i * 4 + 3] = 255; } x.putImageData(im, pw + 8, 0);
       for (const d of G.decor) { x.drawImage(d.spr, d.x, d.y); x.drawImage(d.spr, pw + 8 + d.x, d.y); }

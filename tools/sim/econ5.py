@@ -8,7 +8,7 @@ JOBS = json.load(open('/home/claude/sim/jobs.json'))
 TOOLS = json.load(open('/home/claude/sim/tools.json'))
 BASE_CELL_VALUE = 0.03
 STAR_BONUS = 50
-AREA_SEQ = ['suburbs', 'farm', 'city']
+AREA_SEQ = ['suburbs', 'farm', 'city', 'themepark', 'harbour', 'ski', 'pass', 'north']
 
 CFG = dict(
     speeds={'shovel': 32, 'pusher': 38, 'blower': 44, 'tractor': 52, 'truck': 62, 'super': 74},
@@ -19,7 +19,7 @@ CFG = dict(
     combo=1.35, presentsTaken=0.55, hazardLoss=0.05,
     effFirst=0.60, effGain=0.035, effMax=0.74, eff3=0.75,
     menuSecs=15, dailyEvery=10,
-    bossStars={'blockparty': 25},
+    bossStars={'blockparty': 25, 'harvestfair': 25, 'parade': 25, 'openingday': 26, 'festival': 26, 'grandslalom': 24, 'blizzard': 24, 'icepalace': 24},
     jobs={},  # per-job overrides {id: {time:, value:, stars:}}
 )
 
