@@ -12,7 +12,7 @@ AREA_SEQ = ['suburbs', 'farm', 'city', 'themepark', 'harbour', 'ski', 'pass', 'n
 BASE = 8
 
 CFG = dict(
-    speeds={'shovel': 32, 'pusher': 38, 'blower': 44, 'tractor': 52, 'truck': 62, 'super': 74, 'snowcat': 88, 'rotary': 100},
+    speeds={'shovel': 32, 'pusher': 38, 'blower': 44, 'tractor': 52, 'truck': 62, 'super': 74, 'snowcat': 92, 'rotary': 104},
     widthCap=0.95, speedCap=0.97, lastCap=(1.15, 1.30), levels=6, bumperLevels=5,
     costFrac=0.018, costGrowth=1.5,
     value=dict(base=30, growth=1.62, max=20, per=0.12),
