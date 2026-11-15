@@ -2070,11 +2070,11 @@ function goMap(){ensureDaily();state='map';stopLoops();playMusic('menu');musicRa
   persist();}
 function overlayOpen(){return !!(ridePeek||rideReveal||settingsOpen||trophiesOpen||dailyOpen||winterOpen||adScreen||shopOpen||jobInfo>=0||skinFor||outfitsOpen||trailsOpen||bookOpen||weeklyOpen||(storyOpen&&state==='map'));}
 let privT=0;
-function drawPrivacyCard(dt){privT=Math.min(1,privT+(dt||0.016)*3.5);const e=1-Math.pow(1-privT,3),x=6,w=W-12,h=50,y=Math.round(NAV_Y-h-6+(1-e)*70);
+function drawPrivacyCard(dt){privT=Math.min(1,privT+(dt||0.016)*3.5);const e=1-Math.pow(1-privT,3),x=6,w=W-12,h=58,y=Math.round(NAV_Y-h-6+(1-e)*70);
   btn('privbg',x,y,w,h,()=>{});panel(x,y,w,h,'#13306b','#ffd23f');b.drawImage(SPR.frost,x+6,y+5);text(b,'ANONYMOUS PLAY DATA',x+18,y+6,'#ffd23f',{outline:null});
-  text(b,'WE COUNT HOW THE GAME IS PLAYED,',W/2,y+17,'#ffffff',{align:'center',outline:null});text(b,'NEVER WHO YOU ARE. NEVER SOLD.',W/2,y+25,'#9fc0e8',{align:'center',outline:null});
-  button('privok',x+w/2-56,y+34,52,13,'green','GOT IT',()=>{save.privSeen=true;track('privacy_notice',{choice:'got_it'});persist();sfx('click');});
-  button('privset',x+w/2+4,y+34,52,13,'navy','SETTINGS',()=>{save.privSeen=true;track('privacy_notice',{choice:'settings'});persist();settingsOpen=true;sfx('click');});}
+  text(b,'WE COUNT PLOWS, NOT PEOPLE.',W/2,y+17,'#ffffff',{align:'center',outline:null});text(b,'IT HELPS US MAKE THE GAME BETTER.',W/2,y+26,'#9fc0e8',{align:'center',outline:null});text(b,'NO NAMES. NEVER SOLD.',W/2,y+34,'#9fc0e8',{align:'center',outline:null});
+  button('privok',x+w/2-56,y+42,52,13,'green','GOT IT',()=>{save.privSeen=true;track('privacy_notice',{choice:'got_it'});persist();sfx('click');});
+  button('privset',x+w/2+4,y+42,52,13,'navy','SETTINGS',()=>{save.privSeen=true;track('privacy_notice',{choice:'settings'});persist();settingsOpen=true;sfx('click');});}
 function openShop(){shopOpen=true;sfx('click');}
 function goUpgrades(){state='upgrades';stopLoops();playMusic('menu');musicRate(1);paused=false;settingsOpen=false;sfx('click');persist();}
 function goGarage(){state='garage';stopLoops();playMusic('menu');musicRate(1);paused=false;settingsOpen=false;sfx('click');persist();}
