@@ -50,9 +50,9 @@ def milkshed():
 
 
 def treefarm():
-    """CHRISTMAS TREE FARM: the cutting season. Plantation blocks of pines with lanes between them; the netting shed,
+    """PINE TREE FARM: the cutting season. Plantation blocks of pines with lanes between them; the netting shed,
     tractor and trailer of cut trees, the sales hut at the gate."""
-    d = job('treefarm', 'CHRISTMAS TREE FARM', 'farm', ['milkshed'], 1400, 92, 2.7, 6, start=[90, 48])
+    d = job('treefarm', 'PINE TREE FARM', 'farm', ['milkshed'], 1400, 92, 2.7, 6, start=[90, 48])
     G(d, 'grass', 0, 0, 180, 1400)
     # gate & sales hut (0-180)
     G(d, 'gravel', 0, 0, 180, 180)
