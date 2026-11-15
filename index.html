@@ -62,20 +62,21 @@ const TOOLS=[
   {id:'tractor',name:'TRACTOR',    cost:32000,  width:21, speed:52, value:3.2},
   {id:'truck',  name:'PLOW TRUCK', cost:82000,   width:29, speed:62, value:4.5},
   {id:'super',  name:'SUPER PLOW', cost:680000, width:40, speed:74, value:6.5},
-  {id:'snowcat',name:'SNOWCAT',    cost:6.5e6,  width:52, speed:88, value:9},
-  {id:'rotary', name:'ROTARY BLOWER',cost:1.8e7, width:56, speed:98, value:12.5},
+  {id:'snowcat',name:'SNOWCAT',    cost:6.5e6,  width:44, speed:92, value:9.5},
+  {id:'rotary', name:'ROTARY BLOWER',cost:1.8e7, width:48, speed:104,value:13.5},
   // Wild Rides: appear in the Garage from the winter shown (one per New Winter)
-  {id:'monster',name:'MONSTER TRUCK',cost:2.4e7, width:64, speed:104,value:16,   winter:2, trick:'CRUSHES JUNK'},
-  {id:'jet',    name:'JET TRUCK',  cost:7e7,     width:58, speed:114,value:21,   winter:3, trick:'BLASTS A CONE'},
-  {id:'mech',   name:'MEGA MECH',  cost:2e8,     width:72, speed:104,value:28,   winter:4, trick:'SHOVES CRATES'},
-  {id:'dragon', name:'SNOW DRAGON',cost:6e8,     width:54, speed:124,value:37,   winter:5, trick:'MELTS A STRIP'},
-  {id:'ufo',    name:'UFO',        cost:1.8e9,   width:70, speed:132,value:49,   winter:6, trick:'FLOATS, BEAMS COWS'},
+  {id:'monster',name:'MONSTER TRUCK',cost:2.4e7, width:46, speed:108,value:17,   winter:2, trick:'CRUSHES JUNK'},
+  {id:'jet',    name:'JET TRUCK',  cost:7e7,     width:42, speed:120,value:22,   winter:3, trick:'BLASTS A CONE'},
+  {id:'mech',   name:'MEGA MECH',  cost:2e8,     width:50, speed:106,value:29,   winter:4, trick:'SHOVES CRATES'},
+  {id:'dragon', name:'SNOW DRAGON',cost:6e8,     width:38, speed:130,value:38,   winter:5, trick:'MELTS A STRIP'},
+  {id:'ufo',    name:'UFO',        cost:1.8e9,   width:48, speed:136,value:50,   winter:6, trick:'FLOATS, BEAMS COWS'},
 ];
 const BASE_TOOLS=8;
 const MACHINE_UPG=['speed','size','bumper'],MUP_LV=6,MUP_BUMP=5,MUP_GROWTH=1.45,MUP_COST=0.06;
 const _mspec={};
 function mspec(tid){if(_mspec[tid])return _mspec[tid];const i=TOOLS.findIndex(t=>t.id===tid),t=TOOLS[i];let scap,wcap,nxt;
   if(tid==='super'){scap=1.15;wcap=1.3;nxt=TOOLS[i+1].cost;}
+  else if(i>5){const n=TOOLS[i+1];scap=(i<BASE_TOOLS-1&&n)?Math.max(1.06,0.97*n.speed/t.speed):1.15;wcap=1.25;nxt=(i<BASE_TOOLS-1&&n)?n.cost:t.cost*(i<BASE_TOOLS?4:1.5);}
   else if(i>=0&&i<BASE_TOOLS-1){const n=TOOLS[i+1];scap=0.97*n.speed/t.speed;wcap=0.95*n.width/t.width;nxt=n.cost;}
   else if(i===BASE_TOOLS-1){scap=1.15;wcap=1.15;nxt=t.cost*4;}else{scap=1.15;wcap=1.25;nxt=t.cost*1.5;}
   return _mspec[tid]={speedPer:(scap-1)/MUP_LV,sizePer:(wcap-1)/MUP_LV,upBase:Math.max(8,Math.round(nxt*MUP_COST))};}
@@ -1831,7 +1832,10 @@ function drawVBlade(g,cx,y,bw,bt,tid,c){if(bt<=0)return;const x=cx-Math.floor(bw
   if(tid==='mech'){const half=Math.floor(bw/2),gap=6;for(const [sx,w] of [[x,half-gap/2],[cx+gap/2,half-gap/2]]){R(g,sx,y,w,bt,K);R(g,sx+1,y+1,w-2,bt-2,fill);R(g,sx+1,y+1,w-2,1,hi);R(g,sx+1,y+bt-2,w-2,1,dark);}return;}
   if(tid==='dragon'){for(let i=x+1;i<x+bw-1;i+=3)R(g,i,y+bt-2,2,2,'#e0c08a');return;}
   if(tid==='rotary'){R(g,x,y,bw,bt,K);R(g,x+1,y+1,bw-2,bt-2,fill);R(g,x+1,y+1,bw-2,1,hi);const ph=(c.fr||0)%2;for(let i=x+2+ph*2;i<x+bw-3;i+=4){R(g,i,y+2,2,bt-4,dark);R(g,i+1,y+2,1,1,hi);}R(g,x-1,y-1,3,bt+2,K);R(g,x+bw-2,y-1,3,bt+2,K);R(g,cx-4,y+bt,8,2,K);return;}
-  R(g,x,y,bw,bt,K);R(g,x+1,y+1,bw-2,bt-2,fill);R(g,x+1,y+1,bw-2,1,hi);R(g,x+1,y+bt-2,bw-2,1,dark);
+  {const T0=TOOLS[toolIdx(tid)],base=T0?Math.min(bw,T0.width*2):bw,wing=Math.floor((bw-base)/2);
+    if(wing>=3){const bx=cx-Math.floor(base/2);for(const [wx,ww] of [[x,wing],[bx+base,wing]]){R(g,wx,y+1,ww,bt-1,K);R(g,wx+1,y+2,ww-2,bt-3,fill);R(g,wx+1,y+2,ww-2,1,hi);}
+      R(g,bx-2,y,3,bt,K);R(g,bx-1,y+1,1,bt-2,'#8793a8');R(g,bx+base-1,y,3,bt,K);R(g,bx+base,y+1,1,bt-2,'#8793a8');R(g,bx,y,base,bt,K);R(g,bx+1,y+1,base-2,bt-2,fill);R(g,bx+1,y+1,base-2,1,hi);R(g,bx+1,y+bt-2,base-2,1,dark);}
+    else{R(g,x,y,bw,bt,K);R(g,x+1,y+1,bw-2,bt-2,fill);R(g,x+1,y+1,bw-2,1,hi);R(g,x+1,y+bt-2,bw-2,1,dark);}}
   if(tid==='super'&&!c.deco){for(let i=x+1;i<x+bw-1;i+=4){R(g,i,y+bt-3,2,2,PAL.Y);R(g,i+2,y+bt-3,2,2,K);}}
   if(c.deco==='fin'){for(let i=x+2;i<x+bw-2;i+=3)R(g,i,y+1,2,2,'#ffffff');}
   if(c.deco==='hazard'||c.deco==='tiger'){for(let i=x+2;i<x+bw-2;i+=4)R(g,i,y+1,2,bt-2,'#2a2a36');}
@@ -1846,6 +1850,11 @@ function vehicleSprite(tid,bw,pl,fr,si){
   drawVBlade(g,ox,oy-sp.hh-sp.bt,bw,sp.bt,tid,tid==='rotary'?Object.assign({},c,{fr}):c);if(pl>0&&sp.bt&&tid!=='rotary')drawPile(g,ox,oy-sp.hh-sp.bt,bw-4,pileH,'up');
   v={c:cv2,ox,oy};if(vcache.size>200)vcache.clear();vcache.set(key,v);return v;}
 function drawToolHead(g,x,y,w,h,tid,si){const c=skinPal(tid,si),fill=c.x,dark=c.xd,hz=w>h;
+  if(tid==='pusher'&&!c.deco){const cx=x+(w>>1),cy=y+(h>>1);R(g,x,y,w,h,K);R(g,x+1,y+1,w-2,h-2,fill);if(hz){R(g,x+1,y+1,w-2,1,'#ffffff');R(g,x+1,y+h-2,w-2,1,dark);R(g,x-1,y-1,3,h+2,K);R(g,x+w-2,y-1,3,h+2,K);R(g,x,y,1,h,fill);R(g,x+w-1,y,1,h,fill);R(g,cx-4,y+h,8,2,K);R(g,cx-3,y+h,6,1,'#8793a8');}
+    else{R(g,x+1,y+1,1,h-2,'#ffffff');R(g,x+w-2,y+1,1,h-2,dark);R(g,x-1,y-1,w+2,3,K);R(g,x-1,y+h-2,w+2,3,K);R(g,x,y,w,1,fill);R(g,x,y+h-1,w,1,fill);}return;}
+  if(tid==='blower'&&!c.deco){const cx=x+(w>>1),cy=y+(h>>1),on=Math.floor(tNow*12)%2;R(g,x,y,w,h,K);R(g,x+1,y+1,w-2,h-2,fill);
+    if(hz){for(let i=x+2+on;i<x+w-2;i+=3)R(g,i,y+2,1,h-4,K);R(g,x+1,y+1,w-2,1,'#ff9aa8');R(g,cx-4,y-4,8,5,K);R(g,cx-3,y-3,6,3,'#55607a');R(g,cx+2,y-7,3,5,K);R(g,cx+3,y-6,1,4,fill);R(g,cx+3,y-8,5,2,K);R(g,cx+4,y-8,3,1,fill);}
+    else{for(let i=y+2+on;i<y+h-2;i+=3)R(g,x+2,i,w-4,1,K);R(g,x+1,y+1,1,h-2,'#ff9aa8');R(g,x-4,cy-4,5,8,K);R(g,x-3,cy-3,3,6,'#55607a');R(g,x-7,cy+2,5,3,K);R(g,x-6,cy+3,4,1,fill);}return;}
   R(g,x,y,w,h,K);R(g,x+1,y+1,w-2,h-2,fill);if(hz)R(g,x+1,y+h-2,w-2,1,dark);else R(g,x+w-2,y+1,1,h-2,dark);
   const along=(fn)=>{if(hz){for(let i=x+2;i<x+w-2;i++)fn(i,y+1,1,h-2,i-x);}else{for(let i=y+2;i<y+h-2;i++)fn(x+1,i,w-2,1,i-y);}};
   if(tid==='blower'&&!c.deco){if(hz){for(let i=x+2;i<x+w-2;i+=3)R(g,i,y+2,1,h-4,K);}else{for(let i=y+2;i<y+h-2;i+=3)R(g,x+2,i,w-4,1,K);}}
@@ -1870,7 +1879,7 @@ function bumperFx(){for(let k=0;k<8;k++){const a=k/8*Math.PI*2;particles.push({x
 function drawRig(g,tid,x,y,f,bwPx,pl,bob,fr,flash,si,kidOverride){
   x=Math.round(x);y=Math.round(y);
   if(isKidTool(tid)){
-    const th=tid==='blower'?6:3;const ks=kidOverride||kidSet();const sprite=f===0?ks.up:f===2?ks.down:f===1?ks.side:ks.sideL;const r=kidBladeRect(x,y,f,bwPx,th);
+    const th=tid==='blower'?6:tid==='pusher'?4:3;const ks=kidOverride||kidSet();const sprite=f===0?ks.up:f===2?ks.down:f===1?ks.side:ks.sideL;const r=kidBladeRect(x,y,f,bwPx,th);
     const blade=()=>{if(f===2){R(g,x-4,y-5+bob,1,7,PAL.l);R(g,x+3,y-5+bob,1,7,PAL.l);}else if(f===1)R(g,x+4,y-6+bob,4,1,PAL.l);else if(f===3)R(g,x-7,y-6+bob,4,1,PAL.l);
       drawToolHead(g,r.x,r.y,r.w,r.h,tid,si);drawGuards(g,r.x,r.y,r.w,r.h,f===0||f===2);const ph=pl*2;if(ph>0){if(f===2)drawPile(g,x,r.y+r.h,bwPx-4,ph,'down');else if(f===0)drawPile(g,x,r.y,bwPx-4,ph,'up');
         else if(f===1)drawPile(g,r.x+r.w,y-3,bwPx-4,ph,'right');else drawPile(g,r.x,y-3,bwPx-4,ph,'left');}};
@@ -1881,7 +1890,7 @@ function drawRig(g,tid,x,y,f,bwPx,pl,bob,fr,flash,si,kidOverride){
 function footprint(tid,x,y,f){if(isKidTool(tid))return{x:x-5,y:y-5,w:10,h:6};const s=VSPEC[tid];
   return (f===0||f===2)?{x:x-s.hw,y:y-s.hh,w:s.hw*2,h:s.hh*2}:{x:x-s.hh,y:y-s.hw,w:s.hh*2,h:s.hw*2};}
 function bladeRect(tid,x,y,f,bw){
-  if(isKidTool(tid)){const th=tid==='blower'?6:3;const r=kidBladeRect(Math.round(x),Math.round(y),f,bw,th);
+  if(isKidTool(tid)){const th=tid==='blower'?6:tid==='pusher'?4:3;const r=kidBladeRect(Math.round(x),Math.round(y),f,bw,th);
     if(f===2)r.h+=2;else if(f===0){r.y-=2;r.h+=2;}else if(f===1)r.w+=2;else{r.x-=2;r.w+=2;}return r;}
   const s=VSPEC[tid],half=Math.floor(bw/2),bt=s.bt+2;
   if(f===0)return{x:x-half,y:y-s.hh-bt,w:bw,h:bt};if(f===2)return{x:x-half,y:y+s.hh,w:bw,h:bt};
@@ -2206,7 +2215,7 @@ function updateHazards(dt,tid){
 function spray(br,f,tid){const big=!isKidTool(tid),sp=big?60:40;
   const ends=(f===0||f===2)?[[br.x,br.y+br.h/2,-1,0],[br.x+br.w,br.y+br.h/2,1,0]]:[[br.x+br.w/2,br.y,0,-1],[br.x+br.w/2,br.y+br.h,0,1]];const e=ends[(Math.random()*2)|0];
   if(tid==='rotary'){const fx=(f===0||f===2)?br.x+br.w/2:br.x+br.w/2,fy=(f===0||f===2)?br.y+br.h/2:br.y+br.h/2,side=(f===0||f===3)?1:-1;particles.push({x:fx+rnd(-6,6),y:fy+rnd(-3,3),vx:(f===0||f===2)?side*rnd(55,95):rnd(-10,10),vy:(f===1||f===3)?side*rnd(55,95):rnd(-10,10),z:6,vz:rnd(60,100),life:0.9,t:0,kind:'snow'});return;}
-  if(tid==='blower'){particles.push({x:br.x+br.w/2,y:br.y+br.h/2,vx:(f===1||f===3)?rnd(-70,70):rnd(30,70)*(Math.random()<0.5?-1:1),vy:(f===1||f===3)?rnd(-15,15):0,z:2,vz:rnd(50,90),life:0.8,t:0,kind:'snow'});return;}
+  if(tid==='blower'){const side=(f===0||f===3)?1:-1;particles.push({x:br.x+br.w/2,y:br.y+br.h/2,vx:(f===0||f===2)?side*rnd(40,80):rnd(-12,12),vy:(f===1||f===3)?side*rnd(40,80):rnd(-12,12),z:4,vz:rnd(55,95),life:0.85,t:0,kind:'snow'});if(Math.random()<0.6)particles.push({x:br.x+br.w/2,y:br.y+br.h/2,vx:(f===0||f===2)?side*rnd(20,50):rnd(-8,8),vy:(f===1||f===3)?side*rnd(20,50):rnd(-8,8),z:3,vz:rnd(40,70),life:0.7,t:0,kind:'snow'});return;}
   particles.push({x:e[0],y:e[1],vx:e[2]*rnd(sp*0.4,sp)+rnd(-8,8),vy:e[3]*rnd(sp*0.4,sp)+rnd(-8,8),z:1,vz:rnd(25,55),life:0.6,t:0,kind:'snow'});}
 function updateFx(dt){
   for(const p of particles){p.t+=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vz-=160*dt;p.z+=p.vz*dt;if(p.z<0){p.z=0;p.vz*=-0.3;p.vx*=0.6;p.vy*=0.6;}}
@@ -3595,7 +3604,7 @@ function frame(now){const dt=Math.min(0.05,(now-last)/1000);last=now;
   drawLogo();
   requestAnimationFrame(frame);}
 requestAnimationFrame(frame);
-window.__SR={frostOf,drawToolIconTo,vehicleSprite,skinPal,pineSprite,fogCur,get fogStormY(){return fogStormY;},jobNo,get mapArt2(){return mapArt;},MAP_H,MAPPOS,checkJob,CHECK_EFF,loadTestDef,testLevel,buildLevel,PROPS,HAZ,GROUND_T,TEST_MODE,streakTick,dayIdx,goHome,yard:()=>yard,get checkLast(){return CHECK_LAST;},fp:footprint,blk:blockedBy,bossShort,areaStars,upg:{lvOf,upMax,mLv,mspec,curMachine,buyUpg,moveSpeed,bladeCells,valueMult,bumperRed,helperIncome,upgCost,get offlineGain(){return offlineGain;},OFFLINE_CAP_S,OFFLINE_RATE},setLook,setCorners,setShadow,get LOOK(){return LOOK;},get CORNERS(){return CORNERS;},get camY(){return camY;},get VIEW_Y(){return VIEW_Y;},clearLookToast(){lookToast=0;},get mapView(){return save.mapView;},mapInit,ensureMapArt,get mapArt(){return mapArt;},get mapMs(){return mapInit.ms;},mapEdges,get plowAnim(){return plowAnim;},get ridePeek(){return ridePeek;},set ridePeek(v){ridePeek=v;},get rideReveal(){return rideReveal;},set rideReveal(v){rideReveal=v;},equip,useIdx,get trophyTab(){return trophyTab;},set trophyTab(v){trophyTab=v;},set trophiesOpen(v){trophiesOpen=v;},_t:{buildLevel,footprint,bladeRect,isKidTool,get VSPEC(){return VSPEC;},T_BLOCK,CLEAR_T},get weeklyOpen(){return weeklyOpen;},set weeklyOpen(v){weeklyOpen=v;},weeklyDef,get scrollY(){return scrollY;},get jobInfo(){return jobInfo;},set jobInfo(v){jobInfo=v;},startNewWinter,levelOpen,LEVELS,TOOLS,get audio(){return {ctx:!!AC,state:AC&&AC.state,bufs:Object.keys(BUF).length,music:curMusic,lp:musicFilter?Math.round(musicFilter.frequency.value):null,loop:musicNode?[musicNode.loopStart,musicNode.loopEnd,musicNode.buffer.duration]:null,loops:Object.keys(loopNodes)};},audioInit,openShop,dailyAdd,award,get shopOpen(){return shopOpen;},get dailyOpen(){return dailyOpen;},set dailyOpen(v){dailyOpen=v;},get winterOpen(){return winterOpen;},get state(){return state;},get G(){return G;},get run(){return run;},get P(){return P;},save,startLevel,goMap,goUpgrades,goGarage,endRound:()=>endRound(false),keys,hit};
+window.__SR={drawRig,frostOf,drawToolIconTo,vehicleSprite,skinPal,pineSprite,fogCur,get fogStormY(){return fogStormY;},jobNo,get mapArt2(){return mapArt;},MAP_H,MAPPOS,checkJob,CHECK_EFF,loadTestDef,testLevel,buildLevel,PROPS,HAZ,GROUND_T,TEST_MODE,streakTick,dayIdx,goHome,yard:()=>yard,get checkLast(){return CHECK_LAST;},fp:footprint,blk:blockedBy,bossShort,areaStars,upg:{lvOf,upMax,mLv,mspec,curMachine,buyUpg,moveSpeed,bladeCells,valueMult,bumperRed,helperIncome,upgCost,get offlineGain(){return offlineGain;},OFFLINE_CAP_S,OFFLINE_RATE},setLook,setCorners,setShadow,get LOOK(){return LOOK;},get CORNERS(){return CORNERS;},get camY(){return camY;},get VIEW_Y(){return VIEW_Y;},clearLookToast(){lookToast=0;},get mapView(){return save.mapView;},mapInit,ensureMapArt,get mapArt(){return mapArt;},get mapMs(){return mapInit.ms;},mapEdges,get plowAnim(){return plowAnim;},get ridePeek(){return ridePeek;},set ridePeek(v){ridePeek=v;},get rideReveal(){return rideReveal;},set rideReveal(v){rideReveal=v;},equip,useIdx,get trophyTab(){return trophyTab;},set trophyTab(v){trophyTab=v;},set trophiesOpen(v){trophiesOpen=v;},_t:{buildLevel,footprint,bladeRect,isKidTool,get VSPEC(){return VSPEC;},T_BLOCK,CLEAR_T},get weeklyOpen(){return weeklyOpen;},set weeklyOpen(v){weeklyOpen=v;},weeklyDef,get scrollY(){return scrollY;},get jobInfo(){return jobInfo;},set jobInfo(v){jobInfo=v;},startNewWinter,levelOpen,LEVELS,TOOLS,get audio(){return {ctx:!!AC,state:AC&&AC.state,bufs:Object.keys(BUF).length,music:curMusic,lp:musicFilter?Math.round(musicFilter.frequency.value):null,loop:musicNode?[musicNode.loopStart,musicNode.loopEnd,musicNode.buffer.duration]:null,loops:Object.keys(loopNodes)};},audioInit,openShop,dailyAdd,award,get shopOpen(){return shopOpen;},get dailyOpen(){return dailyOpen;},set dailyOpen(v){dailyOpen=v;},get winterOpen(){return winterOpen;},get state(){return state;},get G(){return G;},get run(){return run;},get P(){return P;},save,startLevel,goMap,goUpgrades,goGarage,endRound:()=>endRound(false),keys,hit};
 })();
 </script>
 </body>
