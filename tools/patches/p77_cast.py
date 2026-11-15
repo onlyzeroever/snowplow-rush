@@ -32,6 +32,8 @@ swapfn('skierSprite',J['skier'])
 swapfn('ghostSprite',J['ghost'])
 swapfn('bearSprite',J['bear'])
 swapfn('gullSprite',J['gull'])
+swapfn('forkliftSprite',J['fork'])
+swapfn('bumperCarSprite',J['bump'])
 # dog: new 14x10 art
 a=s.index('SPR.dog=spr([');e=s.index(']);',a)
 s=s[:a]+'SPR.dog=spr('+J['dog']+s[e+1:]
@@ -53,4 +55,9 @@ swapfn('rockSprite',"function rockSprite(w,h){const c=mk(w,h),g=c.getContext('2d
   "const cxk=Math.round(w*0.56);for(let i=0;i<Math.max(2,Math.round(h*0.3));i++)R(g,cxk+(i>>1),Math.round(h*0.38)+i,1,1,'#55607a');"
   "const cap=Math.max(1,Math.round(h*0.3));for(let y=1;y<=cap;y++){const [x0,x1]=sp[y];R(g,x0+1,y,Math.max(0,x1-x0-1),1,y===1?'#ffffff':PAL.W);}"
   "{const [x0,x1]=sp[cap+1]||sp[cap];for(let x=x0+2;x<x1-1;x+=3)R(g,x,cap+1,1,1,PAL.W);}return c;}")
+
+# Sheep are now 15x11 (cream wool so they read on snow): centre them over their feet; horses/penguins/gulls unchanged.
+rep("const mv=Math.hypot(hz.vx,hz.vy)>6?Math.floor(hz.anim*8)%2:0,fr=hz.peng?PENG_FR[mv]:hz.gull?GULL_FR[Math.floor(hz.anim*10)%2]:hz.horse?HORSE_FR[hz.col+mv]:SHEEP_FR[mv];",
+    "const mv=Math.hypot(hz.vx,hz.vy)>6?Math.floor(hz.anim*8)%2:0,fr=hz.peng?PENG_FR[mv]:hz.gull?GULL_FR[Math.floor(hz.anim*10)%2]:hz.horse?HORSE_FR[hz.col+mv]:SHEEP_FR[mv],ox=(hz.horse||hz.peng||hz.gull)?1:3,oy=hz.horse?6:(hz.peng||hz.gull)?3:5;")
+rep("b.drawImage(fr,-1,hy-(hz.horse?6:3));b.restore();}else b.drawImage(fr,hx-1,hy-(hz.horse?6:3));","b.drawImage(fr,-ox,hy-oy);b.restore();}else b.drawImage(fr,hx-ox,hy-oy);")
 open(f,'w',encoding='utf-8').write(s)

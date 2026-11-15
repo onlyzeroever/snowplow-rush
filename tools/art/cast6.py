@@ -1,0 +1,3 @@
+FORK0=["....KK....KK....","....KC....KC....","....KC....KC....","....KC....KC....","...KKKKKKKKKK...","...KUUUUUUUUK...","..KKKKKKKKKKKK..",".KXKYYYYYYYYKXK.",".KXKYKKKKKKYKXK.",".KXKYKOOOOKYKXK.",".KKKYKOooOKYKKK.","...KYKKKKKKYK...","...KYYYYYYYYK...","...KYZYYYYYYK...","...KyyyyyyyyK...",".KKKyyyyyyyyKKK.",".KXKUUUUUUUUKXK.",".KXKUccUUccUKXK.",".KXKUUUUUUUUKXK.",".KKKKKKKKKKKKKK.","................","................"]
+FORK1=FORK0[:7]+[".KKKYKKKKKKYKKK.",".KXKYKOOOOKYKXK.",".KXKYKOooOKYKXK.",".KXKYKKKKKKYKXK."]+FORK0[11:]
+BUMP=["......KK......","......KD......","......KK......","...KKKKKKKK...","..KXXXXXXXXK..",".KXccccccccXK.",".KXcLLLLLLcXK.",".KXcLhhhhLcXK.",".KXcLhHHhLcXK.",".KXcLLLLLLcXK.",".KXcWccccWcXK.",".KXccccccccXK.","..KXXXXXXXXK..","...KKKKKKKK..."]
