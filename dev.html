@@ -275,7 +275,7 @@ function hexA(h,a){const c=hexRGB(h);return `rgba(${c[0]},${c[1]},${c[2]},${a})`
 function fmt(n){n=Math.floor(n);if(n<1000)return ''+n;const u=['K','M','B','T','Q'];let i=-1,v=n;while(v>=1000&&i<u.length-1){v/=1000;i++;}const d=v<10?2:v<100?1:0;return v.toFixed(d)+u[i];}
 function overlap(a,b){return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;}
 function spr(rows,over){const h=rows.length,w=rows[0].length;const c=mk(w,h),g=c.getContext('2d');
-  for(let y=0;y<h;y++){const row=rows[y];for(let x=0;x<w;x++){const ch=row[x];const col=(over&&over[ch])||PAL[ch];if(col&&ch!=='.'){g.fillStyle=col;g.fillRect(x,y,1,1);}}}return c;}
+  for(let y=0;y<h;y++){const row=rows[y];for(let x=0;x<w;x++){const ch=row[x];const col=(over&&over[ch])||PAL[ch]||({'1':'rgba(255,255,255,0.38)','2':'rgba(20,24,60,0.22)'})[ch];if(col&&ch!=='.'){g.fillStyle=col;g.fillRect(x,y,1,1);}}}return c;}
 function flipH(src){const c=mk(src.width,src.height),g=c.getContext('2d');g.translate(src.width,0);g.scale(-1,1);g.drawImage(src,0,0);return c;}
 function pixCircle(g,cx,cy,r){for(let dy=-r;dy<=r;dy++){const dx=Math.floor(Math.sqrt(r*r-dy*dy));g.fillRect(cx-dx,cy+dy,dx*2+1,1);}}
 
@@ -314,20 +314,11 @@ function text(g,s,x,y,col='#ffffff',o={}){const sc=o.scale||1,ol=o.outline===und
 
 // ---------------- SPRITES ----------------
 const SPR={};
-const ROWS_DOWN=[
-"......KK......",".....KYYK.....","....KKYYKK....","...KYYYYYYK...","..KYYYYYYYYK..",".KYYYYYYYYYYK.",
-".KyYyYyYyYyYK.",".KHHHHHHHHHHK.",".KHSHSSSSHSHK.",".KSSKSSSSKSSK.",".KSpSSkkSSpSK.","..KSSStkSSSK..",
-".KKRRKKKKRRKK.","KRRRRRrRRRRRRK","KMRRRRrRRRRRMK",".KKRRRrRRRRKK.","..KJJJKKJJJK..","..KTTK..KTTK.."];
+const ROWS_DOWN=["......KK......",".....KY1K.....","....KKYYKK....","...KY1YYYYK...","..KY1YYYYY2K..",".KYYYYYYYYY2K.",".KyYyYyYyYyYK.",".KHHHHHHHHHHK.",".KHSHSSSSHSHK.",".KSSKSSSSKSSK.",".KSpSSkkSSpSK.","..KSSStkSSSK..",".KyyyyyyyyyyK.","KR1RRyyrRRR2RK","KMR1RyyrRRR2MK",".KKRRRrRRR2KK.","..KJJJKKJJJK..","..KTTK..KTTK.."];
 SPR.kidDown=spr(ROWS_DOWN);
-const ROWS_UP=[
-"......KK......",".....KYYK.....","....KKYYKK....","...KYYYYYYK...","..KYYYYYYYYK..",".KYYYYYYYYYYK.",
-".KyYyYyYyYyYK.",".KHHHHHHHHHHK.",".KHHhHHHHhHHK.","..KHHHHHHHHK..",".KRRRRRRRRRRK.","KRrrrrrrrrrrRK",
-"KRRRRRRRRRRRRK","KMRRRRRRRRRRMK","KMRRRRRRRRRRMK",".KKRRRRRRRRKK.","..KJJJKKJJJK..","..KTTK..KTTK.."];
+const ROWS_UP=["......KK......",".....KY1K.....","....KKYYKK....","...KY1YYYYK...","..KY1YYYYY2K..",".KYYYYYYYYY2K.",".KyYyYyYyYyYK.",".KHHHHHHHHHHK.",".KHHhHHHHhHHK.","..KHHHHHHHHK..",".KyyyyyyyyyyK.","KR1rrrrrrrr2RK","KR1RRRRRRRR2RK","KMRRRRRRRRR2MK","KMRRRRRRRRR2MK",".KKRRRRRRRRKK.","..KJJJKKJJJK..","..KTTK..KTTK.."];
 SPR.kidUp=spr(ROWS_UP);
-const ROWS_SIDE=[
-"......KK......",".....KYYK.....","....KKYYKK....","...KYYYYYYK...","..KYYYYYYYYK..","..KYYYYYYYYYK.",
-"..KyYyYyYyYyK.","..KHHHHHHSSSK.","..KHHHHHSSKSK.","..KHHHHSSSSSK.","..KHHHSSpSkkK.","...KKSSSSSSK..",
-"...KRRRRRRK...","..KRRRRRRRMMK.","..KRrRRRRRMMK.","..KRRRRRRRKK..","...KJJKKJJK...","...KTTK.KTTK.."];
+const ROWS_SIDE=["......KK......",".....KY1K.....","....KKYYKK....","...KY1YYYYK...","..KY1YYYYYYK..","..KYYYYYYYYYK.","..KyYyYyYyYyK.","..KHHHHHHSSSK.","..KHHHHHSSKSK.","..KHHHHSSSSSK.","..KHHHSSpSkkK.","...KKSSSSSSK..","...KyyyyyyK...","..KyR1RRRRMMK.","..KyrR1RRRMMK.","..KRRRRRRRKK..","...KJJKKJJK...","...KTTK.KTTK.."];
 SPR.kidSide=spr(ROWS_SIDE);
 SPR.kidSideL=flipH(SPR.kidSide);
 const KID_ROWS={down:ROWS_DOWN,up:ROWS_UP,side:ROWS_SIDE};
