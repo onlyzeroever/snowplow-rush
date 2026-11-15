@@ -73,6 +73,10 @@ def wild(d, kind, x, y, w, h, seed=1, dens=0.75, step=9):
     _l(d, 'wilds').append([kind, int(x), int(y), int(w), int(h), seed, dens, step])
 def carve(d, w, pts):
     _l(d, 'carves').append([w] + [int(v) for p in pts for v in p])
+def clear(d, x, y, w, h, t=None):
+    """a rectangular clearing in a wild area (wild cells inside it are open ground)"""
+    _l(d, 'clears').append([int(x), int(y), int(w), int(h)])
+    if t: G(d, t, x, y, w, h)
 def path(d, t, w, pts):
     _l(d, 'paths').append([t, w] + [int(v) for p in pts for v in p])
 def rng(seed): return random.Random(seed)
