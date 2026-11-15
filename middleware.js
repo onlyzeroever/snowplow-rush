@@ -1,10 +1,10 @@
-// Login for the level editor (Vercel Routing Middleware).
+// Login for the level editor and the dev build at /dev (Vercel Routing Middleware).
 // The username and password live in the Vercel project's environment variables
 // EDITOR_USER and EDITOR_PASSWORD; they are never stored in this repo.
-// If they aren't set, the editor stays locked.
+// If they aren't set, the editor and /dev stay locked.
 
 export const config = {
-  matcher: ['/editor', '/editor.html'],
+  matcher: ['/editor', '/editor.html', '/dev', '/dev.html'],
 };
 
 function sameText(a, b) {
@@ -29,7 +29,7 @@ function locked(text) {
 export default function middleware(request) {
   const user = process.env.EDITOR_USER;
   const pass = process.env.EDITOR_PASSWORD;
-  if (!user || !pass) return locked('The editor login is not set up yet.');
+  if (!user || !pass) return locked('The login is not set up yet.');
 
   const auth = request.headers.get('authorization') || '';
   if (auth.startsWith('Basic ')) {

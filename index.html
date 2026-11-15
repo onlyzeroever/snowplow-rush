@@ -587,7 +587,10 @@ function sfxStar(i){if(!playBuf('star'+(i+1)))tone(880*Math.pow(1.26,i),0.2,'tri
 function buzz(ms){try{navigator.vibrate&&navigator.vibrate(ms);}catch(e){}}
 
 // ---------------- SAVE ----------------
-const TEST_MODE=/[?&]test=1/.test(location.search),REVIEW_MODE=/[?&]review=(1|all)/.test(location.search);const SAVE_KEY=TEST_MODE?'snowplowRush.test':REVIEW_MODE?(/[?&]review=all/.test(location.search)?'snowplowRush.reviewAll':'snowplowRush.review'):'snowplowRush.proto.v2';
+const TEST_MODE=/[?&]test=1/.test(location.search),REVIEW_MODE=/[?&]review=(1|all)/.test(location.search);const DEV_MODE=!!window.SR_DEV;
+const DEV=(()=>{let d={};if(DEV_MODE)try{d=JSON.parse(localStorage.getItem('sr.dev')||'{}')||{};}catch(e){}return Object.assign({open:false,freeze:false,speed:1,all:false,hit:false},d,{open:false});})();
+function devSave(){try{localStorage.setItem('sr.dev',JSON.stringify({freeze:DEV.freeze,speed:DEV.speed,all:DEV.all,hit:DEV.hit}));}catch(e){}}
+const SAVE_KEY=DEV_MODE?'snowplowRush.dev':TEST_MODE?'snowplowRush.test':REVIEW_MODE?(/[?&]review=all/.test(location.search)?'snowplowRush.reviewAll':'snowplowRush.review'):'snowplowRush.proto.v2';
 const NL=LEVELS.length;
 const save={coins:0,tool:0,mlv:{},lv:{speed:0,size:0,value:0,bumper:0,helpers:0},stars:Array(NL).fill(0),best:Array(NL).fill(0),muted:false,last:Date.now(),ctrl:'joy',tut:false,ach:{},stats:{cells:0,gifts:0,dodges:0,gnome:0,neighbours:0},hat:'yellow',hats:{yellow:true},daily:null,frost:0,winters:0,winterCoins:0,fails:Array(NL).fill(0),boostNext:false,gems:0,pro:false,adGems:null,dailySeen:'',winterSeen:false,musicOff:false,v:6,gold:-1,tolls:{},outfit:'classic',outfits:{classic:true},skin:{},skins:{},trail:'classic',trails:{classic:true},treasures:{}};
 function loadSave(){try{let s=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');
@@ -614,7 +617,7 @@ function sanitizeSave(){const num=(v,d)=>(typeof v==='number'&&isFinite(v))?v:d,
   if(!obj(save.lv))save.lv={};for(const k of ['speed','size','value','bumper','helpers'])save.lv[k]=Math.max(0,Math.min(k in UPG?upMax(k):99,Math.floor(num(save.lv[k],0))));
   if(save.mlv!=null){if(!obj(save.mlv))save.mlv={};for(const t in save.mlv){const m=save.mlv[t];if(!obj(m)){delete save.mlv[t];continue;}for(const k of MACHINE_UPG)m[k]=Math.max(0,Math.min(upMax(k),Math.floor(num(m[k],0))));}}
   if(save.parts)for(const t in save.parts)save.parts[t]=Math.max(0,Math.min(3,Math.floor(num(save.parts[t],0))));}
-function persist(){try{save.last=Date.now();localStorage.setItem(SAVE_KEY,JSON.stringify(save));}catch(e){}}
+function persist(){if(window.__noPersist)return;try{save.last=Date.now();localStorage.setItem(SAVE_KEY,JSON.stringify(save));}catch(e){}}
 function resetSave(){Object.assign(save,{coins:0,tool:0,lv:{speed:0,size:0,value:0,bumper:0,helpers:0},stars:Array(NL).fill(0),best:Array(NL).fill(0),tut:false,ach:{},stats:{cells:0,gifts:0,dodges:0,gnome:0,neighbours:0},hat:'yellow',hats:{yellow:true},daily:null,frost:0,winters:0,winterCoins:0,fails:Array(NL).fill(0),boostNext:false,gems:0,pro:false,adGems:null,dailySeen:'',winterSeen:false,gold:-1,tolls:{},outfit:'classic',outfits:{classic:true},skin:{},skins:{},trail:'classic',trails:{classic:true},treasures:{}});persist();vcache.clear();kidCacheClear();}
 let achQueue=[];
 function award(id){if(save.ach[id])return;const a=ACH.find(x=>x.id===id);if(!a)return;save.ach[id]=true;save.coins+=a.reward;save.gems=(save.gems||0)+SHOP.trophyGems;achQueue.push({a,t:2.6});sfx('trophy');buzz(25);persist();}
@@ -628,7 +631,7 @@ function tool(){if(chal())return TOOLS[toolIdx(run.challenge)];if(drv())return T
   if(ui2===g&&g+1<TOOLS.length){const n=TOOLS[g+1];v=Object.assign({},t,{width:n.width,speed:n.speed,value:t.value*2,gold:true,name:'GOLDEN '+t.name});}
   _tc={k,v};return v;}
 function goldFor(w){return w>=2?Math.min(4,w-2):-1;}
-const levelAvail=i=>(LEVELS[i].winter||1)<=winterNo()||missionOn(i);
+const levelAvail=i=>(DEV_MODE&&DEV.all)||(LEVELS[i].winter||1)<=winterNo()||missionOn(i);
 function missionOn(i){const L=LEVELS[i];return !!(L&&L.area==='secret'&&L.tool&&save&&save.parts&&(save.parts[L.tool]||0)>=3&&save.tool<toolIdx(L.tool));}
 function baseStars(){let s=0;for(let i=0;i<BASE_LEVELS;i++)s+=save.stars[i];return s;}
 const lvIdx=id=>LEVELS.findIndex(l=>l.id===id);
@@ -638,7 +641,7 @@ function areaStars(a){let n=0;LEVELS.forEach((L,i)=>{if(L.area===a&&!L.boss&&lev
 function bossShort(i){const L=LEVELS[i];return L&&L.boss?Math.max(0,(BOSS_STARS[L.id]||0)-areaStars(L.area)):0;}
 function levelGateOK(i){const L=LEVELS[i];return !L.gate||save.tool>=toolIdx(L.gate);}
 function levelPaid(i){const L=LEVELS[i];return !L.toll||!!(save.tolls||{})[L.id];}
-function levelOpen(i){return levelReach(i)&&levelGateOK(i)&&levelPaid(i);}
+function levelOpen(i){return (DEV_MODE&&DEV.all)||(levelReach(i)&&levelGateOK(i)&&levelPaid(i));}
 function starsNeeded(){let n=0;for(let i=0;i<NL;i++)if((LEVELS[i].winter||1)<=winterNo())n+=3;return n;}
 const isKidTool=id=>id==='shovel'||id==='pusher'||id==='blower';
 const VSPEC={tractor:{hw:8,hh:12,bt:5},truck:{hw:10,hh:18,bt:6},super:{hw:12,hh:22,bt:7},snowcat:{hw:13,hh:21,bt:7},rotary:{hw:13,hh:23,bt:8},monster:{hw:12,hh:16,bt:7},jet:{hw:11,hh:20,bt:6},mech:{hw:15,hh:13,bt:6},dragon:{hw:9,hh:19,bt:4},ufo:{hw:15,hh:15,bt:0}};
@@ -2215,7 +2218,7 @@ function updatePlay(dt){
   // snowfall
   run.snowAcc+=G.def.snowfall*dt;while(run.snowAcc>=1){run.snowAcc--;const i=(Math.random()*G.depth.length)|0;if(G.type[i]!==T_BLOCK&&G.depth[i]<1)setDepth(G,i,Math.min(1,G.depth[i]+0.35));}
   // squalls (flash snow)
-  if(G.def.squall){if(run.squall){const s=run.squall;s.t+=dt;
+  if(G.def.squall||(DEV_MODE&&run.squall&&run.devSquall)){if(run.squall){const s=run.squall;s.t+=dt;
       if(s.t>=1.8&&!s.dumped){s.dumped=true;addSnowCircle(G,s.x,s.y,s.r,0.75);sfx('flump');for(let k=0;k<30;k++)particles.push({x:s.x+rnd(-s.r,s.r),y:s.y+rnd(-s.r,s.r),vx:rnd(-8,8),vy:rnd(-4,4),z:rnd(10,24),vz:-rnd(10,30),life:0.6,t:0,kind:'snow'});}
       if(s.t>2.6)run.squall=null;}
     else{run.squallT-=dt;if(run.squallT<=0){run.squallT=G.def.squall*rnd(0.8,1.2);const r=G.def.value>=6?rnd(28,38):G.def.value>=4?rnd(24,32):rnd(20,28);
@@ -2231,7 +2234,7 @@ function updatePlay(dt){
   updateHazards(dt,tid);
   const target=clamp(P.y-VIEW_H*0.55,0,Math.max(0,G.ph-VIEW_H));camY+=(target-camY)*Math.min(1,dt*6);if(shake>0)shake-=dt;
   updateFx(dt);flushLevel(G);
-  run.time-=dt;const pct=G.cleared/G.clearable*100;if(pct>=99.5)endRound(true);else if(run.time<=0){run.time=0;const st=G.def.stars.filter(q=>pct>=q).length;
+  if(!(DEV_MODE&&DEV.freeze))run.time-=dt;const pct=G.cleared/G.clearable*100;if(pct>=99.5)endRound(true);else if(run.time<=0){run.time=0;const st=G.def.stars.filter(q=>pct>=q).length;
     if(!run.contUsed&&!run.challenge&&st<3){run.contUsed=true;run.offer=true;joy=null;dpad=null;stopLoops();musicDuck(0.4);}else endRound(false);}}
 function clearCell(i,acc){if(G.type[i]===T_BLOCK)return;const d=G.depth[i];if(d>0.03){acc.got+=d;if(d>0.3)acc.cnt++;if(d>0.6)acc.fresh++;setDepth(G,i,0);}}
 function groundTypeNear(x,y,w,h){for(const [px,py] of [[x+w/2,y+h+3],[x+w/2,y-3],[x-3,y+h/2],[x+w+3,y+h/2]]){const cx=px>>1,cy=py>>1;if(cx>=0&&cy>=0&&cx<G.cols&&cy<G.rows){const t=G.type[cy*G.cols+cx];if(t!==T_BLOCK)return t;}}return T_ASPH;}
@@ -2457,7 +2460,24 @@ function draw(){const dtD=Math.min(0.05,Math.max(0,tNow-(draw.t==null?tNow:draw.
     else if(q.kind==='skin'){panel(x,y,160,24,'#3a1e6b','#c4a0f5');b.drawImage(SPR.trophy,x+6,y+8);text(b,'NEW SKIN UNLOCKED!',x+20,y+5,'#c4a0f5');text(b,q.name,x+20,y+14,'#ffffff',{outline:null});}
     else if(q.kind==='treasure'){panel(x,y,160,24,'#5a3a1e','#ffd23f');b.drawImage(SPR.coin,x+6,y+8);text(b,'TREASURE: '+q.name,x+20,y+5,'#ffd23f');text(b,'+2% COINS FOREVER',x+20,y+14,'#ffffff',{outline:null});}
     else{panel(x,y,160,24,'#13306b','#ffd23f');b.drawImage(SPR.trophy,x+6,y+8);text(b,'TROPHY: '+a.name,x+20,y+5,'#ffd23f');text(b,'+'+fmt(a.reward)+' COINS  +'+SHOP.trophyGems,x+20,y+14,'#ffffff',{outline:null});b.drawImage(SPR.gemS,x+20+textW('+'+fmt(a.reward)+' COINS  +'+SHOP.trophyGems)+2,y+14);}}
-  if(toast){const y=state==='play'?VIEW_Y+VIEW_H-20:NAV_Y-18;const w=textW(toast.s)+12;panel(Math.floor(W/2-w/2),y,w,13,'#13306b','#ffd23f');text(b,toast.s,W/2,y+4,toast.col,{align:'center'});}}
+  if(toast){const y=state==='play'?VIEW_Y+VIEW_H-20:NAV_Y-18;const w=textW(toast.s)+12;panel(Math.floor(W/2-w/2),y,w,13,'#13306b','#ffd23f');text(b,toast.s,W/2,y+4,toast.col,{align:'center'});}
+  if(DEV_MODE)drawDev();}
+function devWin(k){if(state!=='play'||!run||run.ended){showToast('START A JOB FIRST','#ff9aa8');return;}const L=G.def,pct=k>0?(k>=3?Math.min(99,L.stars[2]+2):L.stars[k-1]+2):0;G.cleared=Math.ceil(G.clearable*pct/100);run.contUsed=true;DEV.open=false;endRound(false);}
+function devPart(){const ri=nextRideIdx();if(ri<0){showToast('OWN THE ROTARY FIRST','#ff9aa8');return;}const id=TOOLS[ri].id;save.parts=save.parts||{};const n=Math.min(3,(save.parts[id]||0)+1);save.parts[id]=n;if(n>=3){save.rideSeen=save.rideSeen||{};save.rideSeen[id]=true;}persist();showToast(TOOLS[ri].name+' PART '+n+'/3','#c4a0f5');}
+function devLooks(){for(const t of TOOLS)for(let i=1;i<=4;i++)save.skins[t.id+':'+i]=true;for(const o of OUTFITS)save.outfits[o.id]=true;for(const h of HATS)save.hats[h.id]=true;if(typeof TRAILS!=='undefined')for(const t of TRAILS)save.trails[t.id]=true;persist();vcache.clear();kidCacheClear();showToast('EVERY LOOK UNLOCKED','#7fe08a');}
+function drawDev(){const play=state==='play'&&run&&!run.ended;
+  if(!DEV.open){const lab='DEV'+(DEV.freeze?' II':'')+(DEV.speed>1?' X'+DEV.speed:''),w=textW(lab)+8,x=Math.round(W/2-w/2);R(b,x,23,w,10,K);R(b,x+1,24,w-2,8,'#d8364b');text(b,lab,W/2,25,'#ffffff',{align:'center',outline:null});btn('devtag',x-4,21,w+8,14,()=>{DEV.open=true;sfx('click');});return;}
+  ui=[];scrollAreas=[];b.fillStyle='rgba(8,14,40,0.82)';b.fillRect(0,0,W,H);panel(4,18,W-8,288,'#1b1f3b','#d8364b');text(b,'DEV MODE',W/2,24,'#ff9aa8',{align:'center',scale:2});
+  text(b,'OWN SAVE. TESTERS NEVER SEE THIS.',W/2,40,'#9fc0e8',{align:'center',outline:null});
+  const cx=[10,65,120];let y=50;const row=(lbl,items)=>{text(b,lbl,10,y,'#ffd23f',{outline:null});y+=8;items.forEach((it,k)=>{if(it)button('dev'+lbl+k,cx[k],y,50,16,it[1],it[0],it[2]);});y+=22;};
+  row('TIME',[[DEV.freeze?'CLOCK: OFF':'CLOCK: ON',DEV.freeze?'red':'green',()=>{DEV.freeze=!DEV.freeze;devSave();}],['SPEED X'+DEV.speed,DEV.speed>1?'orange':'blue',()=>{DEV.speed=DEV.speed>=4?1:DEV.speed*2;devSave();}],[DEV.hit?'HITBOX ON':'HITBOX OFF',DEV.hit?'orange':'grey',()=>{DEV.hit=!DEV.hit;devSave();}]]);
+  row('FINISH',[['1 STAR',play?'gold':'grey',()=>devWin(1)],['2 STARS',play?'gold':'grey',()=>devWin(2)],['3 STARS',play?'gold':'grey',()=>devWin(3)]]);
+  row('EVENTS',[['FAIL',play?'red':'grey',()=>devWin(0)],['SQUALL',play?'blue':'grey',()=>{if(!play)return;run.devSquall=true;run.squall={x:clamp(P.x,24,156),y:clamp(P.y-40,30,G.ph-30),r:28,t:0,dumped:false};sfx('squall');DEV.open=false;}],['RIDE PART','purple',devPart]]);
+  row('MONEY',[['+1M COINS','green',()=>{save.coins+=1e6;persist();}],['+1B COINS','green',()=>{save.coins+=1e9;persist();}],['+100 GEMS','purple',()=>{save.gems=(save.gems||0)+100;persist();}]]);
+  row('UNLOCK',[[DEV.all?'ALL JOBS: ON':'ALL JOBS',DEV.all?'orange':'grey',()=>{DEV.all=!DEV.all;devSave();}],['MACHINES','blue',()=>{save.tool=TOOLS.length-1;_tc.k='';vcache.clear();persist();showToast('EVERY MACHINE IS YOURS','#7fe08a');}],['ALL LOOKS','blue',devLooks]]);
+  row('WORLD',[['NO MONEY','grey',()=>{save.coins=0;save.gems=0;persist();}],['NEW WINTER','orange',()=>{DEV.open=false;if(play)endRound(false);startNewWinter();}],['AWAY 2H','blue',()=>{save.last=Date.now()-7200e3;if(!(save.lv.helpers>0))save.lv.helpers=1;persist();window.__noPersist=true;location.reload();}]]);
+  y+=4;button('devreset',10,y,78,18,'red','RESET SAVE',()=>{window.__noPersist=true;try{localStorage.removeItem(SAVE_KEY);}catch(e){}location.reload();});button('devclose',92,y,78,18,'blue','CLOSE',()=>{DEV.open=false;sfx('click');});
+  text(b,'COINS '+fmt(save.coins)+'  GEMS '+(save.gems||0)+'  WINTER '+winterNo(),W/2,y+24,'#9fc0e8',{align:'center',outline:null});}
 function drawFlakes(y0,y1){for(const f of flakes){if(f.y<y0||f.y>y1)continue;R(b,Math.round(f.x),Math.round(f.y),f.d,f.d,'#ffffff');}}
 function drawNav(){R(b,0,NAV_Y-2,W,H-NAV_Y+2,'#0b1838');R(b,0,NAV_Y-2,W,1,'#4f8fdc');
   button('nav-map',3,NAV_Y+2,56,24,'blue','JOBS',()=>{if(state!=='map')goMap();},{active:state==='map'});
@@ -3733,7 +3753,8 @@ function drawPlay(){
   for(const nb of G.neighbours){if(nb.y<top||nb.y>bot)continue;ents.push({base:nb.y+1,draw:()=>{const nx=Math.round(nb.x),ny=Math.round(nb.y);b.drawImage(SPR.granny,nx-5,ny-14+(nb.state==='walk'?Math.floor(nb.t*6)%2:0));
     if(nb.state==='wait'&&Math.floor(tNow*1.5)%2===0){R(b,nx-8,ny-26,17,9,K);R(b,nx-7,ny-25,15,7,'#ffffff');R(b,nx,ny-17,2,2,K);text(b,'...',nx,ny-24,'#13306b',{align:'center',outline:null});}
     if(nb.state==='done'&&Math.floor(tNow*2)%2===0)text(b,'<3',nx,ny-22,'#ff4fa3',{align:'center'});}});}
-  const fp=footprint(tid,P.x,P.y,P.f),pl=Math.min(4,Math.round(P.load*4));
+  if(DEV_MODE&&DEV.hit)ents.push({base:1e9,draw:()=>{b.save();b.globalAlpha=0.65;b.lineWidth=1;for(const o of G.obstacles)if(o.y+o.h>top&&o.y<bot){b.strokeStyle='#ff2040';b.strokeRect(o.x+0.5,o.y+0.5,o.w-1,o.h-1);}for(const h of G.hazards)if(h.y+h.h>top&&h.y<bot){b.strokeStyle='#ffd23f';b.strokeRect(Math.round(h.x)+0.5,Math.round(h.y)+0.5,Math.max(1,h.w-1),Math.max(1,h.h-1));}const f2=footprint(tid,P.x,P.y,P.f),br2=bladeRect(tid,P.x,P.y,P.f,bwPx);b.strokeStyle='#33ff66';b.strokeRect(Math.round(f2.x)+0.5,Math.round(f2.y)+0.5,f2.w-1,f2.h-1);b.strokeStyle='#33ccff';b.strokeRect(Math.round(br2.x)+0.5,Math.round(br2.y)+0.5,br2.w-1,br2.h-1);b.restore();}});
+    const fp=footprint(tid,P.x,P.y,P.f),pl=Math.min(4,Math.round(P.load*4));
   ents.push({base:fp.y+fp.h,draw:()=>drawRig(b,tid,P.x,P.y,P.spin>0?(P.f+Math.floor(P.spin*14))%4:P.f,bwPx,pl,P.bob,tid==='mech'?(P.step|0):P.fr,(P.stun>0||P.inv>0)&&Math.floor(tNow*20)%2===0)});
   ents.sort((a,c)=>a.base-c.base);for(const e of ents)e.draw();
   for(const o of G.over)if(o.sy+o.spr.height>top&&o.sy<bot){const un=P&&P.x>o.sx-6&&P.x<o.sx+o.spr.width+6&&P.y>o.sy-4&&P.y<o.sy+o.spr.height+14;b.save();b.globalAlpha=0.18;b.drawImage(shadowOf(o.spr),o.sx+4,o.sy+10);b.globalAlpha=un?0.4:1;b.drawImage(bright(o.spr),o.sx,o.sy);b.restore();}
@@ -3899,7 +3920,7 @@ function drawSparkle(x,y,r,rot,a){ctx.save();ctx.translate(x,y);ctx.rotate(rot);
   const g=ctx.createRadialGradient(0,0,0,0,0,r*0.9);g.addColorStop(0,'rgba(255,255,255,0.9)');g.addColorStop(1,'rgba(255,255,255,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(0,0,r*0.9,0,Math.PI*2);ctx.fill();
   ctx.fillStyle='#ffffff';for(let k=0;k<2;k++){ctx.beginPath();ctx.moveTo(0,-r);ctx.lineTo(r*0.14,0);ctx.lineTo(0,r);ctx.lineTo(-r*0.14,0);ctx.closePath();ctx.fill();ctx.rotate(Math.PI/2);}
   ctx.restore();}
-function drawLogo(){
+function drawLogo(){if(DEV_MODE&&DEV.open)return;
   if(state!=='title'){logoT0=null;return;}
   if(!logoReady||settingsOpen)return;
   if(logoT0==null)logoT0=tNow;
@@ -3931,7 +3952,7 @@ const LOGO_SRC='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAeAAAACxCAYAAAAccW
 if(LOGO_SRC.startsWith('data:')){logoImg=new Image();logoImg.onload=()=>{logoReady=true;};logoImg.src=LOGO_SRC;}
 let last=performance.now();
 function frame(now){const dt=Math.min(0.05,(now-last)/1000);last=now;
-  if(!(TEST_MODE&&window.__HOLD))try{update(dt);draw();}catch(err){console.error(err);}
+  if(!(TEST_MODE&&window.__HOLD))try{update(dt);if(DEV_MODE&&DEV.speed>1&&state==='play')for(let k=1;k<DEV.speed;k++)update(dt);draw();}catch(err){console.error(err);}
   ctx.imageSmoothingEnabled=false;ctx.drawImage(buf,0,0,W*KS,H*KS);
   drawLogo();
   requestAnimationFrame(frame);}

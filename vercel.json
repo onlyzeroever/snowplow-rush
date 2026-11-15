@@ -35,12 +35,34 @@
           "value": "public, max-age=604800"
         }
       ]
+    },
+    {
+      "source": "/dev.html",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        }
+      ]
+    },
+    {
+      "source": "/dev",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        }
+      ]
     }
   ],
   "rewrites": [
     {
       "source": "/editor",
       "destination": "/editor.html"
+    },
+    {
+      "source": "/dev",
+      "destination": "/dev.html"
     }
   ]
 }
