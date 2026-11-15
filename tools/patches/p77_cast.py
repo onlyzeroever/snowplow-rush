@@ -60,4 +60,17 @@ swapfn('rockSprite',"function rockSprite(w,h){const c=mk(w,h),g=c.getContext('2d
 rep("const mv=Math.hypot(hz.vx,hz.vy)>6?Math.floor(hz.anim*8)%2:0,fr=hz.peng?PENG_FR[mv]:hz.gull?GULL_FR[Math.floor(hz.anim*10)%2]:hz.horse?HORSE_FR[hz.col+mv]:SHEEP_FR[mv];",
     "const mv=Math.hypot(hz.vx,hz.vy)>6?Math.floor(hz.anim*8)%2:0,fr=hz.peng?PENG_FR[mv]:hz.gull?GULL_FR[Math.floor(hz.anim*10)%2]:hz.horse?HORSE_FR[hz.col+mv]:SHEEP_FR[mv],ox=(hz.horse||hz.peng||hz.gull)?1:3,oy=hz.horse?6:(hz.peng||hz.gull)?3:5;")
 rep("b.drawImage(fr,-1,hy-(hz.horse?6:3));b.restore();}else b.drawImage(fr,hx-1,hy-(hz.horse?6:3));","b.drawImage(fr,-ox,hy-oy);b.restore();}else b.drawImage(fr,hx-ox,hy-oy);")
+
+# People: beanies with a highlight, rosy cheeks, scarves and mittens, a zip on the coat; Granny gets a shawl; the
+# snowball kid keeps the same pose with the new look; penguins get a proper white front, flippers and feet.
+P=J['people']
+old_thr=P['old_thrower_rows']
+rep("const THROWER_ROWS="+old_thr+";","const THROWER_ROWS="+P['new_thrower_rows']+";")
+rep("SPR.thrower=spr("+old_thr+");","SPR.thrower=spr(THROWER_ROWS);")
+a=s.index("SPR.throwerWind=spr(");e=s.index(");",a)
+s=s[:a]+"SPR.throwerWind=spr("+P['new_wind']+s[e:]
+rep("SPR.peds=[spr(THROWER_ROWS,{Q:'#d8364b',q:'#8e1f30',B:'#6b3b55',J:'#3a3f5c'}),spr(THROWER_ROWS,{Q:'#3f86d6',q:'#2a5fa8',B:'#c98d4a',J:'#55607a'}),spr(THROWER_ROWS,{Q:'#e0e6f0',q:'#9aa1b5',B:'#33b24a',J:'#2a2a36'})];",
+    "SPR.peds=[spr(THROWER_ROWS,{Q:'#d8364b',q:'#8e1f30',B:'#6b3b55',J:'#3a3f5c',D:'#ffc727'}),spr(THROWER_ROWS,{Q:'#3f86d6',q:'#2a5fa8',B:'#c98d4a',J:'#55607a',D:'#e03a4e'}),spr(THROWER_ROWS,{Q:'#e0e6f0',q:'#9aa1b5',B:'#33b24a',J:'#2a2a36',D:'#3f86d6'})];")
+rep("SPR.granny=spr("+P['old_granny']+");","SPR.granny=spr("+P['new_granny']+",{N:'#ff9ab8'});")
+swapfn('penguinSprite',P['peng'])
 open(f,'w',encoding='utf-8').write(s)
