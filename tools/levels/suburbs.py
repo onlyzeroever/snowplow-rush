@@ -30,9 +30,9 @@ G(d, 'conc', 20, 518, 12, 30); G(d, 'conc', 148, 518, 12, 30)   # house paths
 P(d, 'shop', 62, 0, 0)                             # the corner shop
 P(d, 'smallhouse', 4, 0, 1); P(d, 'smallhouse', 132, 0, 3)
 P(d, 'crate', 50, 44); P(d, 'crate', 50, 30); P(d, 'trash', 120, 50); P(d, 'trash', 128, 50); P(d, 'kiosk', 120, 64, 2)
-P(d, 'phonebox', 150, 70); P(d, 'postbox', 34, 76); P(d, 'bench', 56, 92); P(d, 'lamp', 6, 76); P(d, 'lamp', 168, 76)
+P(d, 'phonebox', 150, 70); P(d, 'postbox', 34, 76); P(d, 'lamp', 6, 76); P(d, 'lamp', 168, 76)
 # row 1 bays (y108..142): parked cars and two that pull out
-P(d, 'car', 28, 110, 1); P(d, 'car', 106, 110, 4)
+P(d, 'car', 28, 110, 1)
 d['pull'] += [[53, 110, 2], [131, 110, 0]]
 # row 2 bays (y236..270)
 P(d, 'car', 54, 238, 3); P(d, 'car', 80, 238, 0); P(d, 'car', 132, 238, 1)
@@ -40,7 +40,7 @@ P(d, 'bollard', 12, 150); P(d, 'bollard', 12, 250); P(d, 'bollard', 163, 150); P
 P(d, 'planter', 26, 340); P(d, 'planter', 140, 340); P(d, 'trash', 128, 300); P(d, 'trash', 136, 300); P(d, 'trash', 144, 300); P(d, 'trash', 60, 354); P(d, 'cone', 112, 346); P(d, 'cone', 120, 352)
 # the street and the houses at the bottom
 P(d, 'smallhouse', 4, 470, 2); P(d, 'smallhouse', 132, 470, 4)
-P(d, 'hedge', 0, 548, 22); P(d, 'hedge', 44, 548, 30); P(d, 'hedge', 106, 548, 26); P(d, 'hedge', 160, 548, 20)
+P(d, 'hedge', 0, 548, 16); P(d, 'hedge', 50, 548, 22); P(d, 'hedge', 108, 548, 22); P(d, 'hedge', 164, 548, 16)
 P(d, 'mailbox', 52, 532); P(d, 'mailbox', 122, 532); P(d, 'snowman', 58, 470); P(d, 'gnome', 116, 476); P(d, 'gnome', 64, 504)
 pines(d, [(4, 566, 24), (152, 566, 26), (110, 572, 18)])
 H(d, 'cart', 70, 200); H(d, 'thrower', 120, 500)
@@ -51,29 +51,28 @@ J['cornershop'] = d
 
 # ---------------------------------------------------------------- 8. PLAYGROUND
 # A railed playground inside a park loop. Four corners of kit to plow round, kids that throw and kids that run.
-d = job('playground', start=[90, 24])
+d = job('playground', start=[90, 36])
 G(d, 'grass', 0, 0, 180, 640)
 G(d, 'conc', 78, 0, 24, 560)                       # path through the middle
-G(d, 'conc', 6, 104, 168, 16); G(d, 'conc', 6, 104, 16, 470); G(d, 'conc', 158, 104, 16, 470); G(d, 'conc', 6, 560, 168, 14)  # park loop
-G(d, 'conc', 30, 302, 120, 36)                     # cross path inside
+G(d, 'conc', 4, 104, 172, 16); G(d, 'conc', 4, 104, 26, 470); G(d, 'conc', 150, 104, 26, 470); G(d, 'conc', 4, 560, 172, 14)  # park loop
+G(d, 'conc', 41, 302, 98, 36)                     # cross path inside
 for k in range(6): G(d, 'yel' if k % 2 else 'wht', 82, 360 + k * 14, 16, 10)   # hopscotch
 d['circles'] += [['ice', 90, 606, 26]]             # frozen pond
-P(d, 'hedge', 0, 70, 70); P(d, 'hedge', 110, 70, 70); P(d, 'planter', 62, 40); P(d, 'planter', 104, 40)
-P(d, 'oak', 10, 10); P(d, 'oak', 148, 14); P(d, 'bench', 30, 84); P(d, 'bench', 138, 84)
+P(d, 'hedge', 0, 70, 60); P(d, 'hedge', 120, 70, 60); P(d, 'planter', 48, 40); P(d, 'planter', 118, 40)
+P(d, 'oak', 10, 10); P(d, 'oak', 148, 14); P(d, 'bench', 20, 40); P(d, 'bench', 144, 46)
 # railings with gates top, bottom, left and right
-P(d, 'rail', 28, 128, 50); P(d, 'rail', 102, 128, 50)
-P(d, 'rail', 28, 532, 50); P(d, 'rail', 102, 532, 50)
-P(d, 'railv', 26, 128, 172); P(d, 'railv', 26, 342, 197); P(d, 'railv', 149, 128, 172); P(d, 'railv', 149, 342, 197)
+P(d, 'rail', 38, 128, 27); P(d, 'rail', 115, 128, 27)
+P(d, 'rail', 38, 532, 27); P(d, 'rail', 115, 532, 27)
+P(d, 'railv', 36, 128, 164); P(d, 'railv', 36, 350, 189); P(d, 'railv', 139, 128, 164); P(d, 'railv', 139, 350, 189)
 # top-left: swings and a climbing frame; top-right: slide, roundabout, seesaw
-P(d, 'swing', 36, 148); P(d, 'swing', 36, 186); P(d, 'climb', 44, 238)
-P(d, 'slide', 132, 146); P(d, 'roundabout', 108, 196); P(d, 'seesaw', 110, 262)
+P(d, 'swing', 42, 148); P(d, 'swing', 42, 186); P(d, 'climb', 43, 238)
+P(d, 'slide', 124, 146); P(d, 'roundabout', 116, 196); P(d, 'seesaw', 108, 262)
 # bottom-left: sandpit and benches; bottom-right: climbing frame, swings, slide
-P(d, 'sandpit', 38, 360); P(d, 'bench', 40, 420); P(d, 'bench', 58, 470); P(d, 'trash', 34, 500)
-P(d, 'climb', 112, 364); P(d, 'swing', 110, 430); P(d, 'slide', 134, 476)
-P(d, 'snowman', 66, 160); P(d, 'snowman', 120, 280)
+P(d, 'sandpit', 42, 360); P(d, 'bench', 44, 420); P(d, 'bench', 46, 470); P(d, 'trash', 44, 500)
+P(d, 'climb', 114, 364); P(d, 'swing', 112, 430); P(d, 'slide', 124, 476)
+P(d, 'snowman', 46, 286); P(d, 'snowman', 124, 300)
 # outside the rails
-P(d, 'lamp', 8, 220); P(d, 'lamp', 167, 220); P(d, 'lamp', 8, 420); P(d, 'lamp', 167, 420)
-P(d, 'bench', 160, 330); P(d, 'trash', 10, 330)
+P(d, 'lamp', 60, 86); P(d, 'lamp', 114, 86)
 P(d, 'oak', 2, 590); P(d, 'oak', 156, 588); P(d, 'bench', 50, 600); P(d, 'bench', 118, 600); P(d, 'reed', 64, 590); P(d, 'reed', 112, 620)
 pines(d, [(34, 584, 20), (130, 616, 22)])
 H(d, 'thrower', 64, 290); H(d, 'thrower', 124, 512); H(d, 'pedx', 40, 316); H(d, 'pedx', 120, 450, 1); H(d, 'ped', 12, 250)
@@ -81,10 +80,9 @@ J['playground'] = d
 
 # ---------------------------------------------------------------- 9. ALLOTMENTS
 # Rows of raised beds with gaps you can just fit down, sheds and greenhouses at the ends, a dog on the main path.
-d = job('allotments', start=[90, 20])
+d = job('allotments', start=[90, 40])
 G(d, 'grass', 0, 0, 180, 700)
 G(d, 'conc', 74, 0, 32, 700)                        # main path
-P(d, 'wallv', 60, 0, 34); P(d, 'wallv', 106, 0, 34)  # gate posts
 blocks = ['beds2', 'shed', 'beds4', 'open', 'green', 'beds2']
 for side, x0 in (('L', 6), ('R', 110)):
     for k, y0 in enumerate(range(52, 640, 100)):
@@ -111,18 +109,18 @@ d = job('dogpark', start=[90, 690])
 G(d, 'grass', 0, 0, 180, 720)
 G(d, 'conc', 76, 600, 28, 120); G(d, 'conc', 6, 600, 168, 16)     # entrance path and a path along the fence
 d['circles'] += [['ice', 50, 230, 16], ['ice', 126, 160, 14], ['ice', 140, 300, 12]]
-P(d, 'rail', 0, 588, 70); P(d, 'rail', 110, 588, 70)                # fence with the gate
-P(d, 'bench', 20, 640); P(d, 'bench', 150, 640); P(d, 'trash', 40, 660); P(d, 'trash', 136, 660); P(d, 'lamp', 66, 650); P(d, 'lamp', 110, 650)
+P(d, 'rail', 0, 588, 60); P(d, 'rail', 120, 588, 60)                # fence with the gate
+P(d, 'bench', 20, 640); P(d, 'bench', 150, 640); P(d, 'trash', 30, 664); P(d, 'trash', 146, 664); P(d, 'lamp', 54, 650); P(d, 'lamp', 122, 650)
 pines(d, [(2, 676, 24), (154, 680, 22)])
 # agility course (y 400..580): hurdles in a zigzag and a slalom
-for k, (x, y) in enumerate([(30, 560), (80, 530), (130, 500), (80, 470), (30, 440)]): P(d, 'hurdle', x, y)
-for k in range(6): P(d, 'pole', 40 + k * 18, 404)
-P(d, 'kennel', 150, 430); P(d, 'kennel', 150, 456); P(d, 'kennel', 150, 482)
+for k, (x, y) in enumerate([(70, 450), (110, 490), (70, 530)]): P(d, 'hurdle', x, y)
+for k in range(4): P(d, 'pole', 60 + k * 18, 400)
+P(d, 'kennel', 160, 430); P(d, 'kennel', 160, 456); P(d, 'kennel', 160, 482)
 # the field (y 110..380)
 P(d, 'oak', 16, 120); P(d, 'oak', 140, 220); P(d, 'oak', 30, 320); P(d, 'oak', 84, 150); P(d, 'oak', 150, 340); P(d, 'bench', 84, 260); P(d, 'trash', 100, 262)
 P(d, 'tub', 100, 330); P(d, 'hedge', 54, 196, 30); P(d, 'hedge', 110, 120, 24)
-for x, y in [(30, 498), (60, 508), (100, 556)]: P(d, 'tires', x, y)
-P(d, 'hedge', 0, 392, 30); P(d, 'hedge', 150, 392, 30)
+for x, y in [(126, 452), (122, 532)]: P(d, 'tires', x, y)
+P(d, 'hedge', 0, 392, 20); P(d, 'hedge', 160, 392, 20)
 # top: the pet shop and the owners' benches
 P(d, 'shop', 62, 0, 9); P(d, 'bench', 20, 70); P(d, 'bench', 146, 70); P(d, 'lamp', 4, 40); P(d, 'lamp', 170, 40)
 G(d, 'conc', 0, 66, 180, 30)
@@ -133,7 +131,7 @@ J['dogpark'] = d
 
 # ---------------------------------------------------------------- 11. TENNIS CLUB  (new: ball machines)
 # Three courts, nets you plow round, lines that appear as you clear. Ball machines fire across the courts.
-d = job('tennis', start=[90, 76])
+d = job('tennis', start=[90, 86])
 G(d, 'grass', 0, 0, 180, 760)
 G(d, 'conc', 0, 58, 180, 44)
 P(d, 'big', 35, 0, 8); P(d, 'planter', 10, 64); P(d, 'planter', 156, 64); P(d, 'bench', 28, 88); P(d, 'bench', 140, 88); P(d, 'trash', 60, 90)
@@ -144,8 +142,8 @@ for k in range(3):
     G(d, 'wht', 24, y0 + 6, 132, 2); G(d, 'wht', 24, y0 + 192, 132, 2); G(d, 'wht', 24, y0 + 6, 2, 188); G(d, 'wht', 154, y0 + 6, 2, 188)
     G(d, 'wht', 40, y0 + 6, 2, 188); G(d, 'wht', 138, y0 + 6, 2, 188)
     G(d, 'wht', 40, y0 + 52, 100, 2); G(d, 'wht', 40, y0 + 146, 100, 2); G(d, 'wht', 89, y0 + 52, 2, 96)
-    P(d, 'net', 34, y0 + 96, 112)
-    if k < 2: P(d, 'rail', 14, y0 + 203, 56); P(d, 'rail', 110, y0 + 203, 56)
+    P(d, 'net', 50, y0 + 96, 80)
+    if k < 2: P(d, 'rail', 14, y0 + 203, 46); P(d, 'rail', 120, y0 + 203, 46)
     P(d, 'bench', 2, y0 + 92); P(d, 'bench', 166, y0 + 92)
 H(d, 'balls', 165, 110 + 40, -1, 3.0)
 H(d, 'balls', 3, 322 + 150, 1, 2.8)
@@ -154,7 +152,7 @@ J['tennis'] = d
 
 # ---------------------------------------------------------------- 12. HIGH STREET
 # Shops both sides, a bus running down the street, shoppers on the pavements and at the crossings.
-d = job('highst', start=[90, 24])
+d = job('highst', start=[90, 36])
 G(d, 'conc', 0, 0, 180, 820)
 G(d, 'asph', 56, 0, 68, 820)
 for y in range(8, 820, 24): G(d, 'wht', 89, y, 2, 12)
@@ -183,21 +181,21 @@ J['highst'] = d
 d = job('sledhill', start=[90, 672])
 G(d, 'grass', 0, 0, 180, 700)
 G(d, 'conc', 60, 630, 60, 70)
-P(d, 'stall', 20, 640, 0); P(d, 'kiosk', 136, 646, 1); P(d, 'bench', 66, 628); P(d, 'bench', 104, 628); P(d, 'lamp', 52, 640); P(d, 'lamp', 124, 640)
+P(d, 'stall', 4, 640, 0); P(d, 'kiosk', 156, 646, 1); P(d, 'bench', 40, 610); P(d, 'bench', 124, 610); P(d, 'lamp', 40, 650); P(d, 'lamp', 134, 650)
 pines(d, [(2, 600, 26), (156, 596, 24), (0, 420, 22), (158, 300, 24), (4, 180, 26), (156, 120, 22), (60, 60, 20), (110, 40, 24)])
 for x, y in [(40, 540), (130, 500), (70, 380), (120, 260), (36, 200), (90, 120)]: P(d, 'snowman', x, y)
 for x, y in [(20, 470), (150, 400), (84, 300), (24, 300), (140, 180)]: P(d, 'hay', x, y)
 P(d, 'oak', 80, 8); P(d, 'bench', 40, 30); P(d, 'bench', 126, 30)
 pines(d, [(50, 450, 18), (62, 458, 22), (118, 340, 20), (130, 330, 16), (40, 250, 20), (100, 200, 18), (112, 196, 22)])
 for x, y, h in [(30, 330, 90), (146, 470, 80), (96, 420, 60), (70, 140, 70)]: G(d, 'ice', x, y, 10, h)
-P(d, 'fence', 0, 560, 50); P(d, 'fence', 168, 540, 60)
+P(d, 'fence', 0, 540, 50); P(d, 'fence', 168, 530, 60)
 H(d, 'cannon', 2, 236, 0.35, 6.5, 70); H(d, 'cannon', 160, 420, math.pi - 0.35, 6.5, 70)
 H(d, 'sled', 0, 0, [3, 5]); H(d, 'thrower', 140, 560); H(d, 'thrower', 40, 120)
 J['sledhill'] = d
 
 # ---------------------------------------------------------------- 14. FOUNTAIN SQUARE
 # A big paved square with rings round a frozen fountain, café tables, a market, and people everywhere.
-d = job('fountainsq', start=[90, 24])
+d = job('fountainsq', start=[90, 40])
 G(d, 'conc', 0, 0, 180, 860)
 G(d, 'asph', 0, 60, 180, 36)
 for k in range(8): G(d, 'wht', 58 + k * 8, 66, 5, 24)
@@ -217,47 +215,48 @@ for k, (x, y) in enumerate([(8, 150), (40, 150), (114, 150), (148, 150), (24, 19
 P(d, 'kiosk', 150, 214, 3); P(d, 'phonebox', 4, 250); P(d, 'postbox', 168, 256)
 for y in (330, 530): P(d, 'bench', 6, y); P(d, 'bench', 162, y)
 # market rows
-for k in range(3): P(d, 'stall', 14 + k * 54, 610, k); P(d, 'stall', 14 + k * 54, 680, k + 2)
-P(d, 'oak', 6, 744); P(d, 'oak', 152, 744); P(d, 'bench', 50, 760); P(d, 'bench', 118, 760); P(d, 'kiosk', 82, 742, 4); P(d, 'trash', 36, 770); P(d, 'trash', 140, 770)
+for k in range(3): P(d, 'stall', 4 + k * 71, 610, k); P(d, 'stall', 4 + k * 71, 680, k + 2)
+P(d, 'oak', 6, 744); P(d, 'oak', 152, 744); P(d, 'bench', 40, 760); P(d, 'bench', 124, 760)
 H(d, 'ped', 30, 300); H(d, 'ped', 150, 520, 1); H(d, 'pedx', 30, 580); H(d, 'pedx', 130, 760, 1); H(d, 'pedx', 60, 236, 1)
 H(d, 'thrower', 160, 380); H(d, 'thrower', 20, 470); H(d, 'dog', 100, 300)
 J['fountainsq'] = d
 
 # ---------------------------------------------------------------- 15. BLOCK PARTY  (boss)
-# The whole street is out. Party tables to weave through, a stage with a snow machine, dodgeball machines,
-# a BBQ, cars leaving and a granny who wants a path to the fun.
-d = job('blockparty', start=[90, 24])
+# The whole street is out, and Mrs. Grimshaw is NOT happy about it: she hunts you all job. Party tables to slalom,
+# a stage with a snow machine, dodgeball machines, food stalls, cars leaving and a granny who wants a path to the fun.
+# A 48px+ lane runs the full street so every machine (up to the Super Plow and Wild Rides) gets through.
+d = job('blockparty', start=[90, 36])
 G(d, 'grass', 0, 0, 180, 1000)
 G(d, 'asph', 50, 0, 80, 1000); G(d, 'conc', 38, 0, 12, 1000); G(d, 'conc', 130, 0, 12, 1000)
 for y in range(10, 1000, 30): G(d, 'wht', 89, y, 2, 14)
 for y in range(140, 1000, 160): d['decor'].append(['bunting', 40, y, 100])
-# 1: closed road
-for x in range(54, 128, 12):
-    if not 80 < x < 100: P(d, 'cone', x, 70)
-P(d, 'smallhouse', 0, 0, 0); P(d, 'smallhouse', 138, 0, 2); P(d, 'barrel', 52, 64); P(d, 'barrel', 122, 64)
-# 2: tables
-for r, y in enumerate(range(170, 400, 40)):
-    for x in ((56, 100) if r % 2 == 0 else (78,)): P(d, 'table', x, y, (r + x) % 4)
+def barrier(y):
+    for x in (52, 62, 118, 128): P(d, 'cone', x, y)
+# 1: the closed road
+barrier(70); P(d, 'smallhouse', 0, 0, 0); P(d, 'smallhouse', 138, 0, 2); P(d, 'barrel', 40, 64); P(d, 'barrel', 134, 64)
+# 2: party tables, one per row, alternating sides: a slalom
+for r, y in enumerate(range(170, 400, 44)): P(d, 'table', 52 if r % 2 == 0 else 102, y, r % 4)
 P(d, 'smallhouse', 0, 170, 3); P(d, 'smallhouse', 138, 230, 4); P(d, 'smallhouse', 0, 330, 1)
-H(d, 'thrower', 150, 330); H(d, 'pedx', 60, 220); H(d, 'pedx', 110, 300, 1)
-# 3: the stage, with a snow machine
-P(d, 'stage', 50, 440); P(d, 'speaker', 38, 440); P(d, 'speaker', 132, 440)
-H(d, 'cannon', 150, 492, math.pi * 0.72, 7.0, 64)
+H(d, 'thrower', 150, 330); H(d, 'pedx', 60, 236); H(d, 'pedx', 110, 320, 1)
+# 3: the stage on the left, its snow machine on the right
+P(d, 'stage', 4, 432); P(d, 'speaker', 86, 436)
+H(d, 'cannon', 150, 482, math.pi * 0.72, 7.0, 64)
 H(d, 'pedx', 70, 500); H(d, 'pedx', 110, 520, 1)
-P(d, 'smallhouse', 0, 500, 2); pines(d, [(150, 520, 24)])
-# 4: games: dodgeball machines and the BBQ
-H(d, 'balls', 132, 640, -1, 2.6); H(d, 'balls', 38, 720, 1, 2.6)
-P(d, 'stall', 54, 560, 0); P(d, 'stall', 96, 560, 3); P(d, 'bbq', 60, 600); P(d, 'bbq', 108, 600); P(d, 'table', 54, 790, 1); P(d, 'table', 100, 760, 2); P(d, 'hay', 72, 680); P(d, 'hay', 100, 690); P(d, 'hay', 86, 760)
+P(d, 'smallhouse', 0, 500, 2); pines(d, [(160, 526, 18)])
+# 4: food stalls, BBQs and the dodgeball machines
+P(d, 'stall', 36, 560, 0); P(d, 'stall', 114, 560, 3); P(d, 'bbq', 44, 612); P(d, 'bbq', 126, 612)
+H(d, 'balls', 124, 652, -1, 2.6); H(d, 'balls', 40, 720, 1, 2.6)
+P(d, 'hay', 60, 684); P(d, 'hay', 108, 694); P(d, 'table', 100, 750, 2)
 P(d, 'smallhouse', 138, 600, 0); P(d, 'smallhouse', 0, 650, 4)
-# 5: houses, cars leaving, a granny, another snow machine
+# 5: houses, cars leaving, a granny, another snow machine, the far barrier
 P(d, 'smallhouse', 0, 820, 3); P(d, 'smallhouse', 138, 860, 1)
 d['pull'] += [[104, 800, 1], [56, 900, 4]]
 H(d, 'dog', 90, 860); H(d, 'cannon', 152, 940, math.pi * 0.85, 7.0, 60)
 d['neighbours'] = [dict(rects=[[16, 868, 78, 14]], path=[[22, 868], [50, 875], [90, 875]])]
-for x in range(54, 128, 12):
-    if not 80 < x < 100: P(d, 'cone', x, 980)
-P(d, 'snowman', 84, 940)
+barrier(980); P(d, 'snowman', 84, 940)
 pines(d, [(150, 760, 22), (4, 940, 24)])
+# Mrs. Grimshaw comes out of her house after 6 seconds
+H(d, 'chaser', 152, 284, 'grimshaw', 6)
 J['blockparty'] = d
 
 META = {'cornershop': (600, 70, 1.65, 5), 'playground': (640, 70, 1.7, 5), 'allotments': (700, 75, 1.75, 5), 'dogpark': (720, 80, 1.8, 6),

@@ -56,7 +56,7 @@ async function one(browser, id) {
     if (s) samples.push(s); if (s && s.ended) break;
     if (n < shots.length && (Date.now() - t0) / T > shots[n]) { await page.screenshot({ path: `/home/claude/levels/out/bot_${id}_${n}.png` }); n++; } }
   const res = await page.evaluate(() => { const R = window.__SR, G = R.G, run = R.run, L = G.def; const pct = G.cleared / G.clearable * 100;
-    return { pct: +pct.toFixed(1), stars: L.stars.filter(q => pct >= q).length, hits: run.hits, earned: Math.round(run.earned), bot: window.__botStats,
+    return { pct: +pct.toFixed(1), stars: L.stars.filter(q => pct >= q).length, hits: run.hits, caught: run.caught || 0, chaser: (G.hazards.find(h => h.kind === 'chaser') || {}).state, earned: Math.round(run.earned), bot: window.__botStats,
       nbDone: G.neighbours.filter(x => x.state === 'done').length, nbAll: G.neighbours.length }; });
   const maxDrop = samples.reduce((a, s, i) => i ? Math.max(a, samples[i - 1].pct - s.pct) : 0, 0);
   console.log(id, JSON.stringify(res), 'pct-dips', maxDrop.toFixed(1), 'errors', JSON.stringify(errors.slice(0, 3)));
