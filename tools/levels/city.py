@@ -7,26 +7,9 @@ J = []
 def kerb_lights(d, x, y0, y1, step=120):
     for y in range(y0, y1, step): P(d, 'lamp', x, y)
 
-# ---------------------------------------------------------------- CITY HALL
-d = job('cityhall', 'CITY HALL', 'city', ['airport'], 2400, 58, 6.2, 7, start=[90, 2360])
-G(d, 'asph', 0, 0, 180, 2400)
-G(d, 'conc', 0, 1500, 180, 820)                                    # the civic plaza
-for k in range(10): G(d, 'wht', 30, 1520 + k * 8, 120, 3)           # steps up to the hall
-P(d, 'big', 35, 1440, 22)
-for x in (6, 22, 150, 166): P(d, 'flag', x, 1600, (x // 16) % 4)
-C(d, 'wht', 50, 1800, 26); C(d, 'conc', 50, 1800, 23); P(d, 'fountain', 37, 1787)
-C(d, 'wht', 130, 1980, 26); C(d, 'conc', 130, 1980, 23); P(d, 'fountain', 117, 1967)
-for x, y in [(130, 1760), (50, 2000)]: P(d, 'statue', x, y)
-for x, y in [(4, 1700), (164, 1700), (4, 2100), (164, 2100)]: P(d, 'planter', x, y)
-for x, y in [(80, 1900), (96, 1900), (80, 2160), (96, 2160)]: P(d, 'bench', x, y)
-H(d, 'ped', 20, 1900); H(d, 'ped', 150, 2050, 1); H(d, 'pedx', 60, 2240); H(d, 'thrower', 150, 1880)
-# avenue up to the old town hall square (y 0-1440): offices both sides, traffic in the middle lane
-for y in range(0, 1250, 104): P(d, 'tower', 0, y, (y // 104) % 5); P(d, 'tower', 130, y + 40, (y // 104 + 2) % 5)
-for y in range(20, 1440, 24): G(d, 'wht', 89, y, 2, 12)
-H(d, 'taxi', 96, -60, 0); H(d, 'taxi', 62, 600, 1)
-kerb_lights(d, 52, 60, 1400); kerb_lights(d, 124, 120, 1400)
-d['data']['pull'] += [[56, 300, 1], [102, 900, 3]]
-J.append(d)
+# ---------------------------------------------------------------- CITY HALL (pro pass: city_pro.py)
+import city_pro
+J.append(city_pro.cityhall())
 
 # ---------------------------------------------------------------- TRAIN STATION  (new: trams)
 # Platforms between parked trains, a tram line that runs up and down all job long, the taxi rank.
@@ -93,37 +76,11 @@ for y in range(1800, 2500, 180): P(d, 'bollard', 90, y)
 H(d, 'pedx', 40, 2000); H(d, 'pedx', 120, 2300, 1); H(d, 'ped', 60, 2200)
 J.append(d)
 
-# ---------------------------------------------------------------- CHINATOWN
-d = job('chinatown', 'CHINATOWN', 'city', ['museum'], 2800, 66, 7.0, 7, start=[90, 40])
-G(d, 'asph', 0, 0, 180, 2800); G(d, 'red', 46, 0, 88, 2800)
-for y in range(150, 2800, 220): d['data']['decor'].append(['lanterns', 40, y, 100])
-names = [25, 26, 27]
-y = 100
-while y < 2650:
-    P(d, 'shopv', 0, y, names[(y // 90) % 3]); P(d, 'shopv', 136, y + 36, names[(y // 90 + 1) % 3])
-    y += 150
-for y in range(260, 2700, 300): P(d, 'stall', 50 if (y // 300) % 2 else 100, y, (y // 300) % 4)
-for y in range(200, 2700, 260): P(d, 'lamp', 46 if (y // 260) % 2 else 128, y)
-H(d, 'pedx', 60, 500); H(d, 'pedx', 100, 1100, 1); H(d, 'pedx', 60, 1700); H(d, 'pedx', 110, 2300, 1); H(d, 'ped', 70, 800); H(d, 'ped', 108, 2000, 1)
-H(d, 'thrower', 90, 1400); H(d, 'cart', 80, 2500)
-J.append(d)
+# ---------------------------------------------------------------- CHINATOWN (pro pass)
+J.append(city_pro.chinatown())
 
-# ---------------------------------------------------------------- DOWNTOWN JUNCTION  (new: cross traffic)
-# Three busy cross streets: cars come through after a warning. Towers on the corners, a taxi in the avenue.
-d = job('junction', 'DOWNTOWN JUNCTION', 'city', ['chinatown'], 3000, 81, 7.2, 7, start=[90, 2960])
-G(d, 'asph', 0, 0, 180, 3000)
-for y in range(0, 3000, 24): G(d, 'wht', 89, y, 2, 12)
-for k, yc in enumerate((600, 1400, 2200)):
-    G(d, 'asph', 0, yc, 180, 50)
-    for x in range(4, 180, 16): G(d, 'wht', x, yc + 24, 8, 2)
-    for kk in range(8): G(d, 'wht', 50 + kk * 10, yc - 30, 6, 24); G(d, 'wht', 50 + kk * 10, yc + 56, 6, 24)
-    H(d, 'cross', 0, yc + 8, 1, 4.5, 'car'); H(d, 'cross', 0, yc + 30, -1, 5.0, 'car')
-for yb in (100, 760, 1560, 2360):
-    P(d, 'tower', 0, yb, (yb // 100) % 5); P(d, 'tower', 130, yb + 60, (yb // 100 + 1) % 5)
-    if yb < 2300: P(d, 'towerw', 0, yb + 130, (yb // 100 + 2) % 5)
-H(d, 'taxi', 96, 0, 0); H(d, 'ped', 54, 400); H(d, 'ped', 120, 1800, 1)
-for y in range(300, 2900, 500): P(d, 'hydrant', 52, y); P(d, 'trash', 122, y + 200)
-J.append(d)
+# ---------------------------------------------------------------- DOWNTOWN JUNCTION (pro pass)
+J.append(city_pro.junction())
 
 # ---------------------------------------------------------------- ICE RINK  (side job)
 # A huge rink: once it's clear it's slippery. Skaters zip across. Hot chocolate at the side.

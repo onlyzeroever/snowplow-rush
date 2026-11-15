@@ -9,9 +9,10 @@ TOOLS = json.load(open('/home/claude/sim/tools.json'))
 BASE_CELL_VALUE = 0.03
 STAR_BONUS = 50
 AREA_SEQ = ['suburbs', 'farm', 'city', 'themepark', 'harbour', 'ski', 'pass', 'north']
+BASE = 8
 
 CFG = dict(
-    speeds={'shovel': 32, 'pusher': 38, 'blower': 44, 'tractor': 52, 'truck': 62, 'super': 74},
+    speeds={'shovel': 32, 'pusher': 38, 'blower': 44, 'tractor': 52, 'truck': 62, 'super': 74, 'snowcat': 88, 'rotary': 100},
     widthCap=0.95, speedCap=0.97, lastCap=(1.15, 1.30), levels=6, bumperLevels=5,
     costFrac=0.018, costGrowth=1.5,
     value=dict(base=30, growth=1.62, max=20, per=0.12),
@@ -24,11 +25,13 @@ CFG = dict(
 )
 
 def machine_specs(cfg):
-    base = [t for t in TOOLS[:6]]
+    base = [t for t in TOOLS[:BASE]]
     spec = {}
     for i, t in enumerate(base):
         sp = cfg['speeds'].get(t['id'], t['speed'])
-        if i + 1 < len(base):
+        if t['id'] == 'super':
+            scap, wcap = cfg['lastCap']; nxtCost = base[i + 1]['cost']
+        elif i + 1 < len(base):
             n = base[i + 1]; nsp = cfg['speeds'].get(n['id'], n['speed'])
             scap = cfg['speedCap'] * nsp / sp; wcap = cfg['widthCap'] * n['width'] / t['width']
             nxtCost = n['cost']
@@ -50,7 +53,7 @@ def run(cfg, maxRuns=600, verbose=False, stop_area=None):
     for jid, o in cfg['jobs'].items():
         if jid in idx: idx[jid].update(o)
     owned = 0  # index of best machine owned
-    mlv = {t['id']: dict(speed=0, size=0, bumper=0) for t in TOOLS[:6]}
+    mlv = {t['id']: dict(speed=0, size=0, bumper=0) for t in TOOLS[:BASE]}
     glv = dict(value=0, helpers=0)
     coins = 0.0; stars = {j['id']: 0 for j in JOBS}; tries = {j['id']: 0 for j in JOBS}; tolls = set()
     log = []; events = []; first = {}
@@ -139,11 +142,11 @@ def run(cfg, maxRuns=600, verbose=False, stop_area=None):
                 if x['toll'] and x['id'] not in tolls and reach(x) and coins >= x['toll']:
                     coins -= x['toll']; tolls.add(x['id']); events.append((r, 'TOLL ' + x['id'])); paid = True
             if paid: continue
-            if owned + 1 < 6 and coins >= TOOLS[owned + 1]['cost']:
+            if owned + 1 < BASE and coins >= TOOLS[owned + 1]['cost']:
                 coins -= TOOLS[owned + 1]['cost']; owned += 1; events.append((r, 'MACHINE ' + mach())); continue
             # saving: a toll or a gate machine stands between you and the next job -> only small upgrades
             goals = [x['toll'] for x in playable if x['toll'] and x['id'] not in tolls and reach(x)]
-            goals += [TOOLS[owned + 1]['cost'] for x in playable if owned + 1 < 6 and x['gate'] and reach(x) and not gate_ok(x)]
+            goals += [TOOLS[owned + 1]['cost'] for x in playable if owned + 1 < BASE and x['gate'] and reach(x) and not gate_ok(x)]
             goal = min(goals) if goals else None
             opts = [k for k in ('speed', 'size', 'value') if not umaxed(k)]
             if not opts: opts = [k for k in ('helpers', 'bumper') if not umaxed(k)]
