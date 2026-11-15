@@ -126,3 +126,52 @@ def facade_row(d, side, y0, y1, seed, kinds=(('shopv', None),), x=None, gap=(0, 
         g = r.randint(*gap)
         if g: gaps.append((y, y + g)); y += g
     return gaps
+
+# ================================ AUTO-DRESS: fill bare edges with area-appropriate clutter ================================
+_FEET = None
+def _feet():
+    global _FEET
+    if _FEET is None: _FEET = json.load(open('/home/claude/levels/feet.json'))
+    return _FEET
+def occupancy(d, pad=6):
+    """coarse 4px occupancy grid from props, scenery and wild areas"""
+    dd = d['data']; h = d['h']; W, H = 45, h // 4 + 1; occ = bytearray(W * H)
+    def mark(x0, y0, x1, y1):
+        for yy in range(max(0, int(y0) // 4), min(H, int(y1) // 4 + 1)):
+            for xx in range(max(0, int(x0) // 4), min(W, int(x1) // 4 + 1)): occ[yy * W + xx] = 1
+    F = _feet()
+    for p in dd.get('props', []) + dd.get('scen', []):
+        f = F.get(p[0])
+        if not f: continue
+        ft = f['foot']; a = p[3] if len(p) > 3 else None
+        if a is not None and p[0] in ('rail', 'stonewall', 'hedge', 'wall', 'works', 'planterl', 'stand', 'crowd', 'container', 'plot', 'icewall', 'coaster'):
+            ft = [ft[0], ft[1], a, ft[3]]
+        if a is not None and p[0] in ('railv', 'stonewallv', 'hedgev', 'fence', 'wallv', 'icewallv', 'coasterv', 'track', 'train'):
+            ft = [ft[0], ft[1], ft[2], a]
+        mark(p[1] + ft[0] - pad, p[2] - pad, p[1] + ft[0] + ft[2] + pad, p[2] + ft[1] + ft[3] + pad)
+    for w in dd.get('wilds', []): mark(w[1] - pad, w[2] - pad, w[1] + w[3] + pad, w[2] + w[4] + pad)
+    for hz in dd.get('hazards', []):
+        if hz[0] in ('cross',): mark(0, hz[2] - 20, 180, hz[2] + 30)
+    for c in dd.get('carves', []): pass
+    return occ, W, H
+def autodress(d, palette, seed, edge=34, chance=0.55, keep_y=(60, None), avoid=('ice',), rows=64):
+    """drop small clusters of palette props flush to the left/right edges wherever an edge band is bare"""
+    r = rng(seed); occ, W, H = occupancy(d); F = _feet(); h = d['h']
+    y1 = keep_y[1] if keep_y[1] is not None else h - 60
+    bad = [g for g in d['data']['ground'] if g[0] in avoid]
+    def ground_bad(x, y): return any(g[1] <= x < g[1] + g[3] and g[2] <= y < g[2] + g[4] for g in bad)
+    added = 0
+    for y in range(keep_y[0], y1, rows):
+        for side in ('l', 'r'):
+            if r.random() > chance: continue
+            k = r.choice(palette); kind, arg = (k if isinstance(k, tuple) else (k, None))
+            f = F.get(kind)
+            if not f: continue
+            fw, fh = f['w'], f['h']; x = 2 if side == 'l' else 178 - fw; yy = y + r.randint(0, rows - fh - 4) if rows > fh + 6 else y
+            if x < 0 or fw > edge + 12: continue
+            cells = [(cx, cy) for cy in range(max(0, yy // 4), min(H, (yy + fh) // 4 + 1)) for cx in range(max(0, x // 4), min(W, (x + fw) // 4 + 1))]
+            if any(occ[cy * W + cx] for cx, cy in cells) or ground_bad(x + fw // 2, yy + fh // 2): continue
+            P(d, kind, x, yy, arg) if arg is not None else P(d, kind, x, yy)
+            for cx, cy in cells: occ[cy * W + cx] = 1
+            added += 1
+    return added
