@@ -3966,7 +3966,7 @@ function phOn(){return !TEST_MODE&&!save.noTrack&&typeof fetch==='function';}
 const PH_ID=(()=>{let id=null;try{id=localStorage.getItem('sr.aid');}catch(e){}if(!id){id='p_'+Date.now().toString(36)+Math.random().toString(36).slice(2,10);try{localStorage.setItem('sr.aid',id);}catch(e){}}return id;})();
 function phSession(){const now=Date.now();if(!PH.sid||now-PH.last>30*60e3)PH.sid=now.toString(36)+Math.random().toString(36).slice(2,8);PH.last=now;return PH.sid;}
 function track(ev,props){try{if(!phOn())return;const t=TOOLS[useIdx()];
-  const p=Object.assign({distinct_id:PH_ID,$session_id:phSession(),$lib:'snowplow-rush',build:DEV_MODE?'dev':REVIEW_MODE?'review':'live',v:'0.8.0',winter:winterNo(),machine:t?t.id:null,stars_total:totalStars(),coins:Math.round(save.coins),gems:save.gems||0,premium:!!save.pro},props||{});
+  const p=Object.assign({distinct_id:PH_ID,$session_id:phSession(),$lib:'snowplow-rush',$geoip_disable:true,build:DEV_MODE?'dev':REVIEW_MODE?'review':'live',v:'0.8.0',winter:winterNo(),machine:t?t.id:null,stars_total:totalStars(),coins:Math.round(save.coins),gems:save.gems||0,premium:!!save.pro},props||{});
   PH.q.push({event:ev,properties:p,timestamp:new Date().toISOString()});if(PH.q.length>=25)phFlush(false);}catch(e){}}
 function phForm(batch){const ev=batch.map(e=>({event:e.event,timestamp:e.timestamp,properties:Object.assign({token:PH.key},e.properties)}));let b64='';try{b64=btoa(unescape(encodeURIComponent(JSON.stringify(ev))));}catch(e){return null;}return 'data='+encodeURIComponent(b64);}
 function phSendForm(batch,final){const body=phForm(batch);if(!body)return;const url=PH.host+'/e/?compression=base64';
@@ -3999,7 +3999,7 @@ for(const [nm,get,set] of [['premium',()=>shopBuyPremium,f=>shopBuyPremium=f],['
 {const o=openShop;openShop=function(){try{track('shop_open',{screen:state});}catch(e){}return o.apply(this,arguments);};}
 {const o=resetSave;resetSave=function(){try{track('save_reset');}catch(e){}return o.apply(this,arguments);};}
 track('session_start',{returning:!!save.tut,away_min:Math.round((offlineAway||0)/60),offline_coins:Math.round(offlineGain||0),w:innerWidth,h:innerHeight,dpr:devicePixelRatio||1,
-  installed:!!((window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone),touch:'ontouchstart' in window,ios:/iPhone|iPad|iPod/.test(navigator.userAgent),android:/Android/.test(navigator.userAgent),lang:navigator.language||'',
+  installed:!!((window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone),touch:'ontouchstart' in window,ios:/iPhone|iPad|iPod/.test(navigator.userAgent),android:/Android/.test(navigator.userAgent),lang:navigator.language||'',tz:(()=>{try{return Intl.DateTimeFormat().resolvedOptions().timeZone||'';}catch(e){return '';}})(),
   $set:{last_version:'0.8.0',stars_total:totalStars(),winter:winterNo(),machine_best:TOOLS[save.tool].id,premium:!!save.pro},$set_once:{first_version:'0.8.0',first_seen:new Date().toISOString().slice(0,10)}});
 })();
 </script>
