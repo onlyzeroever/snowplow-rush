@@ -3968,8 +3968,14 @@ function phSession(){const now=Date.now();if(!PH.sid||now-PH.last>30*60e3)PH.sid
 function track(ev,props){try{if(!phOn())return;const t=TOOLS[useIdx()];
   const p=Object.assign({distinct_id:PH_ID,$session_id:phSession(),$lib:'snowplow-rush',build:DEV_MODE?'dev':REVIEW_MODE?'review':'live',v:'0.8.0',winter:winterNo(),machine:t?t.id:null,stars_total:totalStars(),coins:Math.round(save.coins),gems:save.gems||0,premium:!!save.pro},props||{});
   PH.q.push({event:ev,properties:p,timestamp:new Date().toISOString()});if(PH.q.length>=25)phFlush(false);}catch(e){}}
+function phForm(batch){const ev=batch.map(e=>({event:e.event,timestamp:e.timestamp,properties:Object.assign({token:PH.key},e.properties)}));let b64='';try{b64=btoa(unescape(encodeURIComponent(JSON.stringify(ev))));}catch(e){return null;}return 'data='+encodeURIComponent(b64);}
+function phSendForm(batch,final){const body=phForm(batch);if(!body)return;const url=PH.host+'/e/?compression=base64';
+  try{if(final&&navigator.sendBeacon&&navigator.sendBeacon(url,new Blob([body],{type:'application/x-www-form-urlencoded'})))return;}catch(e){}
+  try{fetch(url,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body,keepalive:!!final}).catch(()=>{});}catch(e){}}
 function phFlush(final){if(!PH.q.length||!phOn()){if(!phOn())PH.q.length=0;return;}const batch=PH.q.splice(0,PH.q.length);
-  try{fetch(PH.host+'/batch/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({api_key:PH.key,batch}),keepalive:!!final}).catch(()=>{});}catch(e){}}
+  // JSON to /batch/ first; if the browser blocks it (CORS) or it fails, fall back to the simple form post that never needs a preflight, and stick with it
+  if(PH.form||final){phSendForm(batch,final);return;}
+  try{fetch(PH.host+'/batch/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({api_key:PH.key,batch})}).then(r=>{if(!r.ok)throw new Error('http '+r.status);}).catch(()=>{PH.form=true;phSendForm(batch,false);});}catch(e){PH.form=true;phSendForm(batch,false);}}
 function trackErr(msg,where){if(PH.errs>=5)return;PH.errs++;track('error',{msg:String(msg||'').slice(0,200),where:String(where||'').slice(0,400),screen:state});}
 setInterval(()=>phFlush(false),15000);
 document.addEventListener('visibilitychange',()=>{if(document.hidden){track('app_hidden',{screen:state});phFlush(true);}});
