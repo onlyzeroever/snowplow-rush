@@ -1,5 +1,5 @@
 """The Frozen North, pro pass (the finale). Taiga and tundra, a frozen bay, the research base, the aurora, then
-Santa's country: the North Pole Post, the palace gardens, the gates, the Great Hall and the Ice Palace itself.
+the far north: the North Pole Post, the palace gardens, the gates, the Great Hall and the Ice Palace itself.
 Shop names: 52 RESEARCH BASE 53 ICE PALACE 54 POST OFFICE."""
 import math
 from common import *
@@ -220,7 +220,7 @@ def spires():
 
 def gardens2():
     """PALACE GARDENS: the formal ice gardens below the palace: parterres walled in ice, frozen fountains, sculptures,
-    the reindeer paddock, the decorated trees, ice arches over the walks."""
+    the reindeer paddock, the lit pines, ice arches over the walks."""
     h = 4400; d = job('gardens2', 'PALACE GARDENS', 'north', ['spires'], h, 74, 25.2, 7, start=[90, 40])
     G(d, 'piste', 0, 0, 180, h); G(d, 'stone', 64, 0, 52, h)
     for r in range(8):
@@ -239,8 +239,8 @@ def gardens2():
 
 
 def northpole():
-    """NORTH POLE POST (side): the post office and the Pole itself, Santa's sleigh and the reindeer, sacks of letters
-    and piles of presents, elves everywhere."""
+    """NORTH POLE POST (side): the post office and the Pole itself, the sleigh and the reindeer, parcels piled up
+    for the mail run, market stalls."""
     h = 3400; d = job('northpole', 'NORTH POLE POST', 'north', ['gardens2'], h, 68, 25.2, 14, start=[90, h - 44], bonus=True)
     G(d, 'piste', 0, 0, 180, h); woods(d, 4201, 0, h, 0, 14, dens=0.9); woods(d, 4202, 0, h, 166, 180, dens=0.9)
     G(d, 'stone', 0, 0, 180, 300); P(d, 'big', 35, 40, SH['POST']); P(d, 'xmastree', 4, 60); P(d, 'xmastree', 144, 60)
@@ -280,7 +280,7 @@ def palacegates():
 
 def greathall():
     """THE GREAT HALL: inside the palace: ice walls, the red carpet, columns, chandeliers overhead, the feast tables
-    and the presents under the great tree."""
+    and the great lit pine."""
     h = 4200; d = job('greathall', 'THE GREAT HALL', 'north', ['palacegates'], h, 69, 26.0, 7, start=[90, 40])
     G(d, 'ice', 0, 0, 180, h); G(d, 'blue', 10, 0, 160, h); G(d, 'red', 70, 0, 40, h)
     P(d, 'icewallv', 0, 0, h); P(d, 'icewallv', 170, 0, h)
