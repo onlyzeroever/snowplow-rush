@@ -2871,7 +2871,8 @@ function lmArt(g,id,x,y){
   sh(x-12,y-6,0);sh(x+3,y-8,1);sh(x-4,y,0);sh(x+8,y-1,1);}break;
   case 'stables':shadow(30);B(x-14,y-4,28,13,'#a8673a');for(let k=0;k<4;k++)R(g,x-11+k*6,y+2,4,6,'#55321d');roof(x,y-10,30,7,'#7a4a2a');break;
   case 'farmcafe':shadow(28);B(x-12,y-4,24,13,'#f4e3c4');roof(x,y-11,28,8,'#2f8a5a');mStall(g,x+6,y+3,'#d8364b');break;
-  case 'windmill':{R(g,x-4,y-8,9,18,K);R(g,x-3,y-7,7,17,'#dfe5ef');roof(x,y-13,12,6,'#a8673a');for(let k=0;k<4;k++){const a=k*Math.PI/2+0.4;for(let d=2;d<13;d++)R(g,Math.round(x+Math.cos(a)*d),Math.round(y-9+Math.sin(a)*d),2,2,d>4?'#f4f8ff':K);}break;}
+  case 'windmill':{for(let r=0;r<18;r++){const hw=Math.round(3+r*0.22);R(g,x-hw-1,y-8+r,hw*2+3,1,K);R(g,x-hw,y-8+r,hw*2+1,1,'#e9edf4');R(g,x+1,y-8+r,hw,1,'#c6ccd6');}R(g,x-1,y+5,3,5,K);R(g,x,y+6,1,4,'#7a4a2a');R(g,x-1,y-2,3,3,K);R(g,x,y-1,1,1,'#ffd77a');roof(x,y-13,10,6,'#a8673a');
+  for(let k=0;k<4;k++){const an=k*Math.PI/2+0.5,ca=Math.cos(an),sa=Math.sin(an);for(let d=2;d<14;d++){const px=Math.round(x+ca*d),py=Math.round(y-10+sa*d);if(d>4){R(g,Math.round(px-sa*2),Math.round(py+ca*2),1,1,'#f4f8ff');R(g,Math.round(px-sa),Math.round(py+ca),1,1,(d%2)?'#c98d4a':'#f4f8ff');}R(g,px,py,1,1,K);}}R(g,x-1,y-11,3,3,K);R(g,x,y-10,1,1,'#c98d4a');break;}
   case 'maze':R(g,x-14,y-9,28,20,K);R(g,x-13,y-8,26,18,'#2f8a5a');for(let k=0;k<4;k++){R(g,x-11+k*6,y-6+(k%2)*4,2,10,'#c9b48a');R(g,x-11,y-6+k*4,22,1,k%2?'#c9b48a':'#2f8a5a');}break;
   case 'mill':shadow(28);B(x-13,y-8,18,18,'#c6b49a');roof(x-4,y-14,22,7,'#7a4a2a');C(x+9,y+3,6,'#8a5a34');R(g,x+8,y-3,2,12,'#55321d');ice(x+4,y+9,12,3);break;
   case 'harvestfair':mTent(g,x-14,y-10,18,18,'#d8364b','#f4f8ff');mTent(g,x+2,y-6,14,14,'#ffc727','#f4f8ff');for(let k=0;k<8;k++)R(g,x-14+k*4,y-12+(k%2),2,2,['#d8364b','#3f86d6','#ffc727','#4fd36a'][k%4]);break;
@@ -2890,7 +2891,8 @@ function lmArt(g,id,x,y){
   case 'skyline':mTower(g,x-14,y-14,9,24,'#8793a8','#6a7896',3);mTower(g,x-4,y-18,10,28,'#9fb3c8','#7f93a8',5);mTower(g,x+7,y-10,8,20,'#c6b49a','#a8967a',7);break;
   case 'parade':for(const [a,b2,c] of [[-10,-6,'#d8364b'],[0,-10,'#ffc727'],[10,-5,'#3f86d6']]){C(x+a,y+b2,4,c);R(g,x+a,y+b2+5,1,10,K);}R(g,x-15,y+8,30,3,'#2f5fae');break;
   // ---------------- Theme Park
-  case 'gates':R(g,x-14,y-8,5,18,K);R(g,x+9,y-8,5,18,K);R(g,x-13,y-7,3,17,'#9b5fd6');R(g,x+10,y-7,3,17,'#9b5fd6');R(g,x-15,y-12,30,5,K);R(g,x-14,y-11,28,3,'#ffc727');for(let k=0;k<6;k++)R(g,x-12+k*5,y-11,2,1,'#e03a4e');break;
+  case 'gates':{shadow(30);const tw=tx=>{R(g,tx,y-8,6,18,K);R(g,tx+1,y-7,4,16,'#9b5fd6');R(g,tx+1,y-7,1,16,'#c49af0');for(let k=0;k<4;k++)R(g,tx+1,y-5+k*4,4,1,'#f4f8ff');R(g,tx-1,y-11,8,4,K);R(g,tx,y-10,6,2,'#e03a4e');R(g,tx+2,y-13,2,2,K);R(g,tx+2,y-14,2,1,'#ffd23f');};tw(x-15);tw(x+9);
+  R(g,x-9,y-11,18,6,K);R(g,x-8,y-10,16,4,'#ffc727');R(g,x-8,y-10,16,1,'#ffe27a');for(let k=0;k<6;k++)R(g,x-7+k*3,y-8,1,1,k%2?'#e03a4e':'#3f86d6');for(let k=0;k<3;k++){R(g,x-6+k*5,y+4,2,5,K);R(g,x-7+k*5,y+5,4,1,'#8793a8');}}break;
   case 'mainst':mShop(g,x-15,y-6,14,'#d8364b',1);mShop(g,x+1,y-6,14,'#3f86d6',2);R(g,x-15,y-10,30,1,'#ffc727');break;
   case 'carousel':mCarousel(g,x,y-4);break;
   case 'games':mStall(g,x-14,y-2,'#d8364b');mStall(g,x+2,y-2,'#2f8a5a');C(x-8,y-8,3,'#ffc727');C(x+8,y-8,3,'#ff4fa3');break;
@@ -2918,11 +2920,13 @@ function lmArt(g,id,x,y){
   case 'lighthouse':R(g,x-4,y-12,9,22,K);for(let yy=y-11;yy<y+10;yy++)R(g,x-3,yy,7,1,((yy>>2)%2)?'#e03a4e':'#f4f8ff');R(g,x-5,y-17,11,6,K);R(g,x-4,y-16,9,4,'#ffd23f');R(g,x-3,y-19,7,3,K);break;
   case 'containers':for(let k=0;k<4;k++)mContainer(g,x-15+(k%2)*15,y-6+((k>>1)*9),14,['#d8364b','#2f5fae','#33b24a','#ffc727'][k]);break;
   case 'boatyard':R(g,x-12,y+6,2,4,K);R(g,x+10,y+6,2,4,K);mBoat(g,x-14,y-2,28,'#3f86d6');break;
-  case 'ferry':ice(x-15,y+5,30,6);R(g,x-15,y-2,30,8,K);R(g,x-14,y-1,28,6,'#f4f8ff');R(g,x-14,y+3,28,2,'#2f5fae');R(g,x-6,y-8,12,6,K);R(g,x-5,y-7,10,4,'#f4f8ff');R(g,x-3,y-11,3,3,'#e03a4e');break;
+  case 'ferry':{ice(x-15,y+5,30,6);R(g,x-15,y-2,30,8,K);R(g,x-14,y-1,28,6,'#f4f8ff');R(g,x-14,y+3,28,2,'#2f5fae');R(g,x-14,y+5,28,1,'#e03a4e');R(g,x+13,y-1,2,4,K);
+  for(let k=0;k<3;k++){R(g,x-12+k*5,y-4,4,3,K);R(g,x-11+k*5,y-3,2,1,['#e03a4e','#ffc727','#33b24a'][k]);}R(g,x+2,y-9,11,8,K);R(g,x+3,y-8,9,6,'#f4f8ff');for(let k=0;k<4;k++)R(g,x+4+k*2,y-7,1,1,'#2f5fae');R(g,x+7,y-13,3,5,K);R(g,x+8,y-12,1,3,'#e03a4e');R(g,x+8,y-14,1,1,'#c6d9f3');}break;
   case 'drawbridge':{ice(x-15,y+2,30,9);B(x-15,y-2,6,9,'#c6d0e0');B(x+9,y-2,6,9,'#c6d0e0');R(g,x-10,y-1,11,4,K);R(g,x-9,y,9,2,'#a8673a');R(g,x-9,y,9,1,'#c98d4a');
   for(let i=0;i<9;i++)R(g,x+1+i,y-2-i,2,4,K);for(let i=0;i<8;i++)R(g,x+2+i,y-1-i,1,2,'#a8673a');B(x+10,y-11,5,9,'#e03a4e');R(g,x+11,y-8,3,2,'#9fd4f4');R(g,x+9,y-12,7,1,K);
   R(g,x-13,y-4,1,4,K);R(g,x-13,y-5,8,2,K);for(let k=0;k<3;k++)R(g,x-12+k*2,y-5,2,1,k%2?'#f4f8ff':'#e03a4e');}break;
-  case 'icefish':ice(x-15,y-4,30,15);for(const a of [-9,5]){R(g,x+a-1,y-7,10,8,K);R(g,x+a,y-6,8,6,'#a8673a');R(g,x+a,y-6,8,1,MC.snow);}C(x-1,y+6,2,'#2a4a7a');break;
+  case 'icefish':{ice(x-15,y-4,30,15);const ht=(hx,c,d)=>{R(g,hx,y-10,10,9,K);R(g,hx+1,y-6,8,4,c);R(g,hx+7,y-6,1,4,d);for(let r=0;r<4;r++)R(g,hx+4-r,y-10+r,2+r*2,1,r<1?MC.snow:'#55607a');R(g,hx+4,y-5,2,3,'#2a2a36');};ht(x-14,'#e03a4e','#a82639');ht(x+3,'#3f86d6','#2a5fa8');
+  C(x-2,y+5,2,'#2a4a7a');R(g,x-2,y+2,1,3,'#55607a');R(g,x-4,y+1,3,1,'#8a5a2c');R(g,x+4,y+5,4,2,K);R(g,x+5,y+5,2,1,'#9aa6ba');R(g,x+8,y+5,1,1,'#9aa6ba');}break;
   case 'pier':{ice(x-15,y-4,30,15);for(let k=0;k<4;k++){R(g,x-5,y-11+k*6,1,2,K);R(g,x+4,y-11+k*6,1,2,K);}R(g,x-4,y-14,8,24,K);R(g,x-3,y-13,6,22,'#c98d4a');for(let yy=y-12;yy<y+9;yy+=2)R(g,x-3,yy,6,1,'#a8673a');R(g,x-3,y-13,1,22,'#e0b070');
   R(g,x-1,y-18,1,5,K);R(g,x-2,y-19,3,2,K);R(g,x-1,y-19,1,1,'#ffd77a');R(g,x+7,y,8,5,K);R(g,x+8,y+1,6,3,'#e03a4e');R(g,x+8,y+1,6,1,'#f4f8ff');R(g,x+10,y-2,1,3,K);}break;
   case 'customs':{shadow(26);B(x-12,y-5,12,13,'#f4f8ff');R(g,x-13,y-8,14,4,K);R(g,x-12,y-7,12,2,'#2f5fae');R(g,x-10,y-2,8,4,K);R(g,x-9,y-1,6,2,'#9fd4f4');R(g,x-9,y-1,2,1,'#e8f6ff');
@@ -2954,7 +2958,8 @@ function lmArt(g,id,x,y){
   R(g,x-7,y-6,7,1,'#e03a4e');R(g,x-5,y-9,2,3,'#2f5fae');R(g,x-5,y-10,2,1,'#f6c7a1');R(g,x-8,y-8,1,1,K);R(g,x-1,y-8,1,1,K);for(const [a,b2] of [[-12,-6],[-11,-4],[-10,-2]])R(g,x+a,y+b2,2,1,'#c6d9f3');}break;
   case 'gondola':R(g,x-16,y-10,32,1,'#2a2a36');R(g,x-1,y-10,1,4,K);R(g,x-5,y-6,10,10,K);R(g,x-4,y-5,8,8,'#e03a4e');R(g,x-3,y-3,6,3,'#bfe6ff');mMountain(g,x+11,y+10,6,10,4);break;
   case 'apres':shadow(30);mChalet(g,x-13,y-8,18,17,4);for(let k=0;k<8;k++)R(g,x-14+k*4,y-11+(k%2),2,2,['#ffd23f','#ff4fa3','#7ad3ff'][k%3]);R(g,x+7,y+2,8,4,'#a8673a');break;
-  case 'snowshoe':pine(x-10,y+8,13);pine(x+10,y+6,11);for(let k=0;k<6;k++)R(g,x-4+((k%2)*3),y+8-k*3,2,1,'#8793a8');break;
+  case 'snowshoe':{pine(x-10,y+8,13);pine(x+10,y+6,11);for(let k=0;k<7;k++){const tx=x-4+((k%2)*3),ty=y+9-k*3;R(g,tx,ty,2,2,'#a6c2ea');R(g,tx,ty,2,1,'#8fb0dc');}
+  R(g,x-3,y-16,2,1,'#f6c7a1');R(g,x-4,y-15,4,4,K);R(g,x-3,y-14,2,2,'#e03a4e');R(g,x-3,y-11,1,2,K);R(g,x-2,y-11,1,2,K);R(g,x-5,y-15,1,5,'#8a5a2c');R(g,x-4,y-9,4,1,'#55607a');}break;
   case 'blackrun':{for(let r=0;r<7;r++){R(g,x-3-r,y-11+r,r*2+3,1,K);R(g,x-3-r,y+1-r,r*2+3,1,K);}for(let r=1;r<7;r++){R(g,x-3-r+1,y-11+r,r*2+1,1,'#f4f8ff');R(g,x-3-r+1,y+1-r,r*2+1,1,'#f4f8ff');}for(let r=2;r<7;r++){R(g,x-3-r+2,y-11+r,r*2-1,1,K);R(g,x-3-r+2,y+1-r,r*2-1,1,K);}
   R(g,x-3,y+2,2,8,K);R(g,x+9,y-9,3,19,K);R(g,x+10,y-8,1,17,'#2a2a36');for(let k=0;k<4;k++)R(g,x+10,y-6+k*4,1,2,'#f4f8ff');mRock(g,x-15,y+4,8,6);}break;
   case 'glacier':ice(x-15,y-2,30,12);mMountain(g,x-4,y+2,10,14,6);R(g,x+6,y-6,10,2,K);R(g,x+8,y-4,6,4,'#e03a4e');break;
@@ -2965,19 +2970,23 @@ function lmArt(g,id,x,y){
   for(let k=0;k<n;k++){R(g,x-14,ys[k],28,3,'#55607a');if(k<n-1){const e=k%2?x-14:x+11;R(g,e,ys[k],3,ys[k+1]-ys[k]+3,'#55607a');}}
   for(let k=0;k<n;k++)for(let j=0;j<4;j++)R(g,x-9+j*6,ys[k]+1,3,1,'#ffd23f');R(g,x-6,ys[1],4,3,K);R(g,x-5,ys[1],2,2,'#e03a4e');R(g,x-5,ys[1],2,1,'#f28b8b');
   break;}
-  case 'snowshed':R(g,x-15,y-1,30,9,'#4a5068');R(g,x-12,y-6,22,14,K);R(g,x-11,y-5,20,12,'#a9b4c6');R(g,x-11,y-5,20,3,MC.snow);for(let k=0;k<4;k++)R(g,x-11+k*6,y+5,2,3,'#6a7896');break;
+  case 'snowshed':{mMountain(g,x-8,y+2,10,14,5);R(g,x-15,y-4,30,4,K);R(g,x-14,y-3,28,2,'#c6d0e0');R(g,x-14,y-3,28,1,MC.snow);R(g,x-15,y-6,30,2,MC.snow);
+  R(g,x-15,y,30,9,K);R(g,x-14,y+1,28,7,'#2a2a36');for(let k=0;k<6;k++){R(g,x-14+k*5,y,2,9,K);R(g,x-13+k*5,y+1,1,7,'#a9b4c6');}R(g,x-15,y+6,30,3,'#55607a');for(let k=0;k<5;k++)R(g,x-12+k*6,y+7,3,1,'#ffd23f');R(g,x-11,y+3,3,2,'#ffd77a');}break;
   case 'tunnel':mMountain(g,x,y+10,15,20,9);R(g,x-5,y+1,10,9,K);R(g,x-4,y+2,8,8,'#2a2a36');R(g,x-6,y,12,2,'#c6c0b0');break;
-  case 'rockfall':mRock(g,x-12,y-2,10,8);mRock(g,x+2,y-8,9,7);mRock(g,x+4,y+3,8,6);R(g,x-15,y-10,1,20,'#2a2a36');for(let yy=y-10;yy<y+10;yy+=2)R(g,x-14,yy,3,1,'#55607a');break;
+  case 'rockfall':{R(g,x-15,y-12,9,24,K);R(g,x-14,y-11,7,22,MC.rock);R(g,x-14,y-11,2,22,MC.rockL);for(let yy=y-9;yy<y+10;yy+=4)R(g,x-14,yy,7,1,MC.rockD);
+  mRock(g,x-4,y-9,7,6);mRock(g,x+1,y-2,8,6);mRock(g,x+6,y+5,9,6);for(const [a2,b2] of [[-6,-7],[-5,-4],[0,-6],[3,1]])R(g,x+a2,y+b2,1,1,'#8793a8');R(g,x+10,y-12,1,9,K);R(g,x+7,y-15,7,5,K);R(g,x+8,y-14,5,3,'#ffc727');R(g,x+10,y-14,1,2,K);}break;
   case 'mhut':shadow(28);mCabin(g,x-12,y-8,24,18,5);R(g,x+10,y-12,1,8,K);R(g,x+11,y-12,4,3,'#e03a4e');break;
   case 'avalanche':{mMountain(g,x-3,y+6,12,20,7);const P2=[[x+2,y+4,4],[x+8,y+2,4],[x+12,y+6,3],[x-4,y+7,3],[x+5,y+8,3]];g.fillStyle='#a6c2ea';P2.forEach(p=>pixCircle(g,p[0],p[1],p[2]+1));g.fillStyle='#ffffff';P2.forEach(p=>pixCircle(g,p[0],p[1],p[2]));
   for(const [a,b2] of [[-1,-6],[2,-4],[4,-1]])R(g,x+a,y+b2,2,2,'#ffffff');R(g,x-13,y-4,1,12,K);R(g,x-15,y-9,5,5,K);R(g,x-14,y-8,3,3,'#ffc727');R(g,x-13,y-8,1,1,K);R(g,x-13,y-6,1,1,K);}break;
   case 'weather':{shadow(28);R(g,x-12,y+3,1,6,K);R(g,x-3,y+3,1,6,K);R(g,x-13,y-4,12,8,K);R(g,x-12,y-3,10,6,'#f4f8ff');for(let k=0;k<3;k++)R(g,x-12,y-2+k*2,10,1,'#c6d0dc');R(g,x-14,y-5,14,1,K);
   C(x+8,y-1,6,'#f4f8ff');R(g,x+5,y-5,6,1,'#c6d0dc');R(g,x+3,y-1,11,1,'#d6dee9');R(g,x+5,y+3,6,1,'#c6d0dc');R(g,x+6,y-5,2,2,'#ffffff');R(g,x+2,y+6,13,2,K);
   R(g,x-7,y-17,1,12,K);R(g,x-11,y-16,9,1,K);R(g,x-12,y-17,2,2,'#e03a4e');R(g,x-3,y-17,2,2,'#e03a4e');R(g,x-10,y-13,6,1,K);R(g,x-11,y-14,2,3,K);}break;
-  case 'waterfall':mRock(g,x-15,y-10,10,20);mRock(g,x+5,y-10,10,20);R(g,x-5,y-10,10,20,'#bfe6ff');for(let k=0;k<5;k++)R(g,x-4+k*2,y-10,1,14+(k%3)*2,'#e8f6ff');break;
+  case 'waterfall':{mRock(g,x-15,y-12,11,22);mRock(g,x+4,y-12,11,22);R(g,x-5,y-12,10,20,K);for(let c=0;c<8;c++){const L=16+((c*5)%5);R(g,x-4+c,y-12,1,L,c%3===0?'#ffffff':c%3===1?'#bfe6ff':'#8fd0f5');}R(g,x-4,y-12,8,1,'#ffffff');
+  R(g,x-9,y+6,18,5,K);R(g,x-8,y+7,16,3,'#7fbaf2');R(g,x-8,y+7,16,1,'#c8e6ff');for(const [a2,b2] of [[-6,5],[-2,4],[3,5],[6,4]])R(g,x+a2,y+b2,1,1,'#ffffff');}break;
   case 'viewpoint':{mMountain(g,x+8,y+2,8,14,3);R(g,x-15,y+3,24,6,K);R(g,x-14,y+4,22,4,'#c98d4a');R(g,x-14,y+4,22,1,'#e0b070');for(let k=0;k<5;k++)R(g,x-12+k*5,y+5,1,3,'#a8673a');
   for(let k=0;k<5;k++)R(g,x-14+k*5,y-1,1,4,K);R(g,x-14,y-1,22,1,K);R(g,x-13,y-2,21,1,'#c6d0dc');R(g,x-7,y-5,1,8,K);R(g,x-10,y-9,7,4,K);R(g,x-9,y-8,5,2,'#2f5fae');R(g,x-9,y-8,5,1,'#5a8ad6');R(g,x-4,y-8,1,2,'#9fd4f4');}break;
-  case 'gorge':mRock(g,x-15,y-4,12,14);mRock(g,x+3,y-4,12,14);R(g,x-4,y-2,8,12,'#2a2a36');R(g,x-15,y-6,30,4,K);R(g,x-14,y-5,28,2,'#a8673a');break;
+  case 'gorge':{mRock(g,x-15,y-6,11,16);mRock(g,x+4,y-6,11,16);R(g,x-4,y-4,8,14,'#3a3f55');R(g,x-4,y+4,8,6,'#2a2a36');R(g,x-3,y-4,1,8,'#55607a');
+  for(let t=0;t<=30;t++){const xx=x-15+t,sag=Math.round(2*Math.sin(Math.PI*t/30));R(g,xx,y-5+sag,1,2,K);if(t%2===0)R(g,xx,y-5+sag,1,1,'#c98d4a');R(g,xx,y-9+sag,1,1,'#8a5a2c');if(t%5===0)R(g,xx,y-9+sag,1,4,'#8a5a2c');}}break;
   case 'icecaves':mMountain(g,x,y+10,15,18,11);g.fillStyle=K;pixCircle(g,x,y+6,6);g.fillStyle='#7ad3ff';pixCircle(g,x,y+6,5);R(g,x-6,y+7,12,4,'#7ad3ff');break;
   case 'cliffroad':{R(g,x-15,y-13,12,26,K);R(g,x-14,y-12,10,24,MC.rock);R(g,x-14,y-12,3,24,MC.rockL);for(let yy=y-10;yy<y+12;yy+=4){R(g,x-14,yy,10,1,MC.rockD);R(g,x-13,yy-1,4,1,MC.snow);}R(g,x-7,y-12,2,24,MC.rockD);
   R(g,x-4,y-13,10,26,K);R(g,x-3,y-12,8,24,'#55607a');for(let k=0;k<5;k++)R(g,x+1,y-11+k*5,1,3,'#ffd23f');R(g,x+6,y-13,1,26,K);for(let k=0;k<7;k++)R(g,x+7,y-12+k*4,2,2,K);R(g,x+7,y-12,1,24,'#c6d0dc');R(g,x+9,y-13,6,26,'#c6d9f3');R(g,x+9,y-13,1,26,MC.sh2);}break;
@@ -2997,7 +3006,8 @@ function lmArt(g,id,x,y){
   case 'frozenlake':mPond(g,x,y+1,14,8);R(g,x-8,y-6,7,6,K);R(g,x-7,y-5,5,4,'#a8673a');C(x+6,y+3,1,'#2a4a7a');break;
   case 'aurora':for(let xx=x-15;xx<x+15;xx++){const yy=Math.round(y-6+4*Math.sin(xx*0.3));R(g,xx,yy,1,8,'rgba(90,255,170,0.55)');R(g,xx,yy-2,1,2,'rgba(190,120,255,0.55)');}mMountain(g,x,y+10,12,9,13);break;
   case 'snowmen':for(const [a,b2] of [[-10,4],[0,0],[10,5]])mSnowmanTo(g,x+a,y+b2,0);break;
-  case 'polartrail':for(let k=0;k<4;k++)pole(x-12+k*8,y-6+(k%2)*6,10,'#e03a4e');for(let k=0;k<12;k++)R(g,x-14+k*2,y+8-(k%3),1,1,'#8793a8');break;
+  case 'polartrail':{for(let t=0;t<30;t++){const yy=y+6-Math.round(t*0.45+Math.sin(t/4)*2);R(g,x-15+t,yy,1,1,'#a6c2ea');R(g,x-15+t,yy+3,1,1,'#a6c2ea');}
+  for(let k=0;k<3;k++)pole(x-13+k*8,y-4-k*3+(k%2)*2,9,'#f07a1a');R(g,x+11,y-1,1,9,K);R(g,x+8,y-3,7,3,K);R(g,x+9,y-2,4,1,'#c98d4a');R(g,x+14,y-2,1,1,K);}break;
   case 'spires':for(const [a,h] of [[-10,16],[-3,22],[5,14],[11,19]]){for(let r=0;r<h;r++){const hw=Math.round(1+r*0.18);R(g,x+a-hw,y+10-h+r,hw*2,1,r<2?'#ffffff':'#9fd4f4');}}break;
   case 'gardens2':{const hd=hx=>{R(g,hx,y+1,11,8,K);R(g,hx+1,y+2,9,6,'#a8dcfa');R(g,hx+1,y+2,9,1,'#e8f6ff');R(g,hx+8,y+3,2,5,'#7dbfe8');for(let k=0;k<3;k++)R(g,hx+2+k*3,y+5,1,1,'#ffffff');};hd(x-15);hd(x+4);
   for(let r=0;r<12;r++){const hw=Math.round(r*0.45);R(g,x-hw-1,y-13+r,hw*2+3,1,K);R(g,x-hw,y-13+r,hw+1,1,'#c8ecff');if(hw>0)R(g,x+1,y-13+r,hw,1,'#7dbfe8');}R(g,x-1,y-1,3,3,K);R(g,x,y-1,1,2,'#a8dcfa');R(g,x,y-15,1,1,'#ffffff');R(g,x-1,y-14,3,1,'#ffffff');}break;
