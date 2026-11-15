@@ -5,6 +5,10 @@ from common import *
 import ski_pro
 J = [f() for f in ski_pro.ALL]
 
+# longer late-game jobs (Nov 16): same layouts stretched vertically so rounds don't get shorter at the end
+STRETCH = {'grandslalom': 1.3, 'snowshoe': 1.6}
+for j in J: stretch(j, STRETCH.get(j['id'], 1.12))
+
 ids = [j['id'] for j in J]
 POS = {}
 for k, i in enumerate(ids):

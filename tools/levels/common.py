@@ -179,3 +179,46 @@ def autodress(d, palette, seed, edge=34, chance=0.55, keep_y=(60, None), avoid=(
             for cx, cy in cells: occ[cy * W + cx] = 1
             added += 1
     return added
+
+
+# ================================ vertical stretch (longer late-game jobs, same layout) ================================
+_VLEN_PROPS = ('railv', 'snowfencev', 'icewallv', 'rocknet', 'carpet', 'stonewallv', 'hedgev', 'wallv', 'track', 'coasterv', 'containerv', 'fence')
+_VLEN_DECALS = ('kerb', 'dashv', 'edge', 'dyl', 'rails')
+def stretch(d, s):
+    """stretch a job vertically by s: positions, lengths along y and ground heights scale; sizes across stay, so every
+    gap is at least as wide as before (fit is never worse)"""
+    if s == 1: return d
+    Y = lambda v: int(round(v * s))
+    h0 = d['h']; d['h'] = Y(h0); dd = d['data']
+    sx, sy = d['start'] if 'start' in d else dd.get('start', [90, 40])
+    ny = d['h'] - (h0 - sy) if sy > h0 / 2 else sy
+    if 'start' in d: d['start'] = [sx, ny]
+    if 'start' in dd: dd['start'] = [sx, ny]
+    for g in dd.get('ground', []): y0, y1 = Y(g[2]), Y(g[2] + g[4]); g[2] = y0; g[4] = max(1, y1 - y0)
+    for c in dd.get('circles', []): c[2] = Y(c[2])
+    for p in dd.get('props', []) + dd.get('scen', []):
+        p[2] = Y(p[2])
+        if p[0] in _VLEN_PROPS and len(p) > 3 and isinstance(p[3], (int, float)): p[3] = Y(p[3])
+    for e in dd.get('decals', []):
+        e[2] = Y(e[2])
+        if e[0] in _VLEN_DECALS and len(e) > 3: e[3] = Y(e[3])
+        if e[0] == 'hatch' and len(e) > 4: e[4] = Y(e[4])
+    for o in dd.get('over', []):
+        o[2] = Y(o[2])
+        if o[0] in ('liftline', 'gondola') and len(o) > 3: o[3] = Y(o[3])
+        if o[0] in ('shed', 'tunnel') and len(o) > 4: o[4] = Y(o[4])
+    for w in dd.get('wilds', []): w[2] = Y(w[2]); w[4] = Y(w[4])
+    for c in dd.get('clears', []): c[1] = Y(c[1]); c[3] = Y(c[3])
+    for c in dd.get('carves', []):
+        for i in range(2, len(c), 2): c[i] = Y(c[i])
+    for p in dd.get('paths', []):
+        for i in range(3, len(p), 2): p[i] = Y(p[i])
+    for e in dd.get('decor', []): e[2] = Y(e[2])
+    for e in dd.get('pull', []): e[1] = Y(e[1])
+    for hz in dd.get('hazards', []):
+        k = hz[0]; hz[2] = Y(hz[2])
+        if k == 'taxi' and len(hz) > 5: hz[4] = Y(hz[4]); hz[5] = Y(hz[5])
+        if k in ('skier', 'rockfall') and len(hz) > 4 and isinstance(hz[4], list):
+            ln = hz[4]
+            for i in range(1, len(ln), 2): ln[i] = Y(ln[i])
+    return d

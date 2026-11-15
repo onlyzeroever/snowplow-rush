@@ -6,6 +6,10 @@ from common import *
 import north_pro
 J = [f() for f in north_pro.ALL]
 
+# longer late-game jobs (Nov 16): same layouts stretched vertically so rounds don't get shorter at the end
+STRETCH = {'icepalace': 1.75, 'aurora': 1.9, 'spires': 1.9}
+for j in J: stretch(j, STRETCH.get(j['id'], 1.6))
+
 ids = [j['id'] for j in J]
 POS = {}
 for k, i in enumerate(ids):
