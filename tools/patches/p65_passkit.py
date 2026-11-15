@@ -26,3 +26,8 @@ rep("function buildFromData(g,D,setT,ob,setCircle,paintText){", KIT+"\nfunction 
 rep("  iceblock:{arg:14,","  rocknet:{arg:120,min:20,max:600,make:a=>rockNetSprite(a),foot:a=>[0,0,8,a]},\n  avfence:{arg:60,min:20,max:180,make:a=>avFenceSprite(a),foot:a=>[0,3,a,6]},\n  chevron:{arg:0,min:0,max:1,make:a=>chevronSprite(a),foot:()=>[6,16,6,4]},\n  passsign:{make:()=>scnSpr('psg',passSignSprite),foot:()=>[6,30,64,10]},\n  solar:{make:()=>scnSpr('sol',solarSprite),foot:()=>[0,2,30,12]},\n  radar:{make:()=>scnSpr('rad',radarSprite),foot:()=>[4,24,28,16]},\n  iceblock:{arg:14,")
 rep("const OVERS={gondola:","const OVERS={shed:(a,b)=>shedOverSprite(a||80,b||200),tunnel:(a,b)=>tunnelOverSprite(a||120,b||300),gondola:")
 open(f,'w',encoding='utf-8').write(s)
+s=open(f,encoding='utf-8').read()
+# dashed paths: a path whose ground name starts with '~' is painted as 10-on / 12-off dashes along its line
+rep("for(const p of D.paths||[]){const t=GROUND_T[p[0]]!=null?GROUND_T[p[0]]:T_GRASS,r=p[1]/2;for(let i=2;i+3<p.length;i+=2){const ax=p[i],ay=p[i+1],bx=p[i+2],by=p[i+3],n=Math.max(1,Math.ceil(Math.hypot(bx-ax,by-ay)/2));for(let k=0;k<=n;k++)setCircle(t,ax+(bx-ax)*k/n,ay+(by-ay)*k/n,r);}}",
+    "for(const p of D.paths||[]){const dsh=p[0][0]==='~',nm=dsh?p[0].slice(1):p[0],t=GROUND_T[nm]!=null?GROUND_T[nm]:T_GRASS,r=p[1]/2;let acc=0;for(let i=2;i+3<p.length;i+=2){const ax=p[i],ay=p[i+1],bx=p[i+2],by=p[i+3],L=Math.hypot(bx-ax,by-ay),n=Math.max(1,Math.ceil(L/2));for(let k=0;k<=n;k++){if(dsh&&((acc+L*k/n)%22)>=10)continue;setCircle(t,ax+(bx-ax)*k/n,ay+(by-ay)*k/n,r);}acc+=L;}}")
+open(f,'w',encoding='utf-8').write(s)
