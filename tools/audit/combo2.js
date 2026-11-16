@@ -1,0 +1,16 @@
+const { chromium } = require('/opt/npm-tools/node_modules/playwright');
+(async () => { const br = await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox'] });
+  const p = await (await br.newContext({ viewport: { width: 360, height: 640 } })).newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message));
+  await p.goto('http://127.0.0.1:8765/index6.html?test=1'); await p.waitForTimeout(900);
+  await p.evaluate(() => { const R = window.__SR; R.save.tut = true; R.save.tool = 5; R.save.use = 5; R.startLevel(R.LEVELS.findIndex(L => L.id === 'carousel')); });
+  await p.waitForTimeout(3500);
+  const out = await p.evaluate(() => { const R = window.__SR, run = R.run, P = R.P, res = []; window.__HOLD = true;
+    run.combo = 12; run.comboT = 0.75; P.inv = 0; R.hit('ob'); res.push(['first bump', run.combo, +run.crackT.toFixed(2), +run.comboT.toFixed(2)]);
+    window.__STEP(18, 1/30, 1); res.push(['0.6 s later (stunned)', run.combo, +run.crackT.toFixed(2)]);
+    return res; });
+  await p.screenshot({ path: '/tmp/combo_crack.png' });
+  const out2 = await p.evaluate(() => { const R = window.__SR, run = R.run, P = R.P, res = []; run.comboT = 0.75; P.inv = 0; P.stun = 0; R.hit('hz', 0.1); res.push(['second bump inside 3 s', run.combo, run.crackT]);
+    run.combo = 8; run.comboT = 0.75; P.inv = 0; P.stun = 0; R.hit('ob'); res.push(['new bump after reset', run.combo, +run.crackT.toFixed(2)]);
+    run.comboT = 9; window.__STEP(100, 1/30, 1); res.push(['3.3 s later', run.combo, +run.crackT.toFixed(2)]); run.comboT = 0.75; P.inv = 0; P.stun = 0; R.hit('ob'); res.push(['bump after healing', run.combo, +run.crackT.toFixed(2)]);
+    window.__HOLD = false; return res.concat([['halved', run.cHalf, 'wiped', run.cBonk]]); });
+  for (const r of out.concat(out2)) console.log(JSON.stringify(r)); console.log('errors', JSON.stringify(errs)); await br.close(); })();

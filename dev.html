@@ -243,7 +243,7 @@ const SHOP={ // TEST MODE: prices are shown but nothing is charged
   dailyGems:5,trophyGems:10,    // free gems from daily jobs and trophies
 };
 const BASE_CELL_VALUE=0.03;   // coins for one fully-snowed cell before multipliers
-const COMBO_MAX=20,COMBO_KEEP=0.75;           // combo steps; each adds +0.1x (max x3.0)
+const COMBO_MAX=20,COMBO_KEEP=0.75,COMBO_CRACK=3;           // combo steps; each adds +0.1x (max x3.0)
 const STAR_BONUS=50;          // first-time star bonus x job value x star number
 const SPILL_HAZARD=0.10, SPILL_BIG=0.15; // share of this run's coins knocked out by a hit
 const STUN_OB=0.45, STUN_HZ=0.6, INVULN=1.0, SPILL_LIFE=2.5;
@@ -2395,7 +2395,7 @@ function hitFx(){const fp=footprint(tool().id,P.x,P.y,P.f),cx=[fp.x+fp.w/2,fp.x+
   particles.push({x:cx,y:cy-2,vx:0,vy:0,z:0,vz:0,life:0.3,t:0,kind:'pow'});for(let k=0;k<5;k++)particles.push({x:cx,y:cy,vx:rnd(-26,26)-dx*30,vy:rnd(-18,18)-dy*24,z:3,vz:rnd(30,60),life:0.45,t:0,kind:'snow'});HITSTOP=0.06;}
 let HITSTOP=0;
 function hit(kind,spill){
-  if(P.inv>0)return;hitFx();const red=bumperRed();const bmp=curLv().bumper>0;P.inv=INVULN;P.stun=(kind==='ob'?STUN_OB:STUN_HZ)*red*(tool().id==='rotary'?0.5:1);shake=0.25*red;if(run.combo>=2)run.cBonk=(run.cBonk||0)+1;run.combo=0;run.comboProg=0;run.hits++;sfx(kind==='ob'?'bump':'hit',0,bmp?{vol:0.35+0.55*red,rate:0.8+0.2*red}:undefined);buzz(bmp?Math.round(45*red):45);
+  if(P.inv>0)return;hitFx();const red=bumperRed();const bmp=curLv().bumper>0;P.inv=INVULN;P.stun=(kind==='ob'?STUN_OB:STUN_HZ)*red*(tool().id==='rotary'?0.5:1);shake=0.25*red;if(run.combo>=2&&!(run.crackT>0)){run.combo=Math.floor(run.combo/2);run.comboProg=0;run.crackT=COMBO_CRACK;run.comboT=Math.max(run.comboT,COMBO_KEEP+P.stun);run.cHalf=(run.cHalf||0)+1;sfx('cfade');}else{if(run.combo>=2){run.cBonk=(run.cBonk||0)+1;sfx('cend');if(run.combo>=5)addFloat(P.x,P.y-30,'COMBO LOST','#ff8a98',1.0);}run.combo=0;run.comboProg=0;run.crackT=0;}run.hits++;sfx(kind==='ob'?'bump':'hit',0,bmp?{vol:0.35+0.55*red,rate:0.8+0.2*red}:undefined);buzz(bmp?Math.round(45*red):45);
   if(kind==='ob'){addFloat(P.x,P.y-27,bmp?'BUMPER!':'BONK!',bmp?'#ffd23f':'#ff9aa8');if(bmp)bumperFx();if(G.lastOb&&G.lastOb.src===SPR.gnome){save.stats.gnome++;if(save.stats.gnome>=5)award('gnome');}return;}
   const lose=Math.min(save.coins,Math.floor(run.earned*spill*red)),saved=Math.min(save.coins,Math.floor(run.earned*spill))-lose;if(bmp&&saved>=1){const bs='BUMPER SAVED '+fmt(saved),bw2=textW(bs)/2+2;addFloat(clamp(P.x,bw2,W-bw2),P.y-31,bs,'#ffd23f',1.2);bumperFx();}
   if(lose>=1){save.coins-=lose;run.earned-=lose;const n=Math.max(3,Math.min(8,Math.ceil(lose/2)));
@@ -2461,7 +2461,7 @@ function updatePlay(dt){
   if(run.time<10&&!run.hurry){run.hurry=true;}
   if(run.time<=5.5){const s2=Math.ceil(run.time);if(s2!==run.lastTick&&s2>0){run.lastTick=s2;sfx('tick');}}
   {const red=COMBO_KEEP*0.35;if(run.combo>=2&&run.comboT>=red&&run.comboT-dt<red)sfx('cfade');}
-  run.comboT-=dt;if(run.comboT<=0&&run.combo>0){if(run.combo>=2){sfx('cend');run.cFade=(run.cFade||0)+1;}if(run.combo>=5)addFloat(P.x,P.y-24,'COMBO OVER','#9fd8ff',0.9);run.combo=0;run.comboProg=0;}
+  if(run.crackT>0)run.crackT=Math.max(0,run.crackT-dt);run.comboT-=dt;if(run.comboT<=0&&run.combo>0){run.crackT=0;if(run.combo>=2){sfx('cend');run.cFade=(run.cFade||0)+1;}if(run.combo>=5)addFloat(P.x,P.y-24,'COMBO OVER','#9fd8ff',0.9);run.combo=0;run.comboProg=0;}
   run.pendT+=dt;if(run.pendT>0.36){run.pendT=0;if(run.pending>=0.5){const cm=1+0.1*run.combo;const cxp=br.x+br.w/2,cyp=br.y+br.h/2;
     addFloat(cxp+rnd(-6,6),cyp-6,'+'+fmt(Math.max(1,Math.round(run.pending))),run.gold>0?'#ffef7a':cm>=2.5?'#ff6fb5':cm>=2?'#ff9a3c':cm>=1.5?'#ffc43a':'#ffe48a');run.pending=0;
     particles.push({x:cxp,y:cyp,vx:rnd(-20,20),vy:rnd(-10,10),z:0,vz:rnd(40,60),life:0.7,t:0,kind:'coin'});sfx('coin',120);}}
@@ -4365,7 +4365,7 @@ function drawPlay(){
   if(run.boost&&!run.ended)text(b,'BOOST',4,VIEW_Y+VIEW_H-10,'#9fd8ff');
   if(run.challenge&&!run.ended)text(b,'WEEKLY',4,VIEW_Y+VIEW_H-20,'#ffd23f');
   if(run.combo>=2&&!run.ended){const m=(1+0.1*run.combo).toFixed(1);const bounce=Math.max(0,3-Math.floor((0.6-run.comboT)*20));
-    text(b,'x'+m+' COMBO!',W/2,VIEW_Y+10-Math.min(2,bounce),run.combo>=10?'#ffd23f':'#ff4fa3',{align:'center',scale:2});{const k=clamp(run.comboT/COMBO_KEEP,0,1),bw2=60;R(b,W/2-bw2/2-1,VIEW_Y+24,bw2+2,4,K);R(b,W/2-bw2/2,VIEW_Y+25,Math.round(bw2*k),2,k<0.35?'#ff6a7a':run.combo>=10?'#ffd23f':'#ff4fa3');}}
+    const crk=run.crackT>0,blink=crk&&Math.floor(tNow*8)%2===0;text(b,'x'+m+' COMBO!',W/2,VIEW_Y+10-Math.min(2,bounce),blink?'#ffffff':crk?'#ff4a5a':run.combo>=10?'#ffd23f':'#ff4fa3',{align:'center',scale:2});{const k=clamp(run.comboT/COMBO_KEEP,0,1),bw2=60;R(b,W/2-bw2/2-1,VIEW_Y+24,bw2+2,4,K);R(b,W/2-bw2/2,VIEW_Y+25,Math.round(bw2*k),2,blink?'#ffffff':crk?'#ff4a5a':k<0.35?'#ff6a7a':run.combo>=10?'#ffd23f':'#ff4fa3');if(crk){for(const [cx2,cy2] of [[-9,0],[-8,1],[-7,0],[6,1],[7,0],[8,1]])R(b,W/2+cx2,VIEW_Y+25+cy2,1,1,K);text(b,'CAREFUL!',W/2,VIEW_Y+31,blink?'#ffffff':'#ff8a98',{align:'center'});}}}
   if(!run.moved&&!run.ended){const kb=!('ontouchstart' in window)&&!navigator.maxTouchPoints;panel(20,VIEW_Y+VIEW_H-110,140,kb?46:36,'#13306b','#ffd23f');
     text(b,save.ctrl==='joy'?'DRAG ANYWHERE':'USE THE D-PAD',W/2,VIEW_Y+VIEW_H-103,'#ffffff',{align:'center',scale:2});text(b,'TO PUSH THE SNOW',W/2,VIEW_Y+VIEW_H-88,'#ffd23f',{align:'center'});if(!('ontouchstart' in window)&&!navigator.maxTouchPoints)text(b,'OR USE ARROW KEYS / WASD',W/2,VIEW_Y+VIEW_H-76,'#9fd8ff',{align:'center'});}
   if(joy){const ox=Math.round(joy.ox),oy=Math.round(joy.oy);b.fillStyle='rgba(255,255,255,0.35)';for(let a=0;a<24;a++){const an=a/24*Math.PI*2;b.fillRect(Math.round(ox+Math.cos(an)*16),Math.round(oy+Math.sin(an)*16),1,1);}R(b,Math.round(joy.x)-3,Math.round(joy.y)-3,7,7,'rgba(255,255,255,0.45)');}
@@ -4573,7 +4573,7 @@ const phJob=()=>{const L=G&&G.def;return L?{job:L.id,area:L.area}:{};};
 {const o=startLevel;startLevel=function(idx,opts){const r=o.apply(this,arguments);try{const L=LEVELS[idx];PH.jobT=Date.now();PH.frames=0;PH.slow=0;
   track('job_start',{job:L.id,area:L.area,job_no:L.area==='secret'?null:jobNo(idx),attempt:(save.fails[idx]||0)+1,stars_before:save.stars[idx]||0,weekly:!!(opts&&opts.challenge),mission:missionOn(idx),boss:!!L.boss});}catch(e){}return r;};}
 {const o=endRound;endRound=function(){const was=run&&run.ended;const r=o.apply(this,arguments);try{if(run&&!was&&run.res&&!run.phDone){run.phDone=true;const R2=run.res;
-  track('job_end',Object.assign(phJob(),{combo_best:+(1+0.1*(run.cBest||0)).toFixed(1),combo_avg:run.cG?+(run.cW/run.cG).toFixed(2):1,combo_bonks:run.cBonk||0,combo_fades:run.cFade||0,pct:Math.round(R2.pct),stars:R2.stars,all_clear:!!R2.allClear,earned:Math.round(run.earned||0),bonus:Math.round(R2.bonus||0),hits:run.hits||0,gifts:run.gifts||0,continue_used:!!run.contUsed,time_left:Math.round(run.time||0),secs:Math.round((Date.now()-PH.jobT)/1000),slow_frames_pct:PH.frames?Math.round(PH.slow/PH.frames*100):null,weekly:!!run.challenge,score:R2.challenge?R2.challenge.score:null,swept:!!run.swept,unreach_pct:G&&G.ncN?Math.round(G.ncN/(G.clearable+G.ncN)*1000)/10:0}));}}catch(e){}return r;};}
+  track('job_end',Object.assign(phJob(),{combo_halved:run.cHalf||0,combo_best:+(1+0.1*(run.cBest||0)).toFixed(1),combo_avg:run.cG?+(run.cW/run.cG).toFixed(2):1,combo_bonks:run.cBonk||0,combo_fades:run.cFade||0,pct:Math.round(R2.pct),stars:R2.stars,all_clear:!!R2.allClear,earned:Math.round(run.earned||0),bonus:Math.round(R2.bonus||0),hits:run.hits||0,gifts:run.gifts||0,continue_used:!!run.contUsed,time_left:Math.round(run.time||0),secs:Math.round((Date.now()-PH.jobT)/1000),slow_frames_pct:PH.frames?Math.round(PH.slow/PH.frames*100):null,weekly:!!run.challenge,score:R2.challenge?R2.challenge.score:null,swept:!!run.swept,unreach_pct:G&&G.ncN?Math.round(G.ncN/(G.clearable+G.ncN)*1000)/10:0}));}}catch(e){}return r;};}
 for(const [nm,get,set] of [['map',()=>goMap,f=>goMap=f],['garage',()=>goGarage,f=>goGarage=f],['upgrades',()=>goUpgrades,f=>goUpgrades=f]]){const o=get();set(function(){try{if(state==='play'&&run&&!run.ended)track('job_quit',Object.assign(phJob(),{pct:G?Math.round(G.cleared/G.clearable*100):null,secs:Math.round((Date.now()-PH.jobT)/1000)}));if(state!==nm)track('screen',{name:nm,from:state});}catch(e){}return o.apply(this,arguments);});}
 {const o=buyUpg;buyUpg=function(k){const c0=save.coins;const r=o.apply(this,arguments);try{if(save.coins<c0)track('upgrade_buy',{kind:k,machine:curMachine(),level:lvOf(k),cost:Math.round(c0-save.coins)});}catch(e){}return r;};}
 {const o=buyTool;buyTool=function(){const t0=save.tool,c0=save.coins;const r=o.apply(this,arguments);try{if(save.tool>t0)track('machine_buy',{bought:TOOLS[save.tool].id,cost:Math.round(c0-save.coins)});}catch(e){}return r;};}
