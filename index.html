@@ -1472,7 +1472,7 @@ function buildWilds(g,D,setT,setCircle){const cols=g.cols,rows=g.rows;
     for(let cy=cy0;cy<cy1;cy++)for(let cx=cx0;cx<cx1;cx++)if(!inC(cx*2+1,cy*2+1))blk(cx,cy);
     const rn=srng(seed||(x*31+y*7)),st=wd[7]||9;
     for(let py=y+4;py<y+h;py+=st)for(let px=x+2;px<x+w;px+=st){const qx=Math.round(px+(rn()-0.5)*st*0.9),qy=Math.round(py+(rn()-0.5)*st*0.9);if(rn()>(dens==null?0.75:dens))continue;
-      if(qx<0||qy<0||qx>=g.pw||qy>=g.ph)continue;if(!g.wild[(qy>>1)*cols+(qx>>1)]||inC(qx,qy,3))continue;const sp=frostOf(wildSpr(kind,rn));if(!sp)continue;g.scenery.push({spr:sp,sx:Math.round(qx-sp.width/2),sy:qy-sp.height+2,base:qy+2});}}
+      if(qx<0||qy<0||qx>=g.pw||qy>=g.ph)continue;if(!g.wild[(qy>>1)*cols+(qx>>1)]||inC(qx,qy,3))continue;const sp=frostOf(wildSpr(kind,rn));if(!sp)continue;g.scenery.push({spr:sp,sx:Math.round(qx-sp.width/2),sy:qy-sp.height+2,base:qy+2,wild:1});}}
   for(const p of D.scen||[]){const P2=PROPS[p[0]];if(!P2)continue;const a=p[3]!=null?p[3]:P2.arg,sp=P2.make(a),f2=P2.foot(a);{const fz=frostOf(sp);g.scenery.push({spr:fz,sx:p[1],sy:p[2]-(fz.padTop||0),base:p[2]+f2[1]+f2[3]});}if(!p[4])for(let cy=(p[2]+f2[1])>>1;cy<Math.ceil((p[2]+f2[1]+f2[3])/2);cy++)for(let cx=(p[1]+f2[0])>>1;cx<Math.ceil((p[1]+f2[0]+f2[2])/2);cx++)blk(cx,cy);}
   for(const p of D.over||[]){const f=OVERS[p[0]];if(f)g.over.push({spr:f(p[3],p[4]),sx:p[1],sy:p[2]});}
   const W1=cols+1,S=new Int32Array(W1*(rows+1));for(let y=0;y<rows;y++){let rs=0;for(let x=0;x<cols;x++){rs+=g.wild[y*cols+x];S[(y+1)*W1+x+1]=S[y*W1+x+1]+rs;}}g.wsat=S;}
@@ -2057,10 +2057,11 @@ function buildLevel(idx){
       case T_ICE:return n<3?[0xe8,0xf6,0xff]:n<6?[0x9f,0xd4,0xf4]:[0xbf,0xe6,0xff];default:return groundCol2(t,x,y,n);}};
   g.col=col;
   for(let y=0;y<ph;y++)for(let x=0;x<pw;x++){const c=col(g.type[(y>>1)*cols+(x>>1)],x,y);const o=(y*pw+x)*3;g.ground[o]=c[0];g.ground[o+1]=c[1];g.ground[o+2]=c[2];}if(g.decals)paintDecals(g);
-  g.canvas=mk(pw,ph);g.lctx=g.canvas.getContext('2d');g.img=g.lctx.createImageData(pw,ph);
+  g.tiles=[];for(let ty=0;ty<ph;ty+=128){const th=Math.min(128,ph-ty),c=mk(pw,th);g.tiles.push({c,x:c.getContext('2d'),y0:ty,h:th});}g.lctx=g.tiles[0].x;g.img=g.lctx.createImageData(pw,ph);
+  Object.defineProperty(g,'canvas',{configurable:true,get(){const c=mk(pw,ph),x=c.getContext('2d');for(const t of g.tiles)x.drawImage(t.c,0,t.y0);return c;}}); // whole map, for tools only
   g.drift=buildDrift(g);
   for(let cy=0;cy<rows;cy++)for(let cx=0;cx<cols;cx++)paintCell(g,cx,cy);
-  g.lctx.putImageData(g.img,0,0);g.dirty=null;
+  for(const t of g.tiles)t.x.putImageData(g.img,0,-t.y0,0,t.y0,pw,t.h);if(g.dB)g.dB.clear();g.dirty=null;
   if(L.night){const oc=mk(pw,ph),o=oc.getContext('2d');o.fillStyle='rgba(10,16,48,0.58)';o.fillRect(0,0,pw,ph);
     o.globalCompositeOperation='destination-out';for(const l of g.lights){for(const f of [1,0.7,0.45]){o.fillStyle='rgba(0,0,0,0.34)';pixCircle(o,l.x,l.y,Math.round(l.r*f));}}
     o.globalCompositeOperation='source-over';for(const l of g.lights){o.fillStyle=l.c?hexA(l.c,0.18):'rgba(255,205,110,0.16)';pixCircle(o,l.x,l.y,Math.round(l.r*0.75));}
@@ -2081,9 +2082,10 @@ function paintCell(g,cx,cy){
     if(blocked||d>BAYER[sy*2+sx]){c=snowCol(px,py,g.mark[i]&&sy===1,SNOW,SNOW2,g);if(g.wild&&g.wild[i])c=[c[0]-16,c[1]-11,c[2]-4];if(!blocked&&sy===1&&d>0.55&&below<0.3&&!belowB)c=LOOK==='i'?SN_I3:EDGEC;data[o]=c[0];data[o+1]=c[1];data[o+2]=c[2];}
     else{const go=(py*pw+px)*3;let m=1;if(sy===0&&above>0.55&&!aboveB)m=0.72;data[o]=g.ground[go]*m;data[o+1]=g.ground[go+1]*m;data[o+2]=g.ground[go+2]*m;}
     data[o+3]=255;}
-  const dr=g.dirty,x0=cx*2,y0=cy*2;
-  if(!dr)g.dirty={x0,y0,x1:x0+2,y1:y0+2};else{if(x0<dr.x0)dr.x0=x0;if(y0<dr.y0)dr.y0=y0;if(x0+2>dr.x1)dr.x1=x0+2;if(y0+2>dr.y1)dr.y1=y0+2;}}
-function flushLevel(g){const d=g.dirty;if(!d)return;g.lctx.putImageData(g.img,0,0,d.x0,d.y0,d.x1-d.x0,d.y1-d.y0);g.dirty=null;}
+  const x0=cx*2,y0=cy*2,dbi=y0>>5;if(!g.dB)g.dB=new Map();const dr=g.dB.get(dbi);
+  if(!dr)g.dB.set(dbi,{x0,y0,x1:x0+2,y1:y0+2});else{if(x0<dr.x0)dr.x0=x0;if(y0<dr.y0)dr.y0=y0;if(x0+2>dr.x1)dr.x1=x0+2;if(y0+2>dr.y1)dr.y1=y0+2;}g.dirty=1;}
+function flushLevel(g){if(!g.dirty||!g.dB)return;const pw=g.pw,src=g.img.data;if(!g.scr)g.scr=g.lctx.createImageData(pw,32);const sd=g.scr.data;
+  for(const d of g.dB.values()){const t=g.tiles[(d.y0/128)|0];sd.set(src.subarray(d.y0*pw*4,d.y1*pw*4));t.x.putImageData(g.scr,0,d.y0-t.y0,d.x0,0,d.x1-d.x0,d.y1-d.y0);}g.dB.clear();g.dirty=null;}
 function setDepth(g,i,v){const old=g.depth[i];if(old===v)return;g.depth[i]=v;const cy=(i/g.cols)|0,b=Math.floor(cy*2/g.bandH);
   if(!(g.nc&&g.nc[i])){if(old>=CLEAR_T&&v<CLEAR_T){g.cleared++;g.bandClr[b]++;}else if(old<CLEAR_T&&v>=CLEAR_T){g.cleared--;g.bandClr[b]--;}}
   const cx=i%g.cols;paintCell(g,cx,cy);paintCell(g,cx,cy-1);paintCell(g,cx,cy+1);}
@@ -4223,12 +4225,26 @@ function drawSettings(){b.fillStyle='rgba(11,24,56,0.75)';b.fillRect(0,0,W,H);pa
   text(b,'ANONYMOUS AND NEVER SOLD',W/2,195,'#9fc0e8',{align:'center',outline:null});
   if(!(confirmReset>0)){R(b,24,203,132,1,'#2a4a8a');}button('rst',24,206,132,15,confirmReset>0?'red':'navy',confirmReset>0?'TAP AGAIN TO RESET':null,()=>{if(confirmReset>0){resetSave();confirmReset=0;showToast('PROGRESS RESET');}else confirmReset=2.5;});if(!(confirmReset>0))text(b,'RESET PROGRESS',W/2,210,'#ff8f9e',{align:'center'});
   button('close',54,234,72,18,'orange','DONE',()=>{settingsOpen=false;sfx('click');});}
+function bakeWild(g){const key=LOOK+'|'+SHD+'|'+lkShadow()+'|'+lkOutline();if(g.wbk===key)return;
+  if(!g.wlist){g.wlist=g.scenery.filter(o=>o.wild).sort((a,c)=>a.base-c.base);g.scenery=g.scenery.filter(o=>!o.wild);g.wb=new Map();
+    for(const o of g.wlist){for(let k=(o.sy-1)>>5;k<=(o.sy+o.spr.height)>>5;k++){let a=g.wb.get(k);if(!a)g.wb.set(k,a=[]);a.push(o);}}}
+  g.wbk=key;g.wsh=null;g.wtr=null;if(!g.wlist.length)return;const TH=128;
+  const put=(L,img,x,y,al)=>{const a=Math.max(0,y),e=Math.min(g.ph,y+img.height);for(let ty=Math.floor(a/TH);ty*TH<e;ty++){let t=L.get(ty);
+    if(!t){const h=Math.min(TH,g.ph-ty*TH),c=mk(g.pw,h);t={c,x:c.getContext('2d'),y0:ty*TH,h};L.set(ty,t);}t.x.globalAlpha=al;t.x.drawImage(img,x,y-t.y0);t.x.globalAlpha=1;}};
+  if(lkShadow()){const sp=SHD_P[SHD]||SHD_P.thin;g.wsh=new Map();for(const o of g.wlist)put(g.wsh,shadowOf(o.spr),o.sx+sp[0],o.sy+sp[1],sp[2]);}
+  g.wtr=new Map();for(const o of g.wlist){if(lkOutline())put(g.wtr,outlineOf(o.spr),o.sx-1,o.sy-1,1);put(g.wtr,bright(o.spr),o.sx,o.sy,1);}}
+function drawWildLayer(L,cy){if(!L)return;for(let ty=Math.floor(Math.max(0,cy)/128);ty*128<cy+VIEW_H;ty++){const t=L.get(ty);if(!t)continue;
+  const a=Math.max(cy,t.y0),e=Math.min(cy+VIEW_H,t.y0+t.h);if(e>a)b.drawImage(t.c,0,a-t.y0,W,e-a,0,a,W,e-a);}}
+function wildOcc(x,y,w,h,base,ents){const g=G;if(!g.wb)return;x=Math.round(x);y=Math.round(y);w=Math.round(w);h=Math.round(h);const seen=new Set();
+  for(let k=y>>5;k<=(y+h)>>5;k++){const a=g.wb.get(k);if(!a)continue;for(const o of a){if(o.base<=base||seen.has(o))continue;
+    if(o.sx-1>=x+w||o.sx+o.spr.width+1<=x||o.sy-1>=y+h||o.sy+o.spr.height+1<=y)continue;seen.add(o);
+    ents.push({base:o.base,draw:()=>{b.save();b.beginPath();b.rect(x,y,w,h);b.clip();if(lkOutline())b.drawImage(outlineOf(o.spr),o.sx-1,o.sy-1);b.drawImage(bright(o.spr),o.sx,o.sy);b.restore();}});}}}
 function drawPlay(){
   const T=tool(),tid=T.id,bwPx=bladeCells()*2;const sx=shake>0?Math.round(rnd(-1.5,1.5)):0,sy=shake>0?Math.round(rnd(-1.5,1.5)):0,cy=Math.round(camY);
   b.save();b.beginPath();b.rect(0,VIEW_Y,W,VIEW_H);b.clip();b.translate(sx,VIEW_Y-cy+sy);
-  b.drawImage(G.canvas,0,cy,W,VIEW_H,0,cy,W,VIEW_H);
+  for(const t of G.tiles){const a=Math.max(cy,t.y0),e=Math.min(cy+VIEW_H,t.y0+t.h);if(e>a)b.drawImage(t.c,0,a-t.y0,W,e-a,0,a,W,e-a);}
   if(lkTone()){b.fillStyle='rgba(64,96,160,0.10)';b.fillRect(0,cy,W,VIEW_H);}
-  const top=cy-60,bot=cy+VIEW_H+60;
+  const top=cy-60,bot=cy+VIEW_H+60;bakeWild(G);
   for(const d of G.decor)if(d.y>top&&d.y<bot)b.drawImage(d.spr,d.x,d.y);
   for(const pr of G.presents)if(!pr.taken&&pr.y>top&&pr.y<bot){const bob=Math.floor(tNow*3+pr.x)%2;b.drawImage(SPR.bow,pr.x-4,pr.y-3-bob);}
   // squall shadow
@@ -4242,7 +4258,7 @@ function drawPlay(){
   if(G.part&&!G.part.found&&G.part.y>top&&G.part.y<bot){const pt=G.part,ci=(pt.y>>1)*G.cols+(pt.x>>1),open=G.depth[ci]<CLEAR_T;if(open)b.drawImage(partIcon(),pt.x-6,pt.y-6);else if(Math.floor(tNow*1.6+pt.x)%3===0){R(b,pt.x,pt.y-2,1,5,'#e0c8ff');R(b,pt.x-2,pt.y,5,1,'#e0c8ff');R(b,pt.x,pt.y,1,1,'#9b5fd6');}}
   if(G.driveKey&&!G.driveKey.taken&&G.driveKey.y>top&&G.driveKey.y<bot){const dk=G.driveKey,p=Math.floor(tNow*6)%4;b.fillStyle='rgba(255,210,63,0.22)';pixCircle(b,dk.x,dk.y,9+p);b.drawImage(driveIcon(),dk.x-8,dk.y-8-(Math.floor(tNow*3)%2));}
   if(G.treasure&&!G.treasure.found&&Math.floor(tNow*1.3+G.treasure.x)%3===0){const tx=G.treasure.x,ty=G.treasure.y;R(b,tx,ty-2,1,5,'#ffffff');R(b,tx-2,ty,5,1,'#ffffff');R(b,tx,ty,1,1,'#ffd23f');}
-  if(lkShadow()){const sp=SHD_P[SHD]||SHD_P.thin;b.save();b.globalAlpha=sp[2];
+  if(lkShadow()){const sp=SHD_P[SHD]||SHD_P.thin;b.save();drawWildLayer(G.wsh,cy);b.globalAlpha=sp[2];
     for(const o of G.obstacles)if(o.sy+o.spr.height>top-4&&o.sy<bot+4)b.drawImage(shadowOf(o.spr),o.sx+sp[0],o.sy+sp[1]);
     for(const o of G.scenery)if(o.sy+o.spr.height>top-4&&o.sy<bot+4)b.drawImage(shadowOf(o.spr),o.sx+sp[0],o.sy+sp[1]);
     for(const cw of G.cows)if(cw.y>top-10&&cw.y<bot+10&&!(cw.z>0))b.drawImage(shadowOf(cw.flip?COWL:COW),Math.round(cw.x)-8+sp[0],Math.round(cw.y)-10+sp[1]);
@@ -4254,8 +4270,8 @@ function drawPlay(){
   const ents=[];
   for(const cw of G.cows){if(cw.y<top||cw.y>bot)continue;ents.push({base:cw.y+3,draw:()=>{const cx2=Math.round(cw.x),cy2=Math.round(cw.y);if(cw.z>0){b.fillStyle='rgba(30,40,80,0.25)';b.fillRect(cx2-5,cy2+1,10,3);}
     const cyo=cy2-10-Math.round(cw.z)+(cw.state==='graze'&&cw.vx?Math.floor(cw.t*4)%2:0);if(lkOutline()||LOOK==='e')b.drawImage(outlineOf(cw.flip?COWL:COW),cx2-9,cyo-1);b.drawImage(bright(cw.flip?COWL:COW),cx2-8,cyo);if(cw.state==='beam'&&Math.floor(tNow*6)%2)text(b,'MOO?',cx2,cy2-21-Math.round(cw.z),'#ffffff',{align:'center'});}});}
-  for(const o of G.obstacles)if(o.sy+o.spr.height>top&&o.sy<bot)ents.push({base:o.base,draw:()=>{if(lkOutline()||(LOOK==='e'&&smallOb(o)))b.drawImage(outlineOf(o.spr),o.sx-1,o.sy-1);b.drawImage(bright(o.spr),o.sx,o.sy);}});
-  for(const o of G.scenery)if(o.sy+o.spr.height>top&&o.sy<bot)ents.push({base:o.base,draw:()=>{if(lkOutline())b.drawImage(outlineOf(o.spr),o.sx-1,o.sy-1);b.drawImage(bright(o.spr),o.sx,o.sy);}});
+  for(const o of G.obstacles)if(o.sy+o.spr.height>top&&o.sy<bot){ents.push({base:o.base,draw:()=>{if(lkOutline()||(LOOK==='e'&&smallOb(o)))b.drawImage(outlineOf(o.spr),o.sx-1,o.sy-1);b.drawImage(bright(o.spr),o.sx,o.sy);}});wildOcc(o.sx-1,o.sy-1,o.spr.width+2,o.spr.height+2,o.base,ents);}
+  for(const o of G.scenery)if(o.sy+o.spr.height>top&&o.sy<bot){ents.push({base:o.base,draw:()=>{if(lkOutline())b.drawImage(outlineOf(o.spr),o.sx-1,o.sy-1);b.drawImage(bright(o.spr),o.sx,o.sy);}});wildOcc(o.sx-1,o.sy-1,o.spr.width+2,o.spr.height+2,o.base,ents);}
   for(const hz of G.hazards){if(hz.kind!=='skier'&&(hz.y+40<top||hz.y-40>bot))continue;const hx=Math.round(hz.x),hy=Math.round(hz.y);
     if(hz.kind==='dog')ents.push({base:hz.y+hz.h,draw:()=>b.drawImage(hz.spr||(hz.vx>=0?SPR.dog:SPR.dogL),hx-1,hy-4+(Math.floor(hz.t*8)%2))});
     else if(hz.kind==='cart')ents.push({base:hz.y+hz.h,draw:()=>b.drawImage(CART,hx,hy)});
@@ -4296,6 +4312,11 @@ function drawPlay(){
     const fp=footprint(tid,P.x,P.y,P.f),pl=Math.min(4,Math.round(P.load*4));
   ents.push({base:fp.y+fp.h,draw:()=>{drawRig(b,tid,P.x,P.y,P.spin>0?(P.f+Math.floor(P.spin*14))%4:P.f,bwPx,pl,P.bob,tid==='mech'?(P.step|0):P.fr,(P.stun>0||P.inv>0)&&Math.floor(tNow*20)%2===0);
       if(P.stun>0){const top=Math.min(fp.y,P.y-12)-8;for(let k=0;k<3;k++){const t=tNow*7+k*2.09,sx=Math.round(P.x+Math.cos(t)*7),sy=Math.round(top+Math.sin(t)*2.5),front=Math.sin(t)>0;R(b,sx,sy-1,1,3,front?'#ffd23f':'#c98a12');R(b,sx-1,sy,3,1,front?'#ffd23f':'#c98a12');R(b,sx,sy,1,1,front?'#ffffff':'#ffe27a');}}}});
+  if(G.wb){for(const hz of G.hazards){if(hz.kind!=='skier'&&(hz.y+40<top||hz.y-40>bot))continue;wildOcc(hz.x-16,hz.y+hz.h-56,hz.w+32,64,hz.y+hz.h,ents);}
+    for(const cw of G.cows)if(cw.y>top&&cw.y<bot)wildOcc(cw.x-12,cw.y-18-(cw.z||0),24,24+(cw.z||0),cw.y+3,ents);
+    for(const nb of G.neighbours)if(nb.y>top&&nb.y<bot)wildOcc(nb.x-10,nb.y-30,20,32,nb.y+1,ents);
+    wildOcc(P.x-52,fp.y-40,104,fp.h+80,fp.y+fp.h,ents);}
+  drawWildLayer(G.wtr,cy);
   ents.sort((a,c)=>a.base-c.base);for(const e of ents)e.draw();
   for(const o of G.over)if(o.sy+o.spr.height>top&&o.sy<bot){const un=P&&P.x>o.sx-6&&P.x<o.sx+o.spr.width+6&&P.y>o.sy-4&&P.y<o.sy+o.spr.height+14;b.save();b.globalAlpha=0.18;b.drawImage(shadowOf(o.spr),o.sx+4,o.sy+10);b.globalAlpha=un?0.4:1;b.drawImage(bright(o.spr),o.sx,o.sy);b.restore();}
   // snowballs in flight
