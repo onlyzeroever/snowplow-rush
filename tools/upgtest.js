@@ -35,7 +35,7 @@ const { chromium } = require('/opt/npm-tools/node_modules/playwright');
   const b0 = await bump(0), b1 = await bump(10);
   out.push(['E bumper lv0 vs lv10', b0, b1, b1.stun < b0.stun * 0.6 && b1.lost < b0.lost * 0.6 ? 'PASS' : 'FAIL']);
   // F. helpers: coins tick up on the map, and pile up while you're away
-  const help = async (lv) => { await setLv('helpers', lv); await ev(() => { const R = window.__SR; R.goMap(); R.save.coins = 1000; }); await page.waitForTimeout(3000); return ev(() => ({ gained: +(window.__SR.save.coins - 1000).toFixed(1), perSec: +window.__SR.upg.helperIncome().toFixed(2) })); };
+  const help = async (lv) => { await setLv('helpers', lv); await ev(() => { const R = window.__SR; R.goMap(); R.save.coins = 1000; }); await ev(() => { window.__HOLD = true; window.__STEP(90, 1 / 30, 0); window.__HOLD = false; }); /* 3 s of game time */ return ev(() => ({ gained: +(window.__SR.save.coins - 1000).toFixed(1), perSec: +window.__SR.upg.helperIncome().toFixed(2) })); };
   const h0 = await help(0), h1 = await help(5);
   out.push(['F helpers on map 3s, lv0 vs lv5', h0, h1, h0.gained < 0.01 && h1.gained > h1.perSec * 2 ? 'PASS' : 'FAIL']);
   await ev(() => { const R = window.__SR; R.save.lv.helpers = 5; R.save.last = Date.now() - 3600 * 1000; localStorage.setItem('snowplowRush.test', JSON.stringify(R.save)); window.onbeforeunload = null; });
