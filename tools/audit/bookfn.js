@@ -1,0 +1,11 @@
+const { chromium } = require('/opt/npm-tools/node_modules/playwright');
+(async()=>{const b=await chromium.launch({executablePath:'/usr/bin/google-chrome',args:['--no-sandbox']});const p=await (await b.newContext({viewport:{width:360,height:640}})).newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
+await p.goto('http://127.0.0.1:8765/index6.html?test=1');await p.waitForTimeout(800);
+const r=await p.evaluate(async()=>{const R=window.__SR,EV=window.__EV,U=window.__UI;window.__HOLD=true;const raf=()=>new Promise(r=>requestAnimationFrame(()=>r()));const fr=async()=>{await raf();window.__STEP(3,1/30,1);await raf();};
+R.save.tut=true;R.save.privSeen=true;R.save.story={suburbs:true};R.save.treasures={KEY:true,DUCK:true};delete R.save.trSeen;R.goMap();EV('dailyOpen=false');R.dailyOpen=false;await fr();await fr();
+const log=[];log.push(['ui',U.list().join(',')]);log.push(U.press('book'));await fr();log.push(['open',EV('bookOpen'),JSON.stringify(R.save.trSeen)]);
+R.save.treasures.GOLD=true;await fr();log.push(['newGold',EV('!(save.trSeen||{}).GOLD')]);
+log.push(U.press('bk3'));await fr();log.push(['sel',EV('bookSel'),EV('!!(save.trSeen||{}).DUCK')]);log.push(U.press('bkn'));await fr();log.push(['next',EV('bookSel')]);
+log.push(U.press('bkx'));await fr();log.push(['closed card',EV('bookSel')]);log.push(U.press('bkclose'));await fr();log.push(['book',EV('bookOpen'),EV('!!(save.trSeen||{}).GOLD')]);
+log.push(U.press('nav-upg'));await raf();window.__STEP(1,1/60,1);log.push(['during slide ui',U.list().join(',')]);window.__STEP(30,1/30,1);await raf();log.push(['after',U.list().length]);
+return log;});console.log(JSON.stringify(r),errs);await b.close();})();
