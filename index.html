@@ -3852,7 +3852,7 @@ function drawJobInfo(){const i=jobInfo,L=LEVELS[i],st=nodeState(i),open=st==='op
   if(open)button('jplay',40,save.tool>0?199:184,100,save.tool>0?22:24,'orange','PLAY!',()=>{const k=jobInfo;jobInfo=-1;startLevel(k);},{scale:2});
   else if(avail){const why=jobLockReason(i);b.drawImage(SPR.lock,W/2-4,180);text(b,why,W/2,192,'#ff9aa8',{align:'center',outline:null});
     if(why==='ROAD FEE'){button('jtoll',46,202,88,18,save.coins>=L.toll?'green':'grey',null,()=>{tryBuy({c:L.toll},()=>{save.tolls[L.id]=true;showToast('ROAD CLEARED!','#7fe08a');});});text(b,'PAY',W/2-18,208,'#ffffff',{align:'center'});priceDraw({c:L.toll},W/2-6,208,'#ffffff');}}
-  button('jclose',54,228,72,18,'blue','CLOSE',()=>{jobInfo=-1;sfx('click');});}
+  button('jclose',54,228,72,18,'blue','DONE',()=>{jobInfo=-1;sfx('click');});}
 // ---- weekly: challenge + example leaderboard ----
 function weekOfYear(){const d=new Date(),j=new Date(d.getFullYear(),0,1);return Math.floor((d-j)/604800000)+1;}
 const LB_NAMES=['FROSTYFRAN','PLOWKING','SNOWBO','MAPLEMAX','YETIBETTY','SLUSHPUP','ICYMIKE','DRIFTQUEEN','SHOVELSAM','BLIZZBOY','COCOAKID','SLEDNED','FLAKEFACE','TINSELTOM'];
@@ -3878,7 +3878,7 @@ function drawWeekly(){const d=weeklyDef(),L=LEVELS[d.i],t=TOOLS[toolIdx(d.tid)],
   text(b,wk.claimed?'PLAYED THIS WEEK':'+20 GEMS FOR YOUR FIRST RUN',W/2,189,wk.claimed?'#7fe08a':'#ff8fc8',{align:'center',outline:null});
   button('wkplay',40,200,100,22,'orange','PLAY',()=>{startLevel(d.i,{challenge:d.tid});});
   button('wklb',40,226,100,15,'gold',null,()=>{weeklyOpen=false;trophiesOpen=true;trophyTab=1;sfx('click');});b.drawImage(SPR.trophy,47,229);text(b,'LEADERBOARD',95,230,'#ffffff',{align:'center'});
-  button('wkclose',54,250,72,18,'blue','CLOSE',()=>{weeklyOpen=false;sfx('click');});}
+  button('wkclose',54,250,72,18,'blue','DONE',()=>{weeklyOpen=false;sfx('click');});}
 function drawStory(){const lines=STORY[storyOpen]||[];b.fillStyle='rgba(11,24,56,0.8)';b.fillRect(0,0,W,H);panel(14,80,152,130,'#13306b','#ffd23f');
   text(b,AREAS[storyOpen].name,W/2,92,'#ffd23f',{align:'center',scale:2});lines.forEach((l,k)=>text(b,l,W/2,116+k*12,'#ffffff',{align:'center',outline:null}));
   button('sok',54,180,72,20,'orange',"LET'S GO!",()=>{save.story=save.story||{};save.story[storyOpen]=true;storyOpen=null;sfx('click');persist();});}
@@ -3944,7 +3944,7 @@ function drawRidePeek(){const tid=ridePeek,ti=toolIdx(tid),t=TOOLS[ti],isNext=ti
     const ts=totalStars(),need=starsNeeded();text(b,'3-STAR EVERY JOB, THEN',W/2,206,'#ffffff',{align:'center',outline:null});text(b,'START A NEW WINTER',W/2,215,'#ffffff',{align:'center',outline:null});
     R(b,40,226,100,7,K);R(b,41,227,98,5,'#14102a');R(b,41,227,Math.round(98*Math.min(1,ts/need)),5,'#ffd23f');text(b,ts+'/'+need,W/2,236,'#ffd23f',{align:'center',outline:null});}
   else{text(b,'A WILD RIDE FOR WINTER '+t.winter,W/2,184,'#ffd23f',{align:'center',outline:null});text(b,'KEEP PLOWING TO',W/2,200,'#ffffff',{align:'center',outline:null});text(b,'FIND OUT WHAT IT IS...',W/2,210,'#ffffff',{align:'center',outline:null});}
-  button('pkclose',54,246,72,18,'blue','CLOSE',()=>{ridePeek=null;sfx('click');});}
+  button('pkclose',54,246,72,18,'blue','DONE',()=>{ridePeek=null;sfx('click');});}
 // the big reveal when a New Winter brings a Wild Ride
 function drawRideReveal(dt){const R2=rideReveal;R2.t+=dt;const tid=R2.tid,t=TOOLS[toolIdx(tid)],job=LEVELS.find(l=>l.tool===tid);b.fillStyle='rgba(8,6,20,0.9)';b.fillRect(0,0,W,H);panel(10,36,160,240,'#1b1530','#ffd23f');
   text(b,'NEW WILD RIDE!',W/2,46,'#ffd23f',{align:'center',scale:2});const sx=22,syy=66,sw=136,sh=100;R(b,sx-1,syy-1,sw+2,sh+2,K);R(b,sx,syy,sw,sh,'#241c48');R(b,sx,syy+sh-16,sw,16,'#2a2150');
@@ -3975,7 +3975,7 @@ function drawWinter(){b.fillStyle='rgba(11,24,56,0.8)';b.fillRect(0,0,W,H);panel
   text(b,'KEEPS: SKINS, OUTFITS, GEMS,',W/2,y,'#9fc0e8',{align:'center',outline:null});y+=9;text(b,'TROPHIES, TREASURES, FROST',W/2,y,'#9fc0e8',{align:'center',outline:null});y+=12;
   if(ts<need){text(b,'3-STAR EVERY JOB TO UNLOCK',W/2,y,'#ffd23f',{align:'center',outline:null});y+=10;R(b,30,y,120,9,K);R(b,31,y+1,118,7,'#1b2a50');R(b,31,y+1,Math.round(118*ts/need),7,'#ffd23f');
     b.drawImage(SPR.star,66,y+13);text(b,ts+' / '+need+' STARS',76,y+13,'#ffffff');
-    button('wok',54,262,72,20,'orange','OK',()=>{winterOpen=false;sfx('click');});return;}
+    button('wok',54,262,72,20,'orange','DONE',()=>{winterOpen=false;sfx('click');});return;}
   if(!save.winterSeen)save.winterSeen=true;const gain=frostGain();b.drawImage(SPR.frost,40,y);text(b,'+'+gain+' FROST STARS',54,y+2,'#9fd8ff');
   button('wgo',20,262,68,20,'green','START',startNewWinter);button('wno',92,262,68,20,'grey','NOT YET',()=>{winterOpen=false;sfx('click');});}
 function skinState(tid,i){if(skinOwned(tid,i))return 'own';if(i===5)return 'prem';const pr=skinPrice(tid,i);if(pr.earn)return 'earn';return 'buy';}
@@ -4034,21 +4034,49 @@ const TICON={KEY:[[2,3,4,4,'#ffd23f'],[6,4,6,2,'#ffd23f'],[10,6,2,2,'#ffd23f']],
 function drawBook(){b.fillStyle='rgba(11,24,56,0.82)';b.fillRect(0,0,W,H);panel(6,30,168,278,'#5a3a1e','#ffd23f');R(b,10,34,160,242,'#f4e8c8');R(b,89,34,2,242,'#c9b48a');
   text(b,'TREASURE BOOK',W/2,40,'#7a4a2a',{align:'center',scale:2,outline:null});text(b,'FIND THEM GLINTING IN THE SNOW',W/2,56,'#7a4a2a',{align:'center',outline:null});
   TREASURES.forEach((t2,k)=>{const x=16+(k%3)*52,y=70+Math.floor(k/3)*46,found=!!save.treasures[t2[0]];R(b,x,y,44,40,'#e8d8b0');R(b,x+15,y+4,14,14,K);R(b,x+16,y+5,12,12,found?'#fff8e0':'#b8a888');
-    if(found){for(const [a1,b1,c1,d1,col] of (TICON[t2[0]]||[]))R(b,x+16+a1-1,y+5+b1-1,c1,d1,col);}else text(b,'?',x+22,y+8,'#7a6a4a',{align:'center',outline:null});
-    const nm=found?t2[1]:'???';text(b,nm.length>10?nm.slice(0,10):nm,x+22,y+24,'#5a3a1e',{align:'center',outline:null});if(found&&nm.length>10)text(b,nm.slice(10).trim(),x+22,y+31,'#5a3a1e',{align:'center',outline:null});});
+    for(const [a1,b1,c1,d1,col] of (TICON[t2[0]]||[]))R(b,x+16+a1-1,y+5+b1-1,c1,d1,found?col:'#7a6a4c');if(found&&Math.floor(tNow*1.5+k)%4===0){R(b,x+27,y+6,1,3,'#ffffff');R(b,x+26,y+7,3,1,'#ffffff');}
+    const nm=found?t2[1]:'???',cut=nm.length>10?(nm.lastIndexOf(' ',10)>0?nm.lastIndexOf(' ',10):10):nm.length;text(b,nm.slice(0,cut),x+22,y+24,'#5a3a1e',{align:'center',outline:null});if(found&&cut<nm.length)text(b,nm.slice(cut).trim(),x+22,y+31,'#5a3a1e',{align:'center',outline:null});});
   text(b,'EACH ONE: +2% COINS FOREVER',W/2,252,'#7a4a2a',{align:'center',outline:null});text(b,'FOUND '+treasureCount()+' OF '+TREASURES.length+'  (NOW +'+Math.round(treasureCount()*TREASURE_BONUS*100)+'%)',W/2,262,'#a8740a',{align:'center',outline:null});
   button('bkclose',54,284,72,18,'blue','DONE',()=>{bookOpen=false;sfx('click');});}
-let trophyTab=0;
+let trophyTab=0;const TICO={};
+function trophyIcon(id){if(TICO[id])return TICO[id];const c=mk(11,11),g=c.getContext('2d'),Y='#ffd23f',W2='#ffffff',dot=(x,y,col)=>R(g,x,y,1,1,col);
+  const ring=(cx,cy,r,col,fill)=>{g.fillStyle=K;pixCircle(g,cx,cy,r);g.fillStyle=col;pixCircle(g,cx,cy,r-1);if(fill){g.fillStyle=fill;pixCircle(g,cx,cy,r-2);}};
+  switch(id){
+    case 'first':R(g,5,0,2,7,K);R(g,5,1,1,5,'#c98d4a');R(g,2,6,7,5,K);R(g,3,7,5,3,'#8793a8');R(g,3,7,5,1,'#c6ccd8');R(g,4,0,4,2,K);break;
+    case 'drive3':g.drawImage(SPR.bigStar,1,1);break;
+    case 'combo':ring(5,5,5,'#f07a1a');R(g,2,3,2,1,W2);R(g,3,4,1,1,W2);R(g,2,5,2,1,W2);R(g,5,3,3,1,W2);R(g,7,4,1,1,W2);R(g,6,5,2,1,W2);R(g,7,6,1,1,W2);R(g,5,7,3,1,W2);break;
+    case 'gifts':g.drawImage(SPR.present,1,2);g.drawImage(SPR.bow,1,0);break;
+    case 'untouch':R(g,1,0,9,7,K);R(g,2,7,7,2,K);R(g,4,9,3,2,K);R(g,2,1,7,6,'#3f86d6');R(g,3,7,5,1,'#3f86d6');R(g,5,8,1,2,'#3f86d6');R(g,2,1,3,6,'#7fbaf2');R(g,5,2,1,5,W2);R(g,3,4,5,1,W2);break;
+    case 'dodge':ring(6,5,4,'#e8f2fc');R(g,4,3,2,1,W2);R(g,0,4,2,1,'#9fd8ff');R(g,0,6,2,1,'#9fd8ff');R(g,1,8,2,1,'#9fd8ff');break;
+    case 'gnome':g.drawImage(SPR.gnome,1,-1);break;
+    case 'snowday':case 'winter':g.drawImage(SPR.frost,1,1);if(id==='winter'){R(g,7,7,4,4,K);R(g,8,8,2,2,Y);}break;
+    case 'spotless':R(g,5,0,1,11,Y);R(g,0,5,11,1,Y);R(g,4,3,3,5,Y);R(g,3,4,5,3,Y);R(g,5,4,1,3,W2);R(g,4,5,3,1,W2);dot(1,1,W2);dot(9,9,W2);break;
+    case 'garage':for(let r=0;r<4;r++)R(g,4-r,r,3+r*2,1,K);R(g,1,4,9,7,K);R(g,2,4,7,6,'#c98d4a');R(g,3,6,5,4,K);R(g,4,6,3,1,'#8793a8');R(g,4,8,3,1,'#8793a8');R(g,3,1,5,2,'#d8364b');break;
+    case 'night':ring(5,5,5,Y);g.fillStyle='#13306b';pixCircle(g,7,4,3);dot(9,8,W2);dot(1,1,W2);break;
+    case 'takeoff':R(g,4,0,3,11,K);R(g,0,4,11,3,K);R(g,2,8,7,2,K);R(g,5,1,1,9,W2);R(g,1,5,9,1,W2);R(g,3,9,5,1,W2);R(g,5,0,1,1,'#7fbaf2');break;
+    case 'neighbour':R(g,1,2,4,5,K);R(g,6,2,4,5,K);R(g,0,3,11,4,K);R(g,2,7,7,2,K);R(g,4,9,3,2,K);R(g,2,3,3,3,'#ff4fa3');R(g,6,3,3,3,'#ff4fa3');R(g,1,4,9,2,'#ff4fa3');R(g,3,6,5,2,'#ff4fa3');R(g,5,8,1,1,'#ff4fa3');R(g,2,3,1,1,W2);break;
+    case 'crusher':R(g,1,5,9,6,K);R(g,2,6,7,4,'#8793a8');R(g,3,6,1,4,'#c6ccd8');R(g,5,6,1,2,K);R(g,6,8,1,2,K);R(g,4,0,3,5,K);R(g,5,1,1,3,'#d8364b');dot(1,3,Y);dot(9,2,Y);break;
+    case 'moo':R(g,1,2,9,8,K);R(g,2,3,7,6,W2);R(g,2,3,3,2,'#2a2a36');R(g,6,6,3,2,'#2a2a36');R(g,3,7,5,2,'#ffb0c0');R(g,0,1,2,2,K);R(g,9,1,2,2,K);dot(4,8,K);dot(6,8,K);break;
+    case 'hunter':R(g,0,3,11,8,K);R(g,1,4,9,6,'#a8673a');R(g,1,4,9,2,'#c98d4a');R(g,1,6,9,1,Y);R(g,5,5,1,3,Y);R(g,1,1,9,3,K);R(g,2,2,7,1,'#c98d4a');break;
+    case 'dressed':g.drawImage(SPR.helmet,0,2);break;
+    case 'winter6':g.drawImage(SPR.frost,0,0);R(g,6,5,5,6,K);R(g,7,6,3,1,Y);R(g,7,7,1,3,Y);R(g,7,9,3,1,Y);R(g,9,8,1,1,Y);R(g,8,8,1,1,Y);break;
+    default:g.drawImage(SPR.trophy,1,1);}
+  return TICO[id]=c;}
+function trophyProg(id){const st=save.stats||{};switch(id){case 'gifts':return [st.gifts||0,10];case 'dodge':return [st.dodges||0,10];case 'snowday':return [st.cells||0,100000];case 'crusher':return [st.crushed||0,25];
+  case 'moo':return [st.cows||0,10];case 'hunter':return [treasureCount(),6];case 'dressed':return [Object.keys(save.skins||{}).length+Object.keys(save.outfits||{}).length-1+Object.keys(save.trails||{}).length-1,5];
+  case 'neighbour':return [st.neighbours||0,2];case 'garage':return [Math.min(save.tool+1,BASE_TOOLS),BASE_TOOLS];case 'winter6':return [winterNo(),6];}return null;}
 function drawTrophies(){b.fillStyle='rgba(11,24,56,0.78)';b.fillRect(0,0,W,H);panel(6,14,168,280,'#13306b','#ffd23f');
   button('tt0',11,20,76,16,trophyTab===0?'gold':'blue','TROPHIES',()=>{trophyTab=0;sfx('click');});button('tt1',91,20,78,16,trophyTab===1?'gold':'blue','LEADERBOARD',()=>{trophyTab=1;sfx('click');});
   if(trophyTab===1){drawBoard(46);button('tplay',40,240,100,18,'orange','PLAY WEEKLY',()=>{trophiesOpen=false;weeklyOpen=true;sfx('click');});button('tclose',54,266,72,18,'blue','DONE',()=>{trophiesOpen=false;sfx('click');});return;}
   const got=ACH.filter(a=>save.ach[a.id]).length;text(b,got+' OF '+ACH.length+' TROPHIES  (+10 GEMS EACH)',W/2,42,'#9fc0e8',{align:'center',outline:null});
-  const VY=52,VH=214,sy=scrollArea('trophies',6,VY,168,VH,ACH.length*16);b.save();b.beginPath();b.rect(8,VY,164,VH);b.clip();
-  ACH.forEach((a,i)=>{const y=VY+i*16-sy,on=!!save.ach[a.id],hid=a.hidden&&!on;if(y<VY-16||y>VY+VH)return;R(b,12,y,156,15,on?'#1d4f9a':'#1b2a50');
-    if(on)b.drawImage(SPR.trophy,15,y+3);else b.drawImage(SPR.lock,16,y+3);
-    text(b,hid?'???':a.name,28,y+1,on?'#ffd23f':'#c6d9f3',{outline:null});text(b,hid?'A SECRET...':a.how,28,y+8,'#9fc0e8',{outline:null});
-    text(b,a.reward?fmt(a.reward):'-',164,y+5,on?'#7fe08a':'#7d8aa0',{align:'right',outline:null});});
-  b.restore();scrollBar(170,VY+2,VH-4,'trophies',ACH.length*16);
+  const VY=52,VH=214,RH=19,sy=scrollArea('trophies',6,VY,168,VH,ACH.length*RH);b.save();b.beginPath();b.rect(8,VY,164,VH);b.clip();
+  ACH.forEach((a,i)=>{const y=VY+i*RH-sy,on=!!save.ach[a.id],hid=a.hidden&&!on;if(y<VY-RH||y>VY+VH)return;R(b,12,y,156,RH-1,on?'#1d4f9a':'#1b2a50');if(on)R(b,12,y,156,1,'#3f6fc8');
+    R(b,14,y+2,15,14,K);R(b,15,y+3,13,12,on?'#ffe9a8':'#2a3a66');if(hid)text(b,'?',22,y+6,'#7d8aa0',{align:'center',outline:null});else{if(!on)b.globalAlpha=0.35;b.drawImage(trophyIcon(a.id),16,y+4);b.globalAlpha=1;}
+    if(!on){R(b,24,y+11,5,5,K);R(b,25,y+13,3,2,'#c6ccd8');R(b,25,y+11,1,2,'#c6ccd8');R(b,27,y+11,1,2,'#c6ccd8');}else{R(b,25,y+12,4,4,K);R(b,26,y+13,2,2,'#7fe08a');}
+    text(b,hid?'???':a.name,32,y+2,on?'#ffd23f':'#c6d9f3',{outline:null});text(b,hid?'A SECRET...':a.how,32,y+9,'#9fc0e8',{outline:null});
+    if(a.reward){const rs=fmt(a.reward),rw=textW(rs);b.drawImage(SPR.coinS,164-rw-7,y+2);text(b,rs,164,y+2,on?'#7fe08a':'#c6d9f3',{align:'right',outline:null});}
+    const pg=!on&&!hid?trophyProg(a.id):null;if(pg){const fr=Math.min(1,pg[0]/pg[1]),cs=fmt(Math.min(pg[0],pg[1]))+'/'+fmt(pg[1]);R(b,32,y+15,96,3,K);R(b,33,y+16,94,1,'#0b1838');R(b,33,y+16,Math.round(94*fr),1,fr>0?'#3fcf4a':'#0b1838');text(b,cs,164,y+12,'#9fc0e8',{align:'right',outline:null});}});
+  b.restore();scrollBar(170,VY+2,VH-4,'trophies',ACH.length*RH);
   button('tclose',54,272,72,16,'orange','DONE',()=>{trophiesOpen=false;sfx('click');});}
 function drawAd(){R(b,0,0,W,H,'#111522');panel(14,96,152,110,'#1b2a50','#ffd23f');text(b,'AD PLACEHOLDER',W/2,108,'#ffd23f',{align:'center',scale:2});
   text(b,'IN THE REAL GAME A SHORT',W/2,130,'#ffffff',{align:'center',outline:null});text(b,'OPTIONAL VIDEO AD PLAYS HERE',W/2,140,'#ffffff',{align:'center',outline:null});
