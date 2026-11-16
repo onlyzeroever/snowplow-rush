@@ -80,12 +80,20 @@ function mspec(tid){if(_mspec[tid])return _mspec[tid];const i=TOOLS.findIndex(t=
   else if(i>=0&&i<BASE_TOOLS-1){const n=TOOLS[i+1];scap=0.97*n.speed/t.speed;wcap=0.95*n.width/t.width;nxt=n.cost;}
   else if(i===BASE_TOOLS-1){scap=1.15;wcap=1.15;nxt=t.cost*4;}else{scap=1.15;wcap=1.25;nxt=t.cost*1.5;}
   return _mspec[tid]={speedPer:(scap-1)/MUP_LV,sizePer:(wcap-1)/MUP_LV,upBase:Math.max(8,Math.round(nxt*MUP_COST))};}
+const MK2_SPEED=1.08,MK2_COINS=1.1;
+function isMk2(tid){return !!(save.mk2&&save.mk2[tid]);}
+function mk2Cost(tid){return Math.floor(mspec(tid).upBase*Math.pow(MUP_GROWTH,MUP_LV)*2.5);}
+function mk2Ready(){const id=curMachine(),m=mLv(id);return !chal()&&m.speed>=MUP_LV&&m.size>=MUP_LV&&!isMk2(id);}
+function buyMk2(){const id=curMachine(),c=mk2Cost(id);if(!mk2Ready())return;if(save.coins<c){sfx('deny');showToast('NEED '+fmt(c)+' COINS','#ff9aa8');return;}
+  save.coins-=c;save.mk2=save.mk2||{};save.mk2[id]=true;_tc.k='';vcache.clear();sfx('fanfare');buzz(30);showToast(TOOLS[toolIdx(id)].name+' MK II!','#ffd23f');track('upgrade_buy',{upgrade:'mk2',machine:id,cost:c});persist();}
 function mLv(tid){save.mlv=save.mlv||{};return save.mlv[tid]||(save.mlv[tid]={speed:0,size:0,bumper:0});}
 function curMachine(){return TOOLS[useIdx()].id;}
 function lvOf(k){return MACHINE_UPG.includes(k)?mLv(curMachine())[k]:save.lv[k];}
 function upMax(k){return k==='bumper'?MUP_BUMP:MACHINE_UPG.includes(k)?MUP_LV:UPG[k].max;}
 function upPer(k){const m=mspec(curMachine());return k==='speed'?m.speedPer:k==='size'?m.sizePer:k==='bumper'?0.1:UPG[k].per;}
-function upName(k){return MACHINE_UPG.includes(k)?TOOLS[useIdx()].name+' '+{speed:'SPEED',size:'WIDTH',bumper:'BUMPER'}[k]:UPG[k].name;}
+const SHORT_NAME={rotary:'ROTARY',monster:'MONSTER',dragon:'DRAGON',mech:'MECH',jet:'JET TRUCK',super:'SUPER PLOW',truck:'PLOW TRUCK'};
+function upName(k){if(MACHINE_UPG.includes(k)){const t=TOOLS[useIdx()],sfx2={speed:'SPEED',size:'WIDTH',bumper:'BUMPER'}[k],full=t.name+' '+sfx2;return textW(full)<=80?full:(SHORT_NAME[t.id]||t.name.split(' ')[0])+' '+sfx2;}return upNameOld(k);}
+function upNameOld(k){return MACHINE_UPG.includes(k)?TOOLS[useIdx()].name+' '+{speed:'SPEED',size:'WIDTH',bumper:'BUMPER'}[k]:UPG[k].name;}
 const UPG={
   speed:  {name:'MOVE SPEED', base:25,  growth:1.62, max:15, per:0.05},
   size:   {name:'PLOW WIDTH', base:35,  growth:1.64, max:12, per:0.06},
@@ -718,9 +726,9 @@ function rateOf(id,lv){const t=TOOLS[toolIdx(id)],sp=mspec(id);return t.speed*(1
 function bestOwned(except){let best=0,bump=0;for(let j=0;j<=Math.min(save.tool,TOOLS.length-1);j++){const id=TOOLS[j].id;if(id===except)continue;const m=mLv(id);best=Math.max(best,rateOf(id,m));bump=Math.max(bump,m.bumper||0);}return {rate:best,bumper:bump};}
 function matchLv(id){const b0=bestOwned(id),lv={speed:0,size:0,bumper:b0.bumper};while(rateOf(id,lv)<b0.rate&&(lv.speed<MUP_LV||lv.size<MUP_LV)){if(lv.size<=lv.speed&&lv.size<MUP_LV)lv.size++;else if(lv.speed<MUP_LV)lv.speed++;else lv.size++;}return lv;}
 function giveMatch(i){const id=TOOLS[i].id,lv=matchLv(id),m=mLv(id);m.speed=Math.max(m.speed,lv.speed);m.size=Math.max(m.size,lv.size);m.bumper=Math.max(m.bumper||0,lv.bumper);}
-function moveSpeed(){return tool().speed*(1+mspec(tool().id).speedPer*curLv().speed);}
+function moveSpeed(){return tool().speed*(1+mspec(tool().id).speedPer*curLv().speed)*(isMk2(tool().id)&&!chal()&&!drv()&&!msn()?MK2_SPEED:1);}
 function treasureCount(){return Object.keys(save.treasures||{}).length;}
-function valueMult(){return tool().value*(1+UPG.value.per*curLv().value)*(1+FROST_PER*(save.frost||0))*(save.pro?SHOP.pro.mult:1)*(1+TREASURE_BONUS*treasureCount());}
+function valueMult(){return tool().value*(isMk2(tool().id)&&!chal()?MK2_COINS:1)*(1+UPG.value.per*curLv().value)*(1+FROST_PER*(save.frost||0))*(save.pro?SHOP.pro.mult:1)*(1+TREASURE_BONUS*treasureCount());}
 function frostGain(){return 5+Math.floor(Math.sqrt((save.winterCoins||0)/1e6));}
 function bestPay(){let v=1;LEVELS.forEach((L,i)=>{if(levelOpen(i))v=Math.max(v,L.value);});return v;}
 function todayKey(){const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();}
@@ -2247,12 +2255,13 @@ function drawVBlade(g,cx,y,bw,bt,tid,c){if(bt<=0)return;const x=cx-Math.floor(bw
   R(g,cx-5,y+bt,2,2,K);R(g,cx+3,y+bt,2,2,K);}
 const VDRAW={tractor:(g,ox,oy,fr,c)=>drawTractor(g,ox,oy,c),truck:drawTruck,super:drawSuper,snowcat:drawSnowcat,rotary:drawRotary,monster:drawMonster,jet:drawJet,mech:drawMech,dragon:drawDragon,ufo:drawUfo};
 function vehicleSprite(tid,bw,pl,fr,si){
-  si=si==null?skinIdx(tid):si;const key=tid+'|'+bw+'|'+pl+'|'+(fr%2)+'|'+save.outfit+save.hat+'|'+si+'|'+(isGold(tid)?1:0);let v=vcache.get(key);if(v)return v;
+  si=si==null?skinIdx(tid):si;const key=tid+'|'+bw+'|'+pl+'|'+(fr%2)+'|'+save.outfit+save.hat+'|'+si+'|'+(isGold(tid)?1:0)+(isMk2(tid)?'m':'');let v=vcache.get(key);if(v)return v;
   const c=skinPal(tid,si),sp=VSPEC[tid],pileH=sp.bt?pl*2:0,tail=tid==='super'?14:tid==='snowcat'?8:tid==='rotary'?10:tid==='dragon'?8:4;
   const cw=Math.max(bw,sp.hw*2+24)+6,ch=pileH+sp.bt+sp.hh*2+tail+10;
   const cv2=mk(cw,ch),g=cv2.getContext('2d'),ox=Math.floor(cw/2),oy=pileH+sp.bt+sp.hh+6;
   VDRAW[tid](g,ox,oy,fr,tid==='rotary'?Object.assign({},c,{pl:Math.min(6,pl)}):tid==='mech'?Object.assign({},c,{bw}):c);
   drawVBlade(g,ox,oy-sp.hh-sp.bt,bw,sp.bt,tid,tid==='rotary'?Object.assign({},c,{fr}):c);if(pl>0&&sp.bt&&tid!=='rotary')drawPile(g,ox,oy-sp.hh-sp.bt,bw-4,pileH,'up');
+  if(isMk2(tid)){const bx=ox-4,by=oy+sp.hh-9;R(g,bx,by,9,6,K);R(g,bx+1,by+1,7,4,'#ffd23f');R(g,bx+1,by+1,7,1,'#fff3a0');R(g,bx+3,by+2,1,3,'#8a5a00');R(g,bx+5,by+2,1,3,'#8a5a00');}
   v={c:cv2,ox,oy};if(vcache.size>200)vcache.clear();vcache.set(key,v);return v;}
 function drawToolHead(g,x,y,w,h,tid,si){const c=skinPal(tid,si),fill=c.x,dark=c.xd,hz=w>h;
   if(tid==='pusher'&&!c.deco){const cx=x+(w>>1),cy=y+(h>>1);R(g,x,y,w,h,K);R(g,x+1,y+1,w-2,h-2,fill);if(hz){R(g,x+1,y+1,w-2,1,'#ffffff');R(g,x+1,y+h-2,w-2,1,dark);R(g,x-1,y-1,3,h+2,K);R(g,x+w-2,y-1,3,h+2,K);R(g,x,y,1,h,fill);R(g,x+w-1,y,1,h,fill);R(g,cx-4,y+h,8,2,K);R(g,cx-3,y+h,6,1,'#8793a8');}
@@ -2837,8 +2846,8 @@ const UPICO={};function upIcon(k){if(UPICO[k])return UPICO[k];let c;
   return UPICO[k]=c;}
 const STAR_W=spr(["..D..",".DDD.","DDDDD",".DDD.",".D.D."],{D:'#ffffff'});
 function shine(x,y,w,h,per,off){const ph=((tNow+(off||0))%per)/0.55;if(ph>1)return;const bx=Math.round(x-8+ph*(w+16));for(let r=0;r<h;r++){const sx=bx-(r>>1);for(let k=0;k<3;k++){const xx=sx+k;if(xx>=x&&xx<x+w)R(b,xx,y+r,1,1,k===1?'rgba(255,255,255,0.75)':'rgba(255,255,255,0.4)');}}}
-function maxPlate(x,y,w,h,big){R(b,x+1,y,w-2,h,K);R(b,x,y+1,w,h-2,K);R(b,x+1,y+1,w-2,h-2,'#c98a12');R(b,x+1,y+1,w-2,h-3,'#f2b81a');R(b,x+2,y+2,w-4,1,'#ffe27a');R(b,x+1,y+h-2,w-2,1,'#a8740a');
-  if(big){b.drawImage(STAR_W,x+Math.floor(w/2)-2,y+5);text(b,'MAX',x+w/2,y+h-12,'#ffffff',{align:'center'});}
+function maxPlate(x,y,w,h,big,lbl){R(b,x+1,y,w-2,h,K);R(b,x,y+1,w,h-2,K);R(b,x+1,y+1,w-2,h-2,'#c98a12');R(b,x+1,y+1,w-2,h-3,'#f2b81a');R(b,x+2,y+2,w-4,1,'#ffe27a');R(b,x+1,y+h-2,w-2,1,'#a8740a');
+  if(big){b.drawImage(STAR_W,x+Math.floor(w/2)-2,y+5);text(b,lbl||'MAX',x+w/2,y+h-12,'#ffffff',{align:'center'});}
   else{const tw=textW('MAX'),sx=Math.round(x+w/2-(tw+14)/2);R(b,sx+1,y+2,1,3,'#ffffff');R(b,sx,y+3,3,1,'#ffffff');text(b,'MAX',sx+7,y+1,'#5a3a00',{outline:null});R(b,sx+tw+12,y+2,1,3,'#ffffff');R(b,sx+tw+11,y+3,3,1,'#ffffff');}
   shine(x+1,y+1,w-2,h-2,2.8,x*0.013);}
 function priceRow(ico,str,cx,y,col,opt){const tw=ico.width+2+textW(str),sx=Math.round(cx-tw/2);b.drawImage(ico,sx,y);text(b,str,sx+ico.width+2,y,col,opt);}
@@ -2850,14 +2859,17 @@ function drawUpgrades(){
     text(b,upName(k),x+43,y+6,MACHINE_UPG.includes(k)?'#13306b':'#5a2a8a',{outline:null});R(b,x+43,y+15,22,9,max?K:'#13306b');if(max){R(b,x+44,y+16,20,7,'#f2b81a');R(b,x+44,y+16,20,1,'#ffe27a');}text(b,max?'MAX':'LV'+lv,x+54,y+17,max?'#5a3a00':'#ffffff',{align:'center',outline:null});
     const pips=10,filled=Math.round(lv/upMax(k)*pips);for(let p=0;p<pips;p++){if(max){R(b,x+68+p*5,y+17,4,5,'#f2b81a');R(b,x+68+p*5,y+17,4,1,'#fff08a');R(b,x+68+p*5,y+21,4,1,'#c98a12');}else R(b,x+68+p*5,y+17,4,5,p<filled?'#33b24a':'#b8c2d4');}
     // what it does, then what you have now and what the next level gives
-    const what={speed:'MOVE FASTER',size:'PLOW WIDER',value:'MORE COINS',bumper:'SOFTER BUMPS',helpers:'ALWAYS EARNING'}[k];
+    const mkr=k==='speed'&&max&&mk2Ready(),mko=k==='speed'&&isMk2(curMachine());
+    const what=mkr?'MK II IS READY!':mko?'MK II: +8% SPEED':{speed:'MOVE FASTER',size:'PLOW WIDER',value:'MORE COINS',bumper:'SOFTER BUMPS',helpers:'ALWAYS EARNING'}[k];
     const pc=(l)=>k==='bumper'?'-'+Math.round(Math.min(0.5,0.1*l)*100)+'%':'+'+Math.round(upPer(k)*l*100)+'%';
     const hs=(l)=>'+'+fmtR(l*u.per*valueMult())+'/S';
     const cur=k==='helpers'?hs(lv):pc(lv),nxt=k==='helpers'?hs(lv+1):pc(lv+1);
-    text(b,what,x+43,y+27,'#4f6fa0',{outline:null});
-    if(max){text(b,cur,x+43,y+35,'#13306b',{outline:null});text(b,'MAXED OUT',x+47+textW(cur),y+35,'#b07a10',{outline:null});}
+    text(b,what,x+43,y+27,mkr||mko?'#b07a10':'#4f6fa0',{outline:null});
+    if(mkr)text(b,'+8% SPEED, +10% COINS',x+43,y+35,'#1f8a3a',{outline:null});
+    else if(max){text(b,cur,x+43,y+35,'#13306b',{outline:null});text(b,mko?'AND +10% COINS':'MAXED OUT',x+47+textW(cur),y+35,'#b07a10',{outline:null});}
     else{text(b,cur,x+43,y+35,'#13306b',{outline:null});const cw=textW(cur);text(b,'>',x+46+cw,y+35,'#4f6fa0',{outline:null});text(b,nxt,x+52+cw,y+35,'#1f8a3a',{outline:null});}
-    if(max){maxPlate(x+w-46,y+7,42,30,true);btn('u'+k,x+w-46,y+7,42,30,()=>{sfx('click');showToast('MAXED OUT!','#ffd23f');});}
+    if(mkr){const mc=mk2Cost(curMachine());button('umk2',x+w-46,y+7,42,30,save.coins>=mc?'gold':'grey',null,buyMk2);text(b,'MK II',x+w-25,y+12,'#ffffff',{align:'center'});priceRow(SPR.coinS,fmt(mc),x+w-25,y+24,save.coins>=mc?'#ffffff':'#ffd0d6');}
+    else if(max){maxPlate(x+w-46,y+7,42,30,true,mko?'MK II':null);btn('u'+k,x+w-46,y+7,42,30,()=>{sfx('click');showToast(mko?'MK II: FULLY UPGRADED':'MAXED OUT!','#ffd23f');});}
     else{button('u'+k,x+w-46,y+7,42,30,afford?'green':'grey',null,()=>buyUpg(k));text(b,'BUY',x+w-25,y+12,'#ffffff',{align:'center'});
       priceRow(SPR.coinS,fmt(cost),x+w-25,y+24,afford?'#ffffff':'#ffd0d6');}});}
 const STREAK_GEMS=[5,5,10,10,15,20,50];
@@ -3945,7 +3957,7 @@ function drawGarage(){
     const owned=i<=save.tool,next=i===save.tool+1,afford=save.coins>=t.cost,cur=i===use,gold=isGold(t.id);
     card(x,y,w,ch,cur?'#fff6d8':owned?'#eef3fb':wild?'#e6dcf6':'#d8dee8',cur?'#ffd23f':wild?'#b07aff':'#9fc0e8');R(b,x+4,y+3,28,26,K);R(b,x+5,y+4,26,24,'#cfe3f8');
     if(owned||next)drawToolIcon(t.id,x+5,y+4,24,owned?skinIdx(t.id):0);else{b.globalAlpha=0.35;drawToolIcon(t.id,x+5,y+4,24);b.globalAlpha=1;}
-    const T2=(cur&&!chal())?tool():t;text(b,(gold?'GOLDEN ':'')+t.name,x+37,y+5,gold?'#a8740a':'#13306b',{outline:null});
+    const T2=(cur&&!chal())?tool():t;text(b,(gold?'GOLDEN ':'')+t.name+(isMk2(t.id)?' MK II':''),x+37,y+5,gold?'#a8740a':'#13306b',{outline:null});
     text(b,t.trick||('WIDTH '+bladeCells(T2)+'  SPEED '+T2.speed),x+37,y+14,wild?'#7a4fc8':'#4f6fa0',{outline:null});text(b,!owned&&!next?'AFTER '+TOOLS[i-1].name:'x'+(cur?T2.value:t.value)+' COINS',x+37,y+22,!owned&&!next?'#8a6a40':'#4f6fa0',{outline:null});
     if(owned){if(cur){R(b,x+w-38,y+3,34,11,'#1f7a33');text(b,'IN USE',x+w-21,y+5,'#ffffff',{align:'center',outline:null});}else button('use'+i,x+w-38,y+2,34,13,'green','USE',()=>equip(i));
       button('sk'+i,x+w-38,y+16,34,13,'purple','SKINS',()=>{skinFor=t.id;skinSel=skinIdx(t.id);sfx('click');});btn('card'+i,x,y,w-40,ch,()=>{skinFor=t.id;skinSel=skinIdx(t.id);sfx('click');});}
