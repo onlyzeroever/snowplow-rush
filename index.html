@@ -589,7 +589,7 @@ const SFX_VOL={cfade:0.42,cend:0.5,click:0.5,deny:0.55,buy:0.7,coin:0.32,grab:0.
   fanfare:0.8,trophy:0.75,end:0.6,win:0.8,go:0.6,neighbour:0.7,daily:0.7,warn:0.5,squall:0.55,flump:0.6,throw:0.5,splat:0.55,whoosh:0.5,horn:0.45,moo:0.7,crunch:0.8,stomp:0.6};
 let AC=null,master=null,musicBus=null,sfxBus=null,noiseBuf=null;const BUF={};let audioLoading=false,curMusic=null,musicNode=null,musicGainNode=null,musicWant=null;
 const loopNodes={};
-function audioInit(){if(AC){if(AC.state==='suspended')AC.resume();return;}
+function audioInit(){if(AC){if(AC.state==='suspended')Promise.resolve(AC.resume()).catch(()=>{});return;}
   try{AC=new (window.AudioContext||window.webkitAudioContext)();master=AC.createGain();master.gain.value=0.9;master.connect(AC.destination);
     musicBus=AC.createGain();musicBus.gain.value=save.musicOff?0:1;musicBus.connect(master);sfxBus=AC.createGain();sfxBus.gain.value=save.muted?0:1;sfxBus.connect(master);
     noiseBuf=AC.createBuffer(1,AC.sampleRate*0.5,AC.sampleRate);const d=noiseBuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;}catch(e){AC=null;return;}
@@ -4452,7 +4452,7 @@ cv.addEventListener('pointerup',endPtr);cv.addEventListener('pointercancel',endP
 window.addEventListener('blur',()=>{for(const k in keys)keys[k]=false;});
 window.addEventListener('keydown',e=>{keys[e.key]=true;if(LOOKTEST&&state==='play'){if(e.key==='l'||e.key==='L')cycleLook();if(e.key==='h'||e.key==='H')cycleShadow();}if(state==='play'&&['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault();if(e.key===' '&&state==='title')goMap();if(e.key==='Escape'&&state==='play'&&run&&!run.ended)paused=!paused;});
 window.addEventListener('keyup',e=>{keys[e.key]=false;});
-document.addEventListener('visibilitychange',()=>{if(document.hidden){if(state==='play'&&run&&!run.ended)paused=true;persist();if(AC)try{AC.suspend();}catch(e){}}else if(AC)try{AC.resume();}catch(e){}});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){if(state==='play'&&run&&!run.ended)paused=true;persist();if(AC)try{Promise.resolve(AC.suspend()).catch(()=>{});}catch(e){}}else if(AC)try{Promise.resolve(AC.resume()).catch(()=>{});}catch(e){}});
 setInterval(persist,5000);
 
 loadSave();
