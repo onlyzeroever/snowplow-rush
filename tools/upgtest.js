@@ -15,7 +15,7 @@ const { chromium } = require('/opt/npm-tools/node_modules/playwright');
   // drive straight right on an empty job, return distance, cells cleared, coins earned
   const drive = async () => {
     await ev(() => { const R = window.__SR; R.save.tut = true; R.startLevel(0); }); await page.waitForTimeout(3300);
-    await ev(() => { const R = window.__SR, G = R.G, P = R.P; G.obstacles.length = 0; G.hazards.length = 0; G.cows.length = 0; P.x = 30; P.y = 150; R.run.moved = true; R.run.combo = 0; window.__c0 = G.cleared; window.__e0 = R.run.earned; });
+    await ev(() => { const R = window.__SR, G = R.G, P = R.P; G.obstacles.length = 0; G.hazards.length = 0; G.cows.length = 0; if (G.presents) G.presents.length = 0; G.treasure = null; G.part = null; G.driveKey = null; R.run.gold = 0; /* gifts on the path (coins or a x2 Gold Rush) made coin tests random */ P.x = 30; P.y = 150; R.run.moved = true; R.run.combo = 0; window.__c0 = G.cleared; window.__e0 = R.run.earned; });
     await ev(() => { window.__HOLD = true; }); await page.keyboard.down('ArrowRight'); await ev(() => window.__STEP(21, 1 / 30, 0)); await page.keyboard.up('ArrowRight'); await ev(() => { window.__STEP(15, 1 / 30, 0); window.__HOLD = false; }); // fixed 0.7 s of game time, not wall-clock time, so results don't depend on machine load
     return ev(() => { const R = window.__SR; return { dx: +(R.P.x - 30).toFixed(1), cells: R.G.cleared - window.__c0, earned: +(R.run.earned - window.__e0).toFixed(1), speed: +R.upg.moveSpeed().toFixed(1), blade: R.upg.bladeCells(), vm: +R.upg.valueMult().toFixed(2) }; });
   };
