@@ -24,3 +24,10 @@ Findings:
 - With real combos and Mk II the North wall is mostly gone (17 replays in 88 runs, 9 in 47 with the Icebreaker).
 - The old index-based ride missions break with an extra base machine (rides after the Icebreaker, weaker than it):
   Wild Rides must be a separate collection that scales with the best machine (task 77) before the Icebreaker ships.
+
+## Update Nov 18: Super Plow kept as it is, wider Loader (shipped in p126)
+The first version pointed the Super Plow's upgrade caps at the Loader, which made a maxed Super Plow ~15% weaker for
+players who already had it. Instead: Super Plow caps 1.15/1.30 and upgrade prices exactly as today; FRONT LOADER 52 wide,
+speed 80, x7.5, caps speed 1.08 / width 1.06, 2.5M, same body size as the Super Plow (hw 12, so it reaches the same snow).
+ladder3_keepsuper_wide.py: winter 1 299 runs (~7.5 h), loader at run 98 with the Super Plow at about level 5: clearing
++0%, coins/cell +15%; Loader -> Snowcat -15% / +27%; North 47 runs, 9 replays. Combos x0.85: 344 runs.

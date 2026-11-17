@@ -62,7 +62,7 @@ const TOOLS=[
   {id:'tractor',name:'TRACTOR',    cost:32000,  width:21, speed:52, value:3.2},
   {id:'truck',  name:'PLOW TRUCK', cost:82000,   width:29, speed:62, value:4.5},
   {id:'super',  name:'SUPER PLOW', cost:680000, width:40, speed:74, value:6.5},
-  {id:'loader', name:'FRONT LOADER',cost:2.5e6, width:48, speed:84, value:7.5},
+  {id:'loader', name:'FRONT LOADER',cost:2.5e6, width:52, speed:80, value:7.5},
   {id:'snowcat',name:'SNOWCAT',    cost:6.5e6,  width:44, speed:92, value:9.5},
   {id:'rotary', name:'ROTARY BLOWER',cost:1.8e7, width:48, speed:104,value:13.5},
   {id:'icebreaker',name:'ICEBREAKER',cost:1.8e8, width:62, speed:132,value:18},
@@ -86,7 +86,7 @@ function rideTool(i){const t=TOOLS[i],b=rideBase(),w=Math.max(8,Math.min(80,Math
   return Object.assign({},t,{width:w,speed:Math.round(RIDE_BOOST*b.w*b.sp/w*10)/10,value:Math.round(b.v*RIDE_BOOST*100)/100,ride:true,bump:b.bump});}
 const MACHINE_UPG=['speed','size','bumper'],MUP_LV=6,MUP_BUMP=5,MUP_GROWTH=1.45,MUP_COST=0.06;
 const _mspec={};
-const MCAPS={super:[0.97*84/74,0.95*48/40],loader:[1.062,1.10],rotary:[1.15,1.25,7.2e7]};  // [speed cap, width cap, upgrade price base]
+const MCAPS={super:[1.15,1.3,6.5e6],loader:[1.08,1.06],rotary:[1.15,1.25,7.2e7]};  // [speed cap, width cap, upgrade price base]
 function mspec(tid){if(_mspec[tid])return _mspec[tid];const i=TOOLS.findIndex(t=>t.id===tid),t=TOOLS[i];let scap,wcap,nxt;
   if(MCAPS[tid]){const q=MCAPS[tid];scap=q[0];wcap=q[1];nxt=q[2]||TOOLS[i+1].cost;}
   else if(i>5){const n=TOOLS[i+1];scap=(i<BASE_TOOLS-1&&n)?Math.max(1.06,0.97*n.speed/t.speed):1.15;wcap=1.25;nxt=(i<BASE_TOOLS-1&&n)?n.cost:t.cost*(i<BASE_TOOLS?4:1.5);}
@@ -736,7 +736,7 @@ function levelOpen(i){return (DEV_MODE&&DEV.all)||(levelReach(i)&&levelGateOK(i)
 const WINTER_SLACK=60;   // stars you can skip before a New Winter opens
 function starsNeeded(){let n=0;for(let i=0;i<NL;i++)if((LEVELS[i].winter||1)<=winterNo())n+=3;return Math.max(3,n-WINTER_SLACK);}
 const isKidTool=id=>id==='shovel'||id==='pusher'||id==='blower';
-const VSPEC={loader:{hw:13,hh:22,bt:8},icebreaker:{hw:14,hh:24,bt:7},tractor:{hw:8,hh:12,bt:5},truck:{hw:10,hh:18,bt:6},super:{hw:12,hh:22,bt:7},snowcat:{hw:13,hh:21,bt:7},rotary:{hw:13,hh:23,bt:8},monster:{hw:12,hh:16,bt:7},jet:{hw:11,hh:20,bt:6},mech:{hw:15,hh:13,bt:6},dragon:{hw:9,hh:19,bt:4},ufo:{hw:15,hh:15,bt:0}};
+const VSPEC={loader:{hw:12,hh:22,bt:8},icebreaker:{hw:14,hh:24,bt:7},tractor:{hw:8,hh:12,bt:5},truck:{hw:10,hh:18,bt:6},super:{hw:12,hh:22,bt:7},snowcat:{hw:13,hh:21,bt:7},rotary:{hw:13,hh:23,bt:8},monster:{hw:12,hh:16,bt:7},jet:{hw:11,hh:20,bt:6},mech:{hw:15,hh:13,bt:6},dragon:{hw:9,hh:19,bt:4},ufo:{hw:15,hh:15,bt:0}};
 const ZERO_LV={speed:0,size:0,value:0,bumper:0,helpers:0};
 function chal(){return !!(run&&run.challenge&&state==='play');}
 function drv(){return !!(run&&run.drive&&state==='play'&&!run.ended);}
