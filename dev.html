@@ -653,13 +653,18 @@ function sfxStar(i){if(!playBuf('star'+(i+1)))tone(880*Math.pow(1.26,i),0.2,'tri
 function buzz(ms){try{navigator.vibrate&&navigator.vibrate(ms);}catch(e){}}
 
 // ---------------- SAVE ----------------
-const TEST_MODE=/[?&]test=1/.test(location.search),REVIEW_MODE=/[?&]review=(1|all)/.test(location.search);const DEV_MODE=!!window.SR_DEV;
+const TEST_MODE=/[?&]test=1/.test(location.search),REVIEW_MODE=/[?&]review=(1|all|themepark|ski|pass|north)/.test(location.search);const RV=(location.search.match(/[?&]review=(themepark|ski|pass|north)/)||[])[1]||null;const DEV_MODE=!!window.SR_DEV;
 const DEV=(()=>{let d={};if(DEV_MODE)try{d=JSON.parse(localStorage.getItem('sr.dev')||'{}')||{};}catch(e){}return Object.assign({open:false,freeze:false,speed:1,all:false,hit:false},d,{open:false});})();
 function devSave(){try{localStorage.setItem('sr.dev',JSON.stringify({freeze:DEV.freeze,speed:DEV.speed,all:DEV.all,hit:DEV.hit}));}catch(e){}}
-const SAVE_KEY=DEV_MODE?'snowplowRush.dev':TEST_MODE?'snowplowRush.test':REVIEW_MODE?(/[?&]review=all/.test(location.search)?'snowplowRush.reviewAll':'snowplowRush.review'):'snowplowRush.proto.v2';
+const SAVE_KEY=DEV_MODE?'snowplowRush.dev':TEST_MODE?'snowplowRush.test':REVIEW_MODE?(RV?'snowplowRush.review_'+RV:/[?&]review=all/.test(location.search)?'snowplowRush.reviewAll':'snowplowRush.review'):'snowplowRush.proto.v2';
 const NL=LEVELS.length;
 const save={coins:0,tool:0,mlv:{},lv:{speed:0,size:0,value:0,bumper:0,helpers:0},stars:Array(NL).fill(0),best:Array(NL).fill(0),muted:false,last:Date.now(),ctrl:'joy',tut:false,ach:{},stats:{cells:0,gifts:0,dodges:0,gnome:0,neighbours:0},hat:'yellow',hats:{yellow:true},daily:null,frost:0,winters:0,winterCoins:0,fails:Array(NL).fill(0),boostNext:false,gems:0,pro:false,adGems:null,dailySeen:'',winterSeen:false,musicOff:false,v:6,gold:-1,tolls:{},outfit:'classic',outfits:{classic:true},skin:{},skins:{},trail:'classic',trails:{classic:true},treasures:{}};
 function loadSave(){try{let s=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');
+  if(!s&&RV){const ix=id=>TOOLS.findIndex(t=>t.id===id),AR=['suburbs','farm','city','themepark','harbour','ski','pass','north'],
+    P={themepark:{m:'super',lv:[4,4,2],coins:5e5},ski:{m:'snowcat',lv:[6,6,5],coins:1e7},pass:{m:'rotary',lv:[4,3,2],coins:2.7e6},north:{m:'rotary',lv:[6,6,5],coins:2.6e7}}[RV],done=AR.slice(0,AR.indexOf(RV));
+    s={v:6,tv:2,tut:true,coins:P.coins,tool:ix(P.m),use:ix(P.m),gems:40,mlv:{},lv:{speed:0,size:0,value:20,bumper:0,helpers:20},stars:[],best:[],story:{},tolls:{},areaSeen:done.length,rvStage:RV};
+    for(let i=0;i<=ix(P.m);i++)s.mlv[TOOLS[i].id]=i===ix(P.m)?{speed:P.lv[0],size:P.lv[1],bumper:P.lv[2]}:{speed:6,size:6,bumper:5};
+    for(const a of done)s.story[a]=true;LEVELS.forEach((L,i)=>{if(done.includes(L.area)){s.stars[i]=2;s.best[i]=70;if(L.toll)s.tolls[L.id]=true;}});}
   if(!s&&REVIEW_MODE){s={v:6,tut:true,story:{suburbs:true},coins:4000,tool:2,use:2,gems:20,mlv:{shovel:{speed:3,size:3,bumper:1},pusher:{speed:6,size:6,bumper:2},blower:{speed:1,size:1,bumper:0}},lv:{speed:0,size:0,value:6,bumper:0,helpers:3},stars:[],best:[]};
     for(const id of ['driveway','gardens','culdesac','park','school','maple']){const i=LEVELS.findIndex(L=>L.id===id);s.stars[i]=2;s.best[i]=70;}
     if(/[?&]review=all/.test(location.search)){s.tool=7;s.use=7;s.coins=5e7;s.tv=2;s.areaSeen=7;s.tolls={retreat:true,stadium:true};s.story={suburbs:true,farm:true,city:true,themepark:true,harbour:true,ski:true,pass:true,north:true};LEVELS.forEach((L,i)=>{if(L.area!=='secret'){s.stars[i]=1;s.best[i]=40;}});}}
@@ -4603,7 +4608,7 @@ function phOn(){return !TEST_MODE&&!PH_BOT&&!save.noTrack&&typeof fetch==='funct
 const PH_ID=(()=>{let id=null;try{id=localStorage.getItem('sr.aid');}catch(e){}if(!id){id='p_'+Date.now().toString(36)+Math.random().toString(36).slice(2,10);try{localStorage.setItem('sr.aid',id);}catch(e){}}return id;})();
 function phSession(){const now=Date.now();if(!PH.sid||now-PH.last>30*60e3)PH.sid=now.toString(36)+Math.random().toString(36).slice(2,8);PH.last=now;return PH.sid;}
 function track(ev,props){try{if(!phOn())return;const t=TOOLS[useIdx()];
-  const p=Object.assign({distinct_id:PH_ID,$session_id:phSession(),$lib:'snowplow-rush',$geoip_disable:true,build:DEV_MODE?'dev':REVIEW_MODE?'review':'live',v:'0.8.0',winter:winterNo(),machine:t?t.id:null,stars_total:totalStars(),coins:Math.round(save.coins),gems:save.gems||0,premium:!!save.pro},props||{});
+  const p=Object.assign({distinct_id:PH_ID,$session_id:phSession(),$lib:'snowplow-rush',$geoip_disable:true,build:DEV_MODE?'dev':REVIEW_MODE?'review':'live',rv:RV,v:'0.8.0',winter:winterNo(),machine:t?t.id:null,stars_total:totalStars(),coins:Math.round(save.coins),gems:save.gems||0,premium:!!save.pro},props||{});
   PH.q.push({event:ev,properties:p,timestamp:new Date().toISOString()});if(PH.q.length>=25)phFlush(false);}catch(e){}}
 function phForm(batch){const ev=batch.map(e=>({event:e.event,timestamp:e.timestamp,properties:Object.assign({token:PH.key},e.properties)}));let b64='';try{b64=btoa(unescape(encodeURIComponent(JSON.stringify(ev))));}catch(e){return null;}return 'data='+encodeURIComponent(b64);}
 function phSendForm(batch,final){const body=phForm(batch);if(!body)return;const url=PH.host+'/e/?compression=base64';
