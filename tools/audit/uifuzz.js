@@ -5,6 +5,8 @@ const SAVES={
  fresh:null,
  early:{v:6,tv:2,tut:true,story:{suburbs:true},coins:3000,gems:10,tool:1,use:1,stars:[3,2,2,1,1,0,0,0],best:[80,70,70,60,50]},
  mid:{v:6,tv:2,tut:true,story:{suburbs:true,farm:true,city:true,themepark:true},coins:900000,gems:120,tool:4,use:4,areaSeen:3,tolls:{retreat:true},winters:1},
+ rides:{v:6,tv:2,tut:true,story:{suburbs:true,farm:true,city:true},coins:2e6,gems:600,tool:5,use:8,rides:{monster:true},rideSeen:{monster:true,jet:true},mlv:{super:{speed:3,size:3,bumper:1}},areaSeen:3,tolls:{retreat:true,stadium:true}},
+ oldride:{v:6,tv:2,tut:true,story:{suburbs:true,farm:true,city:true,themepark:true,harbour:true,ski:true,pass:true},coins:5e7,gems:50,tool:10,use:9,mlv:{rotary:{speed:6,size:6,bumper:3},jet:{speed:4,size:4,bumper:2}},areaSeen:6,tolls:{retreat:true,stadium:true},winters:1,parts:{dragon:1}},
  late:{v:6,tv:2,tut:true,story:{suburbs:true,farm:true,city:true,themepark:true,harbour:true,ski:true,pass:true,north:true},coins:9e8,gems:900,tool:7,use:7,areaSeen:7,tolls:{retreat:true,stadium:true},winters:2,pro:true,parts:{monster:2,jet:3}}};
 async function walk(browser,vpName,saveName,seed,presses){
   const ctx=await browser.newContext({viewport:VP[vpName],hasTouch:true,isMobile:true}); const sv=SAVES[saveName];

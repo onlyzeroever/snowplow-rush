@@ -72,6 +72,16 @@ const TOOLS=[
   {id:'ufo',    name:'UFO',        cost:1.8e9,   width:48, speed:136,value:50,   winter:6, trick:'FLOATS, BEAMS COWS'},
 ];
 const BASE_TOOLS=8;
+function owns(i){return i>=0&&i<TOOLS.length&&(i<BASE_TOOLS?i<=save.tool:!!(save.rides&&save.rides[TOOLS[i].id])||i<=save.tool);}  // (save.tool past the ladder: only test scripts)
+function rideNextIdx(){for(let i=BASE_TOOLS;i<TOOLS.length;i++)if(!owns(i))return i;return -1;}
+function ridesOwned(){let n=0;for(let i=BASE_TOOLS;i<TOOLS.length;i++)if(owns(i))n++;return n;}
+const RIDE_BOOST=1.15,RIDE_WIDE={monster:1.04,jet:0.92,mech:1.12,dragon:0.86,ufo:1};
+// what a ride is built on: the fastest-clearing regular machine you own and the best coins per cell, upgrades and Mk II in
+function rideBase(){let w=8,sp=32,rate=0,v=1,bump=0;for(let j=0;j<=Math.min(save.tool,BASE_TOOLS-1);j++){const t=TOOLS[j],m=mLv(t.id),ms=mspec(t.id),mk=isMk2(t.id),
+  wj=Math.min(80,Math.round(t.width*(1+ms.sizePer*m.size))),sj=t.speed*(1+ms.speedPer*m.speed)*(mk?MK2_SPEED:1);if(wj*sj>rate){rate=wj*sj;w=wj;sp=sj;}v=Math.max(v,t.value*(mk?MK2_COINS:1));bump=Math.max(bump,m.bumper||0);}
+  return {w,sp,v,bump};}
+function rideTool(i){const t=TOOLS[i],b=rideBase(),w=Math.max(8,Math.min(80,Math.round(b.w*Math.sqrt(RIDE_BOOST)*(RIDE_WIDE[t.id]||1))));
+  return Object.assign({},t,{width:w,speed:Math.round(RIDE_BOOST*b.w*b.sp/w*10)/10,value:Math.round(b.v*RIDE_BOOST*100)/100,ride:true,bump:b.bump});}
 const MACHINE_UPG=['speed','size','bumper'],MUP_LV=6,MUP_BUMP=5,MUP_GROWTH=1.45,MUP_COST=0.06;
 const _mspec={};
 function mspec(tid){if(_mspec[tid])return _mspec[tid];const i=TOOLS.findIndex(t=>t.id===tid),t=TOOLS[i];let scap,wcap,nxt;
@@ -87,13 +97,13 @@ function mk2Ready(){const id=curMachine(),m=mLv(id);return !chal()&&m.speed>=MUP
 function buyMk2(){const id=curMachine(),c=mk2Cost(id);if(!mk2Ready())return;if(save.coins<c){sfx('deny');showToast('NEED '+fmt(c)+' COINS','#ff9aa8');return;}
   save.coins-=c;save.mk2=save.mk2||{};save.mk2[id]=true;_tc.k='';vcache.clear();sfx('fanfare');buzz(30);showToast(TOOLS[toolIdx(id)].name+' MK II!','#ffd23f');track('upgrade_buy',{upgrade:'mk2',machine:id,cost:c});persist();}
 function mLv(tid){save.mlv=save.mlv||{};return save.mlv[tid]||(save.mlv[tid]={speed:0,size:0,bumper:0});}
-function curMachine(){return TOOLS[useIdx()].id;}
+function curMachine(){const u=useIdx();return TOOLS[u>=BASE_TOOLS?save.tool:u].id;}
 function lvOf(k){return MACHINE_UPG.includes(k)?mLv(curMachine())[k]:save.lv[k];}
 function upMax(k){return k==='bumper'?MUP_BUMP:MACHINE_UPG.includes(k)?MUP_LV:UPG[k].max;}
 function upPer(k){const m=mspec(curMachine());return k==='speed'?m.speedPer:k==='size'?m.sizePer:k==='bumper'?0.1:UPG[k].per;}
 const SHORT_NAME={rotary:'ROTARY',monster:'MONSTER',dragon:'DRAGON',mech:'MECH',jet:'JET TRUCK',super:'SUPER PLOW',truck:'PLOW TRUCK'};
-function upName(k){if(MACHINE_UPG.includes(k)){const t=TOOLS[useIdx()],sfx2={speed:'SPEED',size:'WIDTH',bumper:'BUMPER'}[k],full=t.name+' '+sfx2;return textW(full)<=80?full:(SHORT_NAME[t.id]||t.name.split(' ')[0])+' '+sfx2;}return upNameOld(k);}
-function upNameOld(k){return MACHINE_UPG.includes(k)?TOOLS[useIdx()].name+' '+{speed:'SPEED',size:'WIDTH',bumper:'BUMPER'}[k]:UPG[k].name;}
+function upName(k){if(MACHINE_UPG.includes(k)){const t=TOOLS[toolIdx(curMachine())],sfx2={speed:'SPEED',size:'WIDTH',bumper:'BUMPER'}[k],full=t.name+' '+sfx2;return textW(full)<=80?full:(SHORT_NAME[t.id]||t.name.split(' ')[0])+' '+sfx2;}return upNameOld(k);}
+function upNameOld(k){return MACHINE_UPG.includes(k)?TOOLS[toolIdx(curMachine())].name+' '+{speed:'SPEED',size:'WIDTH',bumper:'BUMPER'}[k]:UPG[k].name;}
 const UPG={
   speed:  {name:'MOVE SPEED', base:25,  growth:1.62, max:15, per:0.05},
   size:   {name:'PLOW WIDTH', base:35,  growth:1.64, max:12, per:0.06},
@@ -680,7 +690,9 @@ function loadSave(){try{let s=JSON.parse(localStorage.getItem(SAVE_KEY)||'null')
     save.mlv={};if(refund>0){save.coins+=refund;save.upgRefund=refund;}}}}catch(e){}save.tv=2;sanitizeSave();}
 function sanitizeSave(){const num=(v,d)=>(typeof v==='number'&&isFinite(v))?v:d,obj=v=>v&&typeof v==='object'&&!Array.isArray(v);
   save.coins=Math.max(0,num(save.coins,0));save.gems=Math.max(0,Math.floor(num(save.gems,0)));save.winters=Math.max(0,Math.floor(num(save.winters,0)));
-  save.tool=Math.max(0,Math.min(TOOLS.length-1,Math.floor(num(save.tool,0))));if(save.use!=null){const u=Math.floor(num(save.use,-1));save.use=(u<0||u>save.tool)?null:u;}
+  save.tool=Math.max(0,Math.min(TOOLS.length-1,Math.floor(num(save.tool,0))));{const r0=(save.rides&&typeof save.rides==='object')?save.rides:{},r={};for(let j=BASE_TOOLS;j<TOOLS.length;j++)if(r0[TOOLS[j].id]===true||j<=save.tool)r[TOOLS[j].id]=true;save.rides=r;
+    if(save.tool>=BASE_TOOLS){save.tool=BASE_TOOLS-1;if(save.mlv&&typeof save.mlv==='object')for(let j=BASE_TOOLS;j<TOOLS.length;j++){const m=save.mlv[TOOLS[j].id];if(m&&typeof m==='object'){m.speed=0;m.size=0;}}}}
+  if(save.use!=null){const u=Math.floor(num(save.use,-1));save.use=owns(u)?u:null;}
   if(save.gold!=null&&!(num(save.gold,-1)>=-1&&save.gold<TOOLS.length))save.gold=-1;
   for(const k of ['stars','best','fails']){const src=Array.isArray(save[k])?save[k]:[],a=Array(NL).fill(0);for(let i=0;i<NL&&i<src.length;i++)a[i]=Math.max(0,num(src[i],0));save[k]=a;}
   for(let i=0;i<NL;i++)save.stars[i]=Math.min(3,Math.floor(save.stars[i]));
@@ -698,15 +710,15 @@ const winterNo=()=>(save.winters||0)+1;
 const toolIdx=id=>TOOLS.findIndex(t=>t.id===id);
 const toolAvail=i=>i>=0&&i<TOOLS.length&&(TOOLS[i].winter||1)<=winterNo();
 let _tc={k:'',v:null};
-function tool(){if(chal())return TOOLS[toolIdx(run.challenge)];if(drv())return TOOLS[toolIdx(run.drive)];if(msn())return TOOLS[toolIdx(run.mission)];const ui2=useIdx(),g=save.gold==null?-1:save.gold,k=ui2+'|'+g;if(_tc.k===k)return _tc.v;const t=TOOLS[ui2];let v=t;
+function tool(){if(chal())return TOOLS[toolIdx(run.challenge)];if(drv())return run.rideT||(run.rideT=rideTool(toolIdx(run.drive)));if(msn())return run.rideT||(run.rideT=rideTool(toolIdx(run.mission)));const ui2=useIdx(),g=save.gold==null?-1:save.gold,k=ui2+'|'+g;if(_tc.k===k)return _tc.v;const t=TOOLS[ui2];let v=ui2>=BASE_TOOLS?rideTool(ui2):t;
   if(ui2===g&&g+1<TOOLS.length){const n=TOOLS[g+1];v=Object.assign({},t,{width:n.width,speed:n.speed,value:t.value*2,gold:true,name:'GOLDEN '+t.name});}
   _tc={k,v};return v;}
 function goldFor(w){return w>=2?Math.min(4,w-2):-1;}
 const levelAvail=i=>(DEV_MODE&&DEV.all)||(LEVELS[i].winter||1)<=winterNo()||missionOn(i);
-function missionOn(i){const L=LEVELS[i];return !!(L&&L.area==='secret'&&L.tool&&save&&save.parts&&(save.parts[L.tool]||0)>=3&&save.tool<toolIdx(L.tool));}
+function missionOn(i){const L=LEVELS[i];return !!(L&&L.area==='secret'&&L.tool&&save&&save.parts&&(save.parts[L.tool]||0)>=3&&!owns(toolIdx(L.tool)));}
 function baseStars(){let s=0;for(let i=0;i<BASE_LEVELS;i++)s+=save.stars[i];return s;}
 const lvIdx=id=>LEVELS.findIndex(l=>l.id===id);
-function levelReach(i){const L=LEVELS[i];if(!levelAvail(i))return false;if(L.tool)return save.tool>=toolIdx(L.tool)||missionOn(i);if(!L.from.length)return true;const i2=LEVELS.indexOf(L);if(save.stars[i2]>0||save.best[i2]>0)return true;if(bossShort(i2)>0)return false;return L.from.some(id=>save.stars[lvIdx(id)]>0);}
+function levelReach(i){const L=LEVELS[i];if(!levelAvail(i))return false;if(L.tool)return owns(toolIdx(L.tool))||missionOn(i);if(!L.from.length)return true;const i2=LEVELS.indexOf(L);if(save.stars[i2]>0||save.best[i2]>0)return true;if(bossShort(i2)>0)return false;return L.from.some(id=>save.stars[lvIdx(id)]>0);}
 const BOSS_STARS=Object.assign({blockparty:25},...AREA_PACKS.map(A=>A.bossStars||{}));
 function areaStars(a){let n=0;LEVELS.forEach((L,i)=>{if(L.area===a&&!L.boss&&levelAvail(i))n+=save.stars[i]||0;});return n;}
 function bossShort(i){const L=LEVELS[i];return L&&L.boss?Math.max(0,(BOSS_STARS[L.id]||0)-areaStars(L.area)):0;}
@@ -721,16 +733,11 @@ const ZERO_LV={speed:0,size:0,value:0,bumper:0,helpers:0};
 function chal(){return !!(run&&run.challenge&&state==='play');}
 function drv(){return !!(run&&run.drive&&state==='play'&&!run.ended);}
 function msn(){return !!(run&&run.mission&&state==='play'&&!run.ended);}
-function curLv(){if(chal())return ZERO_LV;if(drv()||msn()){const rl=run.rideLv;return rl?{speed:rl.speed,size:rl.size,bumper:rl.bumper,value:save.lv.value,helpers:save.lv.helpers}:ZERO_LV;}const m=mLv(curMachine());return {speed:m.speed,size:m.size,bumper:m.bumper,value:save.lv.value,helpers:save.lv.helpers};}
+function curLv(){if(chal())return ZERO_LV;{const t=tool();if(t.ride)return {speed:0,size:0,bumper:t.bump||0,value:save.lv.value,helpers:save.lv.helpers};}const m=mLv(curMachine());return {speed:m.speed,size:m.size,bumper:m.bumper,value:save.lv.value,helpers:save.lv.helpers};}
 function weekNo(){return Math.floor((Date.now()/86400000+3)/7);}
 function weeklyDef(){const i=weekNo()%BASE_LEVELS,L=LEVELS[i];return {i,tid:L.area==='suburbs'?'blower':L.area==='farm'?'tractor':'super'};}
 function weeklyState(){const wk=weekNo();if(!save.weekly||save.weekly.week!==wk)save.weekly={week:wk,best:0,claimed:false};return save.weekly;}
-function rideLvFor(t){return (drv()||msn())&&run.rideLv&&run.rideId===t.id?run.rideLv:null;}
-function bladeCells(t){t=t||tool();const rl=rideLvFor(t);return Math.min(80,Math.round(t.width*(1+mspec(t.id).sizePer*(chal()?0:rl?rl.size:(drv()||msn())?0:mLv(t.id).size))));}
-function rateOf(id,lv){const t=TOOLS[toolIdx(id)],sp=mspec(id);return t.speed*(1+sp.speedPer*lv.speed)*Math.min(80,Math.round(t.width*(1+sp.sizePer*lv.size)));}
-function bestOwned(except){let best=0,bump=0;for(let j=0;j<=Math.min(save.tool,TOOLS.length-1);j++){const id=TOOLS[j].id;if(id===except)continue;const m=mLv(id);best=Math.max(best,rateOf(id,m));bump=Math.max(bump,m.bumper||0);}return {rate:best,bumper:bump};}
-function matchLv(id){const b0=bestOwned(id),lv={speed:0,size:0,bumper:b0.bumper};while(rateOf(id,lv)<b0.rate&&(lv.speed<MUP_LV||lv.size<MUP_LV)){if(lv.size<=lv.speed&&lv.size<MUP_LV)lv.size++;else if(lv.speed<MUP_LV)lv.speed++;else lv.size++;}return lv;}
-function giveMatch(i){const id=TOOLS[i].id,lv=matchLv(id),m=mLv(id);m.speed=Math.max(m.speed,lv.speed);m.size=Math.max(m.size,lv.size);m.bumper=Math.max(m.bumper||0,lv.bumper);}
+function bladeCells(t){t=t||tool();return Math.min(80,Math.round(t.width*(1+mspec(t.id).sizePer*(chal()||t.ride?0:mLv(t.id).size))));}
 function moveSpeed(){return tool().speed*(1+mspec(tool().id).speedPer*curLv().speed)*(isMk2(tool().id)&&!chal()&&!drv()&&!msn()?MK2_SPEED:1);}
 function treasureCount(){return Object.keys(save.treasures||{}).length;}
 function valueMult(){return tool().value*(isMk2(tool().id)&&!chal()?MK2_COINS:1)*(1+UPG.value.per*curLv().value)*(1+FROST_PER*(save.frost||0))*(save.pro?SHOP.pro.mult:1)*(1+TREASURE_BONUS*treasureCount());}
@@ -1760,7 +1767,7 @@ function buildFromData(g,D,setT,ob,setCircle,paintText){
   g.start=D.start?{x:D.start[0],y:D.start[1]}:{x:90,y:40};}
 // play any level from the editor (test mode only: uses slot 0 and a throwaway save)
 function testLevel(def,toolI){if(!TEST_MODE)return false;LEVELS[0]=Object.assign({},LEVELS[0],{from:[],bonus:false,gate:null,toll:null,tool:null,night:false},def,{data:def});
-  save.tut=true;save.story={suburbs:true,farm:true,city:true};save.tool=TOOLS.length-1;save.use=toolI==null?0:toolI;_tc.k='';vcache.clear();startLevel(0);return true;}
+  save.tut=true;save.story={suburbs:true,farm:true,city:true};save.tool=BASE_TOOLS-1;save.rides={};for(let j=BASE_TOOLS;j<TOOLS.length;j++)save.rides[TOOLS[j].id]=true;save.use=toolI==null?0:toolI;_tc.k='';vcache.clear();startLevel(0);return true;}
 // ---------------- JOB CHECKER ----------------
 // For a job and a machine: how much snow can it physically reach from the start, and roughly how long would 3 stars take?
 let CHECK_LAST=null;const CHECK_EFF=0.75; // share of the plowing that is fresh snow (turns, overlap, backing up)
@@ -2062,7 +2069,7 @@ function buildLevel(idx){
     g.decals=(g.decals||[]).concat(Q.decals||[]);for(const p of Q.over||[]){const f=OVERS[p[0]];if(f)g.over.push({spr:f(p[3],p[4]),sx:p[1],sy:p[2]});}}
   g.part=null;{const ri=nextRideIdx();if(ri>=0&&!LEVELS[idx].tool){const id2=TOOLS[ri].id,n=(save.parts||{})[id2]||0;if(n<3&&(Math.random()<(n===0?0.45:0.3)||(save.partDry||0)>=PART_PITY-1)){
     for(let k=0;k<300;k++){const x=16+Math.floor(Math.random()*(pw-32)),y=Math.floor(ph*0.15+Math.random()*ph*0.75);if(g.type[(y>>1)*cols+(x>>1)]!==T_BLOCK&&Math.hypot(x-g.start.x,y-g.start.y)>140){g.part={x,y,ri,found:false};break;}}}}}
-  g.driveKey=null;{const ri=teaseRideIdx();if(ri>=0&&!LEVELS[idx].tool){const first=!(save.rideSeen&&save.rideSeen[TOOLS[ri].id]),early=ri!==nextRideIdx();if(Math.random()<(first?0.5:early?0.1:SHOP.driveChance)){
+  g.driveKey=null;{const ri=teaseRideIdx();if(ri>=0&&!LEVELS[idx].tool){const first=!(save.rideSeen&&save.rideSeen[TOOLS[ri].id]),early=save.tool<toolIdx('rotary');if(Math.random()<(first?0.5:early?0.1:SHOP.driveChance)){
     for(let k=0;k<300;k++){const x=20+Math.floor(Math.random()*(pw-40)),y=Math.floor(ph*0.2+Math.random()*ph*0.6);if(g.type[(y>>1)*cols+(x>>1)]!==T_BLOCK&&Math.hypot(x-g.start.x,y-g.start.y)>120){g.driveKey={x,y,ri,taken:false};break;}}}}}
   g.ground=new Uint8ClampedArray(pw*ph*3);
   const col=(t,x,y)=>{const n=hash(x,y)&15;
@@ -2332,7 +2339,7 @@ function startLevel(idx,opts){if(!(opts&&opts.challenge))save.lastJob=LEVELS[idx
   G=buildLevel(idx);P={x:G.start.x,y:G.start.y,f:2,stun:0,inv:0,bob:0,walkT:0,load:0,bumpCd:0,fr:0,frT:0};
   run={time:G.def.time,earned:0,combo:0,comboProg:0,comboT:0,pending:0,pendT:0,ended:false,moved:false,snowAcc:0,res:null,sprayAcc:0,
     squallT:G.def.squall?G.def.squall*0.6:0,squall:null,gold:0,hits:0,gifts:0,boost:save.boostNext,adUsed:false,iceShown:false,nbT:0,challenge:opts&&opts.challenge||null};
-  save.boostNext=false;P.vx=0;P.vy=0;if(run.challenge&&G.driveKey)G.driveKey=null;if(run.challenge)G.part=null;if(!run.challenge&&missionOn(idx)){run.mission=LEVELS[idx].tool;run.rideId=run.mission;run.rideLv=matchLv(run.mission);G.driveKey=null;G.part=null;_tc.k='';addFloat(P.x,P.y-30,'MISSION: 2 STARS KEEPS IT','#ffd23f',2.2);}
+  save.boostNext=false;P.vx=0;P.vy=0;if(run.challenge&&G.driveKey)G.driveKey=null;if(run.challenge)G.part=null;if(!run.challenge&&missionOn(idx)){run.mission=LEVELS[idx].tool;run.rideT=null;G.driveKey=null;G.part=null;_tc.k='';addFloat(P.x,P.y-30,'MISSION: 2 STARS KEEPS IT','#ffd23f',2.2);}
   markReach(G);camY=clamp(P.y-VIEW_H*0.55,0,Math.max(0,G.ph-VIEW_H));particles=[];floats=[];pickups=[];paused=false;joy=null;dpad=null;settingsOpen=false;state='play';sfx('go');stopLoops();playMusic('job');musicRate(1);musicDuck(1);
   if(run.boost)addFloat(P.x,P.y-24,'BOOST! +25% SPEED','#9fd8ff',1.6);}
 function goMap(){if(!TEST_MODE){const n=save.fbRuns||0,k=n>=30&&!save.fbAsk2?2:n>=8&&!save.fbAsk1?1:0;if(k){save['fbAsk'+k]=true;if(k===2)save.fbAsk1=true;persist();setTimeout(()=>{if(state==='map'&&!overlayOpen())openFeedback('ask'+(k===1?8:30));},900);}}
@@ -2358,11 +2365,12 @@ function addFloat(x,y,s,c,life){floats.push({x,y,s,c,t:0,life:life||0.9});}
 
 function buyUpg(k){if(chal()){sfx('deny');showToast('NO UPGRADES IN THE WEEKLY','#ff9aa8');return;}const u=UPG[k];if(lvOf(k)>=upMax(k)){sfx('click');showToast('MAXED OUT!','#ffd23f');return;}
   const c=upgCost(k);if(save.coins<c){sfx('deny');showToast('NEED '+fmt(c)+' COINS','#ff9aa8');return;}
-  save.coins-=c;if(MACHINE_UPG.includes(k))mLv(curMachine())[k]++;else save.lv[k]++;sfx('buy');buzz(15);vcache.clear();
+  save.coins-=c;if(MACHINE_UPG.includes(k))mLv(curMachine())[k]++;else save.lv[k]++;sfx('buy');buzz(15);vcache.clear();_tc.k='';
   if(state==='play'&&P)addFloat(P.x,P.y-22,u.name.split(' ').pop()+' UP!','#7fe08a',1);persist();}
-function buyTool(){const n=save.tool+1;if(n>=TOOLS.length||!toolAvail(n)){sfx('deny');if(n<TOOLS.length)showToast('UNLOCKS IN WINTER '+TOOLS[n].winter,'#9fd8ff');return;}const c=TOOLS[n].cost;
+function buyRideCoins(i){if(i!==rideNextIdx()||!toolAvail(i)){sfx('deny');return;}const c=TOOLS[i].cost;if(save.coins<c){sfx('deny');showToast('NEED '+fmt(c)+' COINS','#ff9aa8');return;}save.coins-=c;grantRide(i);}
+function buyTool(){const n=save.tool+1;if(n>=BASE_TOOLS){sfx('deny');return;}const c=TOOLS[n].cost;
   if(save.coins<c){sfx('deny');showToast('NEED '+fmt(c)+' COINS','#ff9aa8');return;}
-  save.coins-=c;if(TOOLS[n].winter)giveMatch(n);save.tool=n;save.use=n;_tc.k='';sfx('fanfare');buzz(30);vcache.clear();showToast((TOOLS[n].winter?'WILD RIDE: ':'NEW TOOL: ')+TOOLS[n].name,'#ffd23f');if(n===BASE_TOOLS-1)award('garage');persist();}
+  save.coins-=c;save.tool=n;save.use=n;_tc.k='';sfx('fanfare');buzz(30);vcache.clear();showToast('NEW TOOL: '+TOOLS[n].name,'#ffd23f');if(n===BASE_TOOLS-1)award('garage');persist();}
 
 // ---------------- UPDATE ----------------
 function update(dt){
@@ -2545,10 +2553,10 @@ function updateTrail(dt,tid,moving){if(save.trail==='classic'||!moving)return;ru
   const fp=footprint(tid,P.x,P.y,P.f),bx=P.x+rnd(-fp.w/3,fp.w/3),by=P.y+rnd(-fp.h/3,fp.h/3);
   if(save.trail==='fireworks'){const cols=['#ff4fa3','#ffd23f','#4fd36a','#5fb4ff','#ffffff'],c=cols[(Math.random()*5)|0];for(let k=0;k<10;k++){const a=k/10*Math.PI*2;particles.push({x:bx,y:by,vx:Math.cos(a)*40,vy:Math.sin(a)*30,z:6,vz:20,life:0.6,t:0,kind:'fw',c});}}
   else particles.push({x:bx,y:by,vx:rnd(-4,4),vy:rnd(-4,4),z:0,vz:0,life:save.trail==='hearts'?0.9:0.7,t:0,kind:save.trail==='sparkle'?'spark':save.trail==='rainbow'?'rain':'heart',h:tNow*300%360});}
-function teaseRideIdx(){const ri=nextRideIdx();if(ri>=0)return ri;return save.tool>=toolIdx('super')&&save.tool<toolIdx('rotary')?BASE_TOOLS:-1;}
-function nextRideIdx(){const r=toolIdx('rotary');if(save.tool<r)return -1;const i=save.tool+1;return (i<TOOLS.length&&TOOLS[i].winter)?i:-1;}
-function rideForSale(){const i=nextRideIdx();return (i>=0&&save.rideSeen&&save.rideSeen[TOOLS[i].id])?i:-1;}
-function grantRide(i){if(i<0||save.tool>=i)return false;giveMatch(i);save.tool=i;save.use=i;_tc.k='';vcache.clear();sfx('fanfare');buzz(30);showToast('WILD RIDE: '+TOOLS[i].name+' IS YOURS!','#ffd23f');persist();return true;}
+function teaseRideIdx(){return save.tool>=toolIdx('super')?rideNextIdx():-1;}
+function nextRideIdx(){return save.tool>=toolIdx('rotary')?rideNextIdx():-1;}  // the ride whose parts drop
+function rideForSale(){const i=teaseRideIdx();return (i>=0&&save.rideSeen&&save.rideSeen[TOOLS[i].id])?i:-1;}
+function grantRide(i){if(i<BASE_TOOLS||i>=TOOLS.length||owns(i))return false;save.rides=save.rides||{};save.rides[TOOLS[i].id]=true;save.use=i;_tc.k='';vcache.clear();sfx('fanfare');buzz(30);showToast('WILD RIDE: '+TOOLS[i].name+' IS YOURS!','#ffd23f');persist();return true;}
 function buyRide(i,gems){if(i<0||!TOOLS[i])return false;const pr=SHOP.rides[TOOLS[i].id];if(!pr)return false;if(gems){if((save.gems||0)<pr[1]){sfx('deny');showToast('NEED '+pr[1]+' GEMS','#ff9aa8');return false;}save.gems-=pr[1];}return grantRide(i);}
 function unstick(){const tid=tool().id;if(!blockedBy(footprint(tid,P.x,P.y,P.f)))return;for(let r=2;r<=64;r+=2)for(let a=0;a<16;a++){const x=P.x+Math.cos(a*Math.PI/8)*r,y=P.y+Math.sin(a*Math.PI/8)*r;if(!blockedBy(footprint(tid,x,y,P.f))){P.x=x;P.y=y;return;}}}
 const PART_PITY=8;   // the 8th job in a row without a part always has one
@@ -2559,9 +2567,9 @@ function checkPart(br){const pt=G.part;if(!pt||pt.found||!overlap(br,{x:pt.x-5,y
 let PART_ICON=null;function partIcon(){if(PART_ICON)return PART_ICON;const c=mk(12,12),g=c.getContext('2d');g.fillStyle=K;pixCircle(g,6,6,5);g.fillStyle='#9b5fd6';pixCircle(g,6,6,4);for(let k=0;k<8;k++){const a=k*Math.PI/4;R(g,Math.round(6+Math.cos(a)*5)-1,Math.round(6+Math.sin(a)*5)-1,2,2,'#c4a0f5');}g.fillStyle='#2a1d4a';pixCircle(g,6,6,1);return PART_ICON=c;}
 function checkDrive(br,dt){checkPart(br);const dk=G.driveKey;
   if(dk&&!dk.taken&&overlap(br,{x:dk.x-7,y:dk.y-7,w:14,h:14})){dk.taken=true;const t=TOOLS[dk.ri];save.rideSeen=save.rideSeen||{};save.rideSeen[t.id]=true;
-    run.drive=t.id;run.rideId=t.id;run.rideLv=matchLv(t.id);run.driveT=SHOP.driveSecs;run.drove=dk.ri;_tc.k='';showToast('TEST DRIVE: '+t.name+'!','#ffd23f');addFloat(P.x,P.y-26,t.name+'!','#ffd23f',1.6);sfx('fanfare');buzz(40);
+    run.drive=t.id;run.rideT=rideTool(dk.ri);run.driveT=SHOP.driveSecs;run.drove=dk.ri;_tc.k='';showToast('TEST DRIVE: '+t.name+'!','#ffd23f');addFloat(P.x,P.y-26,t.name+'!','#ffd23f',1.6);sfx('fanfare');buzz(40);
     for(let k=0;k<18;k++)particles.push({x:dk.x,y:dk.y,vx:rnd(-50,50),vy:rnd(-40,40),z:2,vz:rnd(40,90),life:0.9,t:0,kind:'spark'});
-    unstick();if(save.ridePass&&dk.ri===nextRideIdx())grantRide(dk.ri);persist();}
+    unstick();if(save.ridePass&&dk.ri===rideNextIdx())grantRide(dk.ri);persist();}
   if(run.drive){run.driveT-=dt;if(run.driveT<=0){run.drive=null;_tc.k='';unstick();addFloat(P.x,P.y-24,'TEST DRIVE OVER','#ffd23f',1.4);sfx('click');}}}
 let DRIVE_ICON=null;function driveIcon(){if(DRIVE_ICON)return DRIVE_ICON;const c=mk(16,16),g=c.getContext('2d');g.fillStyle=K;pixCircle(g,8,8,7);g.fillStyle='#ffd23f';pixCircle(g,8,8,6);g.fillStyle='#3a1d6e';pixCircle(g,8,8,4);
   g.fillStyle='#ffd23f';R(g,7,4,2,9,'#ffd23f');R(g,4,7,9,2,'#ffd23f');g.fillStyle=K;pixCircle(g,8,8,2);g.fillStyle='#fff3a0';pixCircle(g,8,8,1);R(g,5,2,3,1,'#fff3a0');return DRIVE_ICON=c;}
@@ -2787,7 +2795,7 @@ function drawDev(){const play=state==='play'&&run&&!run.ended;
   row('FINISH',[['1 STAR',play?'gold':'grey',()=>devWin(1)],['2 STARS',play?'gold':'grey',()=>devWin(2)],['3 STARS',play?'gold':'grey',()=>devWin(3)]]);
   row('EVENTS',[['FAIL',play?'red':'grey',()=>devWin(0)],['SQUALL',play?'blue':'grey',()=>{if(!play)return;run.devSquall=true;run.squall={x:clamp(P.x,24,156),y:clamp(P.y-40,30,G.ph-30),r:28,t:0,dumped:false};sfx('squall');DEV.open=false;}],['RIDE PART','purple',devPart]]);
   row('MONEY',[['+1M COINS','green',()=>{save.coins+=1e6;persist();}],['+1B COINS','green',()=>{save.coins+=1e9;persist();}],['+100 GEMS','purple',()=>{save.gems=(save.gems||0)+100;persist();}]]);
-  row('UNLOCK',[[DEV.all?'ALL JOBS: ON':'ALL JOBS',DEV.all?'orange':'grey',()=>{DEV.all=!DEV.all;devSave();}],['MACHINES','blue',()=>{save.tool=TOOLS.length-1;_tc.k='';vcache.clear();persist();showToast('EVERY MACHINE IS YOURS','#7fe08a');}],['ALL LOOKS','blue',devLooks]]);
+  row('UNLOCK',[[DEV.all?'ALL JOBS: ON':'ALL JOBS',DEV.all?'orange':'grey',()=>{DEV.all=!DEV.all;devSave();}],['MACHINES','blue',()=>{save.tool=BASE_TOOLS-1;save.rides={};for(let j=BASE_TOOLS;j<TOOLS.length;j++)save.rides[TOOLS[j].id]=true;_tc.k='';vcache.clear();persist();showToast('EVERY MACHINE IS YOURS','#7fe08a');}],['ALL LOOKS','blue',devLooks]]);
   row('WORLD',[['NO MONEY','grey',()=>{save.coins=0;save.gems=0;persist();}],['NEW WINTER','orange',()=>{DEV.open=false;if(play)endRound(false);startNewWinter();}],['AWAY 2H','blue',()=>{save.last=Date.now()-7200e3;if(!(save.lv.helpers>0))save.lv.helpers=1;persist();window.__noPersist=true;location.reload();}]]);
   y+=4;button('devreset',10,y,78,18,'red','RESET SAVE',()=>{window.__noPersist=true;try{localStorage.removeItem(SAVE_KEY);}catch(e){}location.reload();});button('devclose',92,y,78,18,'blue','CLOSE',()=>{DEV.open=false;sfx('click');});
   text(b,'COINS '+fmt(save.coins)+'  GEMS '+(save.gems||0)+'  WINTER '+winterNo(),W/2,y+24,'#9fc0e8',{align:'center',outline:null});}
@@ -2798,7 +2806,7 @@ function drawNav(){R(b,0,NAV_Y-2,W,H-NAV_Y+2,'#0b1838');R(b,0,NAV_Y-2,W,1,'#4f8f
   button('nav-upg',62,NAV_Y+2,56,24,'green','UPGRADES',()=>{if(state!=='upgrades')goUpgrades();},{active:state==='upgrades'});
   button('nav-gar',121,NAV_Y+2,56,24,'orange','GARAGE',()=>{if(state!=='garage')goGarage();},{active:state==='garage'});
   const sel=state==='map'?0:state==='upgrades'?1:2;{const e=slideE(),fx=e<1&&draw.slFrom!=null?draw.slFrom+(sel-draw.slFrom)*e:sel;R(b,Math.round(3+fx*59+20),NAV_Y+26,16,2,'#ffd23f');}
-  const nt=save.tool+1;if(nt<TOOLS.length&&toolAvail(nt)&&state!=='play'){const p=Math.min(1,save.coins/TOOLS[nt].cost);R(b,126,NAV_Y+21,46,3,K);R(b,127,NAV_Y+22,44,1,'#5c2a08');R(b,127,NAV_Y+22,Math.round(44*p),1,p>=1?'#7fe08a':'#ffd23f');
+  const nt=save.tool+1;if(nt<BASE_TOOLS&&state!=='play'){const p=Math.min(1,save.coins/TOOLS[nt].cost);R(b,126,NAV_Y+21,46,3,K);R(b,127,NAV_Y+22,44,1,'#5c2a08');R(b,127,NAV_Y+22,Math.round(44*p),1,p>=1?'#7fe08a':'#ffd23f');
     if(p>=1&&state==='garage')save.garSeen=nt;if(p>=1&&save.garSeen!==nt&&state!=='garage')badge(168,NAV_Y,'!');}}
 function drawTitle(){
   R(b,0,0,W,H,'#9fd0f2');for(let y=60;y<140;y+=2)dither(0,y,W,1,'#bfe0f7');R(b,0,140,W,H-140,'#bfe0f7');
@@ -2931,7 +2939,7 @@ const STORY_EXTRA=Object.fromEntries(AREA_PACKS.filter(A=>A.story).map(A=>[A.are
 const STORY={suburbs:['THE BIG SNOW IS HERE!','THE WHOLE TOWN IS BURIED.','GRAB A SHOVEL AND START','WITH YOUR OWN DRIVEWAY.'],farm:['FARMLAND IS SNOWED IN!','THE FARMERS NEED HELP.','YOUR TRACTOR CAN MAKE IT','DOWN THE COUNTRY LANE.'],
   city:['THE CITY IS CALLING!','SHOPS, STREETS, A STADIUM','AND THE AIRPORT ALL NEED','A PROPER PLOW TRUCK.']};
 Object.assign(STORY,STORY_EXTRA);
-function jobLockReason(i){const L=LEVELS[i];if(!levelAvail(i))return 'NEW WINTER '+L.winter;if(L.tool&&save.tool<toolIdx(L.tool))return 'NEEDS THE '+TOOLS[toolIdx(L.tool)].name;
+function jobLockReason(i){const L=LEVELS[i];if(!levelAvail(i))return 'NEW WINTER '+L.winter;if(L.tool&&!owns(toolIdx(L.tool)))return 'NEEDS THE '+TOOLS[toolIdx(L.tool)].name;
   if(!levelReach(i)){if(bossShort(i)>0&&L.from.some(id=>save.stars[lvIdx(id)]>0))return 'NEEDS '+BOSS_STARS[L.id]+' '+AREAS[L.area].name+' STARS ('+areaStars(L.area)+')';return 'FINISH '+L.from.map(id=>LEVELS[lvIdx(id)].name).join(' OR ');}if(!levelGateOK(i))return 'NEEDS A '+TOOLS[toolIdx(L.gate)].name;if(!levelPaid(i))return 'ROAD FEE';return '';}
 // ---------------- WORLD MAP ----------------
 // The map is a tall hand-laid world (180 x MAP_H) baked once into canvases in the game's own pixel style,
@@ -3926,8 +3934,8 @@ function drawStory(){const lines=STORY[storyOpen]||[];b.fillStyle='rgba(11,24,56
   text(b,AREAS[storyOpen].name,W/2,92,'#ffd23f',{align:'center',scale:2});lines.forEach((l,k)=>text(b,l,W/2,116+k*12,'#ffffff',{align:'center',outline:null}));
   button('sok',54,180,72,20,'orange',"LET'S GO!",()=>{save.story=save.story||{};save.story[storyOpen]=true;storyOpen=null;sfx('click');persist();});}
 // ---------------- GARAGE + WILD RIDES ----------------
-function useIdx(){const u=save.use;return (u==null||u<0||u>save.tool)?save.tool:u;}
-function equip(i){if(i<0||i>save.tool)return;save.use=i;_tc.k='';vcache.clear();sfx('buy');buzz(10);persist();}
+function useIdx(){const u=save.use;return (u==null||!owns(u))?save.tool:u;}
+function equip(i){if(!owns(i))return;save.use=i;_tc.k='';vcache.clear();sfx('buy');buzz(10);persist();}
 function drawToolIconTo(g,tid,x,y,sz,si){sz=sz||30;g.save();g.imageSmoothingEnabled=false;g.beginPath();g.rect(x,y,sz,sz);g.clip();
   if(isKidTool(tid)){const sc=sz/24;g.translate(x,y);g.scale(sc,sc);drawRig(g,tid,Math.round(24*0.43),24-4,1,12,0,0,0,false,si);}
   else{const s=VSPEC[tid];g.translate(x+sz/2,y+sz/2);const sc=(sz-6)/(s.hh*2+14);g.scale(sc,sc);drawRig(g,tid,0,4,0,s.hw*2+4,0,0,Math.floor(tNow*4)%2,false,si);}
@@ -3942,7 +3950,7 @@ function rideShade(tid,sz,lit){const k='sh'+tid+sz+lit;if(_sil[k])return _sil[k]
 function drawRideSil(tid,x,y,sz,rim,rumble){const sh=rumble&&Math.sin(tNow*1.7)>0.55?Math.round(Math.sin(tNow*45)):0;const r=rideSil(tid,sz,rim);
   for(const [dx,dy] of [[-1,0],[1,0],[0,-1],[0,1]])b.drawImage(r,x+dx+sh,y+dy);b.drawImage(rideShade(tid,sz,rumble?1:0.45),x+sh,y);}
 function drawSpot(cx,top,bot,wTop,wBot,a){const sway=Math.sin(tNow*0.9)*3;for(let y=top;y<bot;y++){const k=(y-top)/(bot-top),hw=Math.round(wTop+(wBot-wTop)*k);R(b,Math.round(cx+sway*k-hw),y,hw*2,1,'rgba(255,240,190,'+(a*(0.5+0.5*k)).toFixed(3)+')');}}
-function nextRide(){return TOOLS.findIndex((t,i)=>i>=BASE_TOOLS&&!toolAvail(i));}
+function nextRide(){return rideNextIdx();}
 function drawGarage(){
   R(b,0,0,W,NAV_Y,'#5b6478');for(let y=0;y<NAV_Y;y+=8){R(b,0,y,W,1,'#4c5468');}R(b,0,0,W,22,'#0b1838');
   drawHeaderGems(2,2,50);drawHeaderCoins(W-74,2,72);sign('GARAGE',24);
@@ -3952,30 +3960,30 @@ function drawGarage(){
   b.save();b.beginPath();b.rect(0,VY,W,VH);b.clip();let y=VY-sy;
   for(const it of items){const h=hOf(it);if(y+h<VY||y>VY+VH){y+=h;continue;}
     if(it.hdr){R(b,4,y+5,172,14,K);R(b,5,y+6,170,12,'#2a2140');R(b,5,y+6,170,1,'#6b4fa8');text(b,'WILD RIDES',W/2,y+9,'#c4a0f5',{align:'center'});
-      const got=TOOLS.filter((t,i)=>i>=BASE_TOOLS&&i<=save.tool).length;text(b,got+'/5',170,y+9,'#9f86e0',{align:'right',outline:null});y+=h;continue;}
+      const got=ridesOwned();text(b,got+'/5',170,y+9,'#9f86e0',{align:'right',outline:null});y+=h;continue;}
     const i=it.i,t=TOOLS[i],x=4,w=172,ch=32,wild=i>=BASE_TOOLS;
-    if(wild&&!toolAvail(i)){// a Wild Ride you can't get yet: silhouette only
+    if(wild&&!owns(i)&&!(i===nr&&toolAvail(i))){// a Wild Ride you haven't got: silhouette only
       const isNext=i===nr;card(x,y,w,ch,'#1b1530',isNext?'#c4a0f5':'#3a2f60');R(b,x+4,y+3,28,26,K);R(b,x+5,y+4,26,24,isNext?'#2a2150':'#14102a');
       if(isNext)drawSpot(x+18,y+4,y+28,2,12,0.35);drawRideSil(t.id,x+6,y+5,22,isNext?'#c4a0f5':'#3a2f60',isNext);
       if(isNext){text(b,t.name,x+37,y+5,'#ffd23f',{outline:null});text(b,t.trick,x+37,y+14,'#c4a0f5',{outline:null});text(b,'TAP TO PEEK',x+37,y+23,'#7d6ab8',{outline:null});}
       else{text(b,'???',x+37,y+6,'#7d6ab8',{outline:null});text(b,'A WILD RIDE',x+37,y+15,'#5a4a90',{outline:null});}
       const sw=textW('WINTER '+t.winter)+6;R(b,x+w-sw-5,y+9,sw+2,13,isNext?'#e03a4e':'#3a2f60');R(b,x+w-sw-4,y+10,sw,11,isNext?'#1b1530':'#14102a');text(b,'WINTER '+t.winter,x+w-sw/2-4,y+13,isNext?'#ff8a98':'#5a4a90',{align:'center',outline:null});
       btn('ride'+i,x,y,w,ch,()=>{ridePeek=t.id;sfx('click');});y+=h;continue;}
-    const owned=i<=save.tool,next=i===save.tool+1,afford=save.coins>=t.cost,cur=i===use,gold=isGold(t.id);
+    const owned=owns(i),next=wild?i===nr:i===save.tool+1,afford=save.coins>=t.cost,cur=i===use,gold=isGold(t.id),RT=wild?rideTool(i):null;
     card(x,y,w,ch,cur?'#fff6d8':owned?'#eef3fb':wild?'#e6dcf6':'#d8dee8',cur?'#ffd23f':wild?'#b07aff':'#9fc0e8');R(b,x+4,y+3,28,26,K);R(b,x+5,y+4,26,24,'#cfe3f8');
     if(owned||next)drawToolIcon(t.id,x+5,y+4,24,owned?skinIdx(t.id):0);else{b.globalAlpha=0.35;drawToolIcon(t.id,x+5,y+4,24);b.globalAlpha=1;}
-    const T2=(cur&&!chal())?tool():t;text(b,(gold?'GOLDEN ':'')+t.name+(isMk2(t.id)?' MK II':''),x+37,y+5,gold?'#a8740a':'#13306b',{outline:null});
-    text(b,t.trick||('WIDTH '+bladeCells(T2)+'  SPEED '+T2.speed),x+37,y+14,wild?'#7a4fc8':'#4f6fa0',{outline:null});text(b,!owned&&!next?'AFTER '+TOOLS[i-1].name:'x'+(cur?T2.value:t.value)+' COINS',x+37,y+22,!owned&&!next?'#8a6a40':'#4f6fa0',{outline:null});
+    const T2=(cur&&!chal())?tool():RT||t;text(b,(gold?'GOLDEN ':'')+t.name+(isMk2(t.id)?' MK II':''),x+37,y+5,gold?'#a8740a':'#13306b',{outline:null});
+    text(b,t.trick||('WIDTH '+bladeCells(T2)+'  SPEED '+T2.speed),x+37,y+14,wild?'#7a4fc8':'#4f6fa0',{outline:null});text(b,!owned&&!next?'AFTER '+TOOLS[i-1].name:wild?'BEST MACHINE +15%':'x'+(cur?T2.value:t.value)+' COINS',x+37,y+22,!owned&&!next?'#8a6a40':'#4f6fa0',{outline:null});
     if(owned){if(cur){R(b,x+w-38,y+3,34,11,'#1f7a33');text(b,'IN USE',x+w-21,y+5,'#ffffff',{align:'center',outline:null});}else button('use'+i,x+w-38,y+2,34,13,'green','USE',()=>equip(i));
       button('sk'+i,x+w-38,y+16,34,13,'purple','SKINS',()=>{skinFor=t.id;skinSel=skinIdx(t.id);sfx('click');});btn('card'+i,x,y,w-40,ch,()=>{skinFor=t.id;skinSel=skinIdx(t.id);sfx('click');});}
-    else if(next){button('tool',x+w-46,y+3,42,26,afford?'orange':'grey',null,buyTool);text(b,'BUY',x+w-25,y+7,'#ffffff',{align:'center'});priceRow(SPR.coinS,fmt(t.cost),x+w-25,y+17,afford?'#ffffff':'#ffd0d6');}
+    else if(next){button('tool',x+w-46,y+3,42,26,afford?'orange':'grey',null,wild?()=>buyRideCoins(i):buyTool);text(b,'BUY',x+w-25,y+7,'#ffffff',{align:'center'});priceRow(SPR.coinS,fmt(t.cost),x+w-25,y+17,afford?'#ffffff':'#ffd0d6');}
     else{b.drawImage(SPR.lock,x+w-28,y+4);text(b,fmt(t.cost),x+w-25,y+17,'#7d8aa0',{align:'center',outline:null});}
     y+=h;}
   b.restore();clipUI(uiFrom,VY,VY+VH);scrollBar(W-3,VY+2,VH-4,'garage',content);
   button('outfits',6,252,82,32,'orange',null,()=>{outfitsOpen=true;outfitSel=save.outfit;sfx('click');});b.drawImage(kidSet().down,12,259);text(b,'OUTFITS',58,265,'#ffffff',{align:'center'});
   button('trails',92,252,82,32,'purple',null,()=>{trailsOpen=true;sfx('click');});for(let k=0;k<5;k++)R(b,100+k*3,262+(k%2)*3,2,2,['#ffd23f','#ff4fa3','#4fd36a','#5fb4ff','#ffffff'][k]);text(b,'TRAILS',140,265,'#ffffff',{align:'center'});}
 // peek at a Wild Ride you haven't got yet
-function drawRidePeek(){const tid=ridePeek,ti=toolIdx(tid),t=TOOLS[ti],isNext=ti===nextRide();b.fillStyle='rgba(8,6,20,0.85)';b.fillRect(0,0,W,H);panel(12,40,156,230,'#1b1530','#c4a0f5');
+function drawRidePeek(){const tid=ridePeek,ti=toolIdx(tid),t=TOOLS[ti],isNext=ti===nextRide(),sale=rideForSale()===ti;b.fillStyle='rgba(8,6,20,0.85)';b.fillRect(0,0,W,H);panel(12,40,156,230,'#1b1530','#c4a0f5');
   text(b,'WILD RIDE',W/2,48,'#9f86e0',{align:'center',outline:null});const nm=isNext?t.name:'???';text(b,nm,W/2,60,isNext?'#ffd23f':'#c4a0f5',{align:'center',scale:textW(nm,2)<146?2:1});
   // stage behind frosted glass
   const sx=24,syy=80,sw=132,sh=92;R(b,sx-1,syy-1,sw+2,sh+2,K);for(let y=0;y<sh;y++)R(b,sx,syy+y,sw,1,'rgb('+Math.round(20+y*0.25)+','+Math.round(16+y*0.2)+','+Math.round(48+y*0.35)+')');
@@ -3987,7 +3995,8 @@ function drawRidePeek(){const tid=ridePeek,ti=toolIdx(tid),t=TOOLS[ti],isNext=ti
     const ts=totalStars(),need=starsNeeded();text(b,'OR EARN '+need+' STARS AND',W/2,206,'#ffffff',{align:'center',outline:null});text(b,'START WINTER '+t.winter,W/2,215,'#ffffff',{align:'center',outline:null});
     R(b,40,226,100,7,K);R(b,41,227,98,5,'#14102a');R(b,41,227,Math.round(98*Math.min(1,ts/need)),5,'#ffd23f');text(b,ts+'/'+need,W/2,236,'#ffd23f',{align:'center',outline:null});}
   else{text(b,'A WILD RIDE FOR WINTER '+t.winter,W/2,184,'#ffd23f',{align:'center',outline:null});text(b,'KEEP PLOWING TO',W/2,200,'#ffffff',{align:'center',outline:null});text(b,'FIND OUT WHAT IT IS...',W/2,210,'#ffffff',{align:'center',outline:null});}
-  button('pkclose',54,246,72,18,'blue','DONE',()=>{ridePeek=null;sfx('click');});}
+  if(sale){const pr=SHOP.rides[t.id];button('pkgem',20,246,72,18,(save.gems||0)>=pr[1]?'purple':'grey',pr[1]+' GEMS',()=>{if(buyRide(ti,true))ridePeek=null;});button('pkclose',96,246,64,18,'blue','DONE',()=>{ridePeek=null;sfx('click');});}
+  else button('pkclose',54,246,72,18,'blue','DONE',()=>{ridePeek=null;sfx('click');});}
 // the big reveal when a New Winter brings a Wild Ride
 function drawRideReveal(dt){const R2=rideReveal;R2.t+=dt;const tid=R2.tid,t=TOOLS[toolIdx(tid)],job=LEVELS.find(l=>l.tool===tid);b.fillStyle='rgba(8,6,20,0.9)';b.fillRect(0,0,W,H);panel(10,36,160,240,'#1b1530','#ffd23f');
   text(b,'NEW WILD RIDE!',W/2,46,'#ffd23f',{align:'center',scale:2});const sx=22,syy=66,sw=136,sh=100;R(b,sx-1,syy-1,sw+2,sh+2,K);R(b,sx,syy,sw,sh,'#241c48');R(b,sx,syy+sh-16,sw,16,'#2a2150');
@@ -4004,7 +4013,7 @@ function nextPrize(){const w=winterNo()+1,g=goldFor(w),m=TOOLS.find(t=>t.winter=
 function startNewWinter(){const g2=frostGain();save.frost=(save.frost||0)+g2;save.winters=(save.winters||0)+1;const w=winterNo(),gold=goldFor(w);
   Object.assign(save,{coins:0,tool:Math.max(0,gold),use:null,gold,lv:{speed:0,size:0,value:0,bumper:0,helpers:0},mlv:{},stars:Array(NL).fill(0),best:Array(NL).fill(0),winterCoins:0,fails:Array(NL).fill(0),boostNext:false,tolls:{},winterSeen:false,plowSeen:null});
   _tc.k='';kidCacheClear();scrollY.map=null;winterOpen=false;award('winter');if(w>=6)award('winter6');
-  const m=TOOLS.find(t=>t.winter===w);if(m)rideReveal={tid:m.id,t:0};
+  const m=TOOLS.find(t=>t.winter===w);if(m&&!owns(toolIdx(m.id)))rideReveal={tid:m.id,t:0};
   showToast('WINTER '+w+': +'+g2+' FROST STARS','#9fd8ff');sfx('win');persist();}
 function drawWinter(){b.fillStyle='rgba(11,24,56,0.8)';b.fillRect(0,0,W,H);panel(10,26,160,262,'#13306b','#9fd8ff');
   b.drawImage(SPR.frost,W/2-4,32);text(b,'NEW WINTER',W/2,44,'#ffffff',{align:'center',scale:2});const ts=totalStars(),need=starsNeeded(),pz=nextPrize();
@@ -4251,7 +4260,7 @@ function drawShop(){b.fillStyle='rgba(11,24,56,0.82)';b.fillRect(0,0,W,H);panel(
       if(ri>=0){const T3=TOOLS[ri],pr=SHOP.rides[T3.id];card(12,y,156,34,'#eef3fb','#ffd23f');R(b,14,y+2,32,30,'#cfe3f8');drawToolIcon(T3.id,15,y+2,30);
         text(b,T3.name,50,y+3,'#13306b',{outline:null});text(b,'KEEP IT NOW, OR EARN IT',50,y+11,'#4f6fa0',{outline:null});
         button('sride',50,y+19,52,13,'gold',pr[0],()=>buyRide(ri,false));button('srideg',106,y+19,58,13,(save.gems||0)>=pr[1]?'purple':'grey','OR '+pr[1]+' GEMS',()=>buyRide(ri,true));}
-      else{card(12,y,156,34,'#eef3fb','#9fc0e8');const msg=nx<0?(save.tool<toolIdx('rotary')?save.tool>=toolIdx('super')?['TEST DRIVES CAN TURN UP NOW.','PARTS DROP AFTER THE ROTARY']:['TEST DRIVES BEGIN ONCE YOU','OWN THE SUPER PLOW']:['YOU OWN EVERY','WILD RIDE SO FAR']):['PARTS FOUND: '+((save.parts||{})[TOOLS[nx].id]||0)+' OF 3 ('+TOOLS[nx].name+')','OR FIND A TEST DRIVE IN A JOB'];
+      else{card(12,y,156,34,'#eef3fb','#9fc0e8');const msg=rideNextIdx()<0?['YOU OWN EVERY','WILD RIDE!']:nx<0?(save.tool>=toolIdx('super')?['TEST DRIVES CAN TURN UP NOW.','PARTS DROP AFTER THE ROTARY']:['TEST DRIVES BEGIN ONCE YOU','OWN THE SUPER PLOW']):['PARTS FOUND: '+((save.parts||{})[TOOLS[nx].id]||0)+' OF 3 ('+TOOLS[nx].name+')','OR FIND A TEST DRIVE IN A JOB'];
         text(b,msg[0],W/2,y+9,'#4f6fa0',{align:'center',outline:null});text(b,msg[1],W/2,y+19,'#4f6fa0',{align:'center',outline:null});}}
     {const y=212;card(12,y,156,30,save.ridePass?'#fff6d8':'#eef3fb','#ffd23f');text(b,'WILD RIDE PASS',17,y+4,'#a8740a',{outline:null});text(b,'EACH WILD RIDE IS YOURS',17,y+12,'#4f6fa0',{outline:null});text(b,'AS SOON AS IT APPEARS',17,y+20,'#4f6fa0',{outline:null});
       if(save.ridePass)button('spass',124,y+7,40,16,'grey','OWNED',()=>sfx('click'));else button('spass',124,y+7,40,16,'gold',SHOP.ridePass.price,buyRidePass);}
@@ -4449,7 +4458,7 @@ function drawPause(){ui=[];b.fillStyle='rgba(11,24,56,0.7)';b.fillRect(0,0,W,H);
 function rLine(s,y,col,ol){if(textW(s)<=148)text(b,s,W/2,y,col,{align:'center',outline:ol===false?null:undefined});else condText(b,s,W/2,y,col,ol===false?null:K);}
 function nextGoal(){const c=save.coins,opts=[];
   for(const k in UPG){const lv=lvOf(k);if(lv>=upMax(k))continue;opts.push({need:upgCost(k)-c,label:upName(k)+' LV'+(lv+1),go:goUpgrades});}
-  const n=save.tool+1;if(n<TOOLS.length&&toolAvail(n))opts.push({need:TOOLS[n].cost-c,label:'THE '+TOOLS[n].name,go:goGarage,tool:true});
+  const n=save.tool+1;if(n<BASE_TOOLS)opts.push({need:TOOLS[n].cost-c,label:'THE '+TOOLS[n].name,go:goGarage,tool:true});
   if(!opts.length)return null;opts.sort((a,z)=>a.need-z.need);const can=opts.filter(o=>o.need<=0);
   if(can.length){const p=can.find(o=>o.tool)||can[can.length-1];return {s:'YOU CAN BUY '+p.label+'!',col:'#7fe08a',go:p.go};}
   return {s:fmt(opts[0].need)+' COINS TO '+opts[0].label,col:'#ffffff',go:opts[0].go};}
@@ -4474,7 +4483,7 @@ function drawResults(){
   else if(gated.length)rLine('NEXT AREA NEEDS A '+TOOLS[toolIdx(LEVELS[gated[0]].gate)].name,ly,'#9fd8ff');
   else if(ly<=py+134){const ng=nextGoal();if(ng){rLine(ng.s,ly,ng.col);btn('rgoal',14,ly-2,152,10,()=>{sfx('click');ng.go();});}else text(b,'UPGRADE AND GO AGAIN!',W/2,ly,'#ffffff',{align:'center'});}
   if(!r.challenge&&((r.stars===0&&!close)||kids.length||gated.length)&&ly+10<=py+132){const ng=nextGoal();if(ng){rLine(ng.s,ly+10,ng.col,false);btn('rgoal',14,ly+8,152,10,()=>{sfx('click');ng.go();});}}
-  const offerRide=!r.challenge&&run.drove!=null&&save.tool<run.drove&&!run.offerShut;
+  const offerRide=!r.challenge&&run.drove!=null&&!owns(run.drove)&&!run.offerShut;
   if(t>0.6&&!offerRide){const canAd=!r.challenge&&!run.adUsed&&run.earned>=1,canBoost=!r.challenge&&(save.fails[G.idx]||0)>=BOOST_AFTER_FAILS&&!save.boostNext&&r.stars<3;
     if(save.pro&&canAd){run.adUsed=true;run.proDbl=Math.floor(run.earned);save.coins+=run.proDbl;sfx('buy');persist();if(canBoost)showToast('PREMIUM x2: +'+fmt(run.proDbl)+' COINS','#ffd23f');}
     if(run.proDbl&&!canBoost){R(b,18,py+148,144,16,'#3a2a08');R(b,19,py+149,142,14,'#7a5a14');b.drawImage(SPR.coin,30,py+152);text(b,'PREMIUM x2:  +'+fmt(run.proDbl),W/2+5,py+153,'#ffd23f',{align:'center'});}
@@ -4487,7 +4496,7 @@ function drawResults(){
     button('retry',18,py+176,46,22,'orange','RETRY',()=>startLevelUI(G.idx,run.challenge?{challenge:run.challenge}:null));if(close){const a=0.45+0.55*Math.abs(Math.sin(tNow*4));b.globalAlpha=a;R(b,16,py+174,50,1,'#ffd23f');R(b,16,py+199,50,1,'#ffd23f');R(b,16,py+174,1,26,'#ffd23f');R(b,65,py+174,1,26,'#ffd23f');b.globalAlpha=1;}button('rmap',67,py+176,46,22,'blue','JOBS',goMap);button('rupg',116,py+176,46,22,'green','UPGRADE',goUpgrades);}
   if(run.mission&&t>0.4){const T4=TOOLS[toolIdx(run.mission)];panel(14,18,152,24,r.missionWon?'#1f5a2a':'#3a1d6e',r.missionWon?'#7fe08a':'#c4a0f5');
     text(b,r.missionWon?'MISSION WON!':'MISSION: 2 STARS TO KEEP IT',W/2,22,'#ffd23f',{align:'center',outline:null});text(b,r.missionWon?'THE '+T4.name+' IS YOURS':'TRY AGAIN, THE '+T4.name+' WAITS',W/2,31,'#ffffff',{align:'center',outline:null});}
-  if(offerRide&&t>0.6&&run.drove!==nextRideIdx()){const T3=TOOLS[run.drove];b.fillStyle='rgba(11,24,56,0.6)';b.fillRect(0,0,W,H);panel(16,80,148,156,'#13306b','#ffd23f');
+  if(false){const T3=TOOLS[run.drove];b.fillStyle='rgba(11,24,56,0.6)';b.fillRect(0,0,W,H);panel(16,80,148,156,'#13306b','#ffd23f');
     text(b,'ENJOYED THE TEST DRIVE?',W/2,88,'#ffd23f',{align:'center'});R(b,62,100,56,44,'#cfe3f8');drawToolIcon(T3.id,70,102,40);
     text(b,'ITS PARTS DROP AFTER YOU',W/2,150,'#ffffff',{align:'center',outline:null});text(b,'OWN THE ROTARY BLOWER',W/2,158,'#ffffff',{align:'center',outline:null});
     if(!save.ridePass){button('rop',24,170,132,18,'gold','WILD RIDE PASS '+SHOP.ridePass.price,()=>{buyRidePass();run.offerShut=true;});text(b,'ALL 5 RIDES, AS THEY UNLOCK',W/2,192,'#9fc0e8',{align:'center',outline:null});}
@@ -4578,7 +4587,7 @@ function frame(now){const dt=Math.min(0.05,(now-last)/1000);last=now;if(state===
 requestAnimationFrame(frame);
 if(TEST_MODE)window.__STEP=(n,dt,dr)=>{if(pendingStart){pendingStart.f=1;runPendingStart();}for(let i=0;i<n;i++){if(window.__botTick)window.__botTick();update(dt||1/30);if(dr&&i%dr===0)draw();}draw();};
 if(TEST_MODE)window.__UI={list:()=>ui.map(q=>q.id),rects:()=>ui.map(q=>[q.id,q.x,q.y,q.w,q.h]),press:id=>{const q=ui.find(z=>z.id===id);if(!q)return false;q.fn();return true;},get state(){return state;}};
-window.__MONEY={get run(){return run;},get P(){return P;},get G(){return G;},tool:()=>tool(),setShop:(o,t)=>{shopOpen=o;shopTab=t;},setState:v=>{state=v;},setSkin:(t,k)=>{skinFor=t;skinSel=k;},nextRideIdx:()=>nextRideIdx(),rideForSale:()=>rideForSale(),buyRide:(i,g)=>buyRide(i,g),premium:()=>shopBuyPremium(),starter:()=>shopBuyStarter(),offCap:()=>offCap(),toolIdx:x=>toolIdx(x),lvIdx:x=>lvIdx(x),startLevel:(i,o)=>startLevel(i,o),endRound:a=>endRound(a),missionOn:i=>missionOn(i),TOOLS};
+window.__MONEY={get run(){return run;},get P(){return P;},get G(){return G;},tool:()=>tool(),setShop:(o,t)=>{shopOpen=o;shopTab=t;},setState:v=>{state=v;},setSkin:(t,k)=>{skinFor=t;skinSel=k;},nextRideIdx:()=>nextRideIdx(),rideNextIdx:()=>rideNextIdx(),owns:i=>owns(i),rideTool:i=>rideTool(i),buyRideCoins:i=>buyRideCoins(i),rideForSale:()=>rideForSale(),buyRide:(i,g)=>buyRide(i,g),premium:()=>shopBuyPremium(),starter:()=>shopBuyStarter(),offCap:()=>offCap(),toolIdx:x=>toolIdx(x),lvIdx:x=>lvIdx(x),startLevel:(i,o)=>startLevel(i,o),endRound:a=>endRound(a),missionOn:i=>missionOn(i),TOOLS};
 if(TEST_MODE)window.__EV=(src)=>eval(src);if(TEST_MODE)window.__LM=(id,w,h)=>{w=w||64;h=h||56;const c=mk(w,h),g=c.getContext('2d');lmArt(g,id,w>>1,h>>1);return c;};
 if(TEST_MODE)window.__AUD=()=>({textW,OVERS,CHASERS,HAZ,PROPS,GROUND_T,wildSpr,srng,SFX_FILES:typeof SFX_FILES!=='undefined'?SFX_FILES:null});
 if(TEST_MODE)window.__CAST=()=>({kid:[SPR.kidDown,SPR.kidUp,SPR.kidSide],peds:SPR.peds,thrower:[SPR.thrower,SPR.throwerWind],granny:[SPR.granny],dog:[SPR.dog],cow:[COW],sheep:SHEEP_FR,horse:HORSE_FR,peng:PENG_FR,gull:GULL_FR,ghost:GHOST_FR,skier:SKIER_FR,sled:[SPR.sled],cart:[CART],tug:[TUG],fork:FORK_FR,bumper:BUMPER_FR,rock:[ROCK_SPR],chasers:Object.fromEntries(Object.entries(CHASERS).map(([k,v])=>[k,v.frames]))});
