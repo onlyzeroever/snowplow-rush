@@ -62,8 +62,10 @@ const TOOLS=[
   {id:'tractor',name:'TRACTOR',    cost:32000,  width:21, speed:52, value:3.2},
   {id:'truck',  name:'PLOW TRUCK', cost:82000,   width:29, speed:62, value:4.5},
   {id:'super',  name:'SUPER PLOW', cost:680000, width:40, speed:74, value:6.5},
+  {id:'loader', name:'FRONT LOADER',cost:2.5e6, width:48, speed:84, value:7.5},
   {id:'snowcat',name:'SNOWCAT',    cost:6.5e6,  width:44, speed:92, value:9.5},
   {id:'rotary', name:'ROTARY BLOWER',cost:1.8e7, width:48, speed:104,value:13.5},
+  {id:'icebreaker',name:'ICEBREAKER',cost:1.8e8, width:62, speed:132,value:18},
   // Wild Rides: appear in the Garage from the winter shown (one per New Winter)
   {id:'monster',name:'MONSTER TRUCK',cost:2.4e7, width:46, speed:108,value:17,   winter:2, trick:'CRUSHES JUNK'},
   {id:'jet',    name:'JET TRUCK',  cost:7e7,     width:42, speed:120,value:22,   winter:3, trick:'BLASTS A CONE'},
@@ -71,7 +73,7 @@ const TOOLS=[
   {id:'dragon', name:'SNOW DRAGON',cost:6e8,     width:38, speed:130,value:38,   winter:5, trick:'MELTS A STRIP'},
   {id:'ufo',    name:'UFO',        cost:1.8e9,   width:48, speed:136,value:50,   winter:6, trick:'FLOATS, BEAMS COWS'},
 ];
-const BASE_TOOLS=8;
+const BASE_TOOLS=10;
 function owns(i){return i>=0&&i<TOOLS.length&&(i<BASE_TOOLS?i<=save.tool:!!(save.rides&&save.rides[TOOLS[i].id])||i<=save.tool);}  // (save.tool past the ladder: only test scripts)
 function rideNextIdx(){for(let i=BASE_TOOLS;i<TOOLS.length;i++)if(!owns(i))return i;return -1;}
 function ridesOwned(){let n=0;for(let i=BASE_TOOLS;i<TOOLS.length;i++)if(owns(i))n++;return n;}
@@ -84,8 +86,9 @@ function rideTool(i){const t=TOOLS[i],b=rideBase(),w=Math.max(8,Math.min(80,Math
   return Object.assign({},t,{width:w,speed:Math.round(RIDE_BOOST*b.w*b.sp/w*10)/10,value:Math.round(b.v*RIDE_BOOST*100)/100,ride:true,bump:b.bump});}
 const MACHINE_UPG=['speed','size','bumper'],MUP_LV=6,MUP_BUMP=5,MUP_GROWTH=1.45,MUP_COST=0.06;
 const _mspec={};
+const MCAPS={super:[0.97*84/74,0.95*48/40],loader:[1.062,1.10],rotary:[1.15,1.25,7.2e7]};  // [speed cap, width cap, upgrade price base]
 function mspec(tid){if(_mspec[tid])return _mspec[tid];const i=TOOLS.findIndex(t=>t.id===tid),t=TOOLS[i];let scap,wcap,nxt;
-  if(tid==='super'){scap=1.15;wcap=1.3;nxt=TOOLS[i+1].cost;}
+  if(MCAPS[tid]){const q=MCAPS[tid];scap=q[0];wcap=q[1];nxt=q[2]||TOOLS[i+1].cost;}
   else if(i>5){const n=TOOLS[i+1];scap=(i<BASE_TOOLS-1&&n)?Math.max(1.06,0.97*n.speed/t.speed):1.15;wcap=1.25;nxt=(i<BASE_TOOLS-1&&n)?n.cost:t.cost*(i<BASE_TOOLS?4:1.5);}
   else if(i>=0&&i<BASE_TOOLS-1){const n=TOOLS[i+1];scap=0.97*n.speed/t.speed;wcap=0.95*n.width/t.width;nxt=n.cost;}
   else if(i===BASE_TOOLS-1){scap=1.15;wcap=1.15;nxt=t.cost*4;}else{scap=1.15;wcap=1.25;nxt=t.cost*1.5;}
@@ -208,16 +211,18 @@ const OUTFITS=[
 ];
 const EARN_TXT={starter:'COMES IN THE STARTER PACK',daily10:'CLAIM 10 DAILY JOBS',trophies8:'EARN 8 TROPHIES',winter2:'START A NEW WINTER',combo:'REACH A x3.0 COMBO',neighbour:'HELP 2 NEIGHBOURS'};
 // tool & machine skins: index 0 classic, 1-2 coins, 3 gems, 4 earned (3 stars on the matching job)
-const SKIN_NAMES={snowcat:['CLASSIC','FOREST','NIGHT SHIFT','PISTE PATROL','GLACIER'],rotary:['CLASSIC','HIGHWAY','ARCTIC','INFERNO','CHROME'],
+const SKIN_NAMES={loader:['CLASSIC','HARBOUR BLUE','LIME','NIGHT SHIFT','BUBBLEGUM'],icebreaker:['CLASSIC','POLAR BLUE','COASTGUARD','STEALTH','AURORA'],snowcat:['CLASSIC','FOREST','NIGHT SHIFT','PISTE PATROL','GLACIER'],rotary:['CLASSIC','HIGHWAY','ARCTIC','INFERNO','CHROME'],
   shovel:['CLASSIC','HOCKEY STICK','FRYING PAN','GIANT SPOON','CANDY CANE'], pusher:['CLASSIC','TROLLEY','SLEDGE','BULLDOZER','BROOM'],
   blower:['CLASSIC','HAIR DRYER','VACUUM','PARTY','DRAGON HEAD'], tractor:['CLASSIC','FARM RED','PUMPKIN','RACE KART','DINO'],
   truck:['CLASSIC','FIRE ENGINE','ICE CREAM','SCHOOL BUS','RESURFACER'], super:['CLASSIC','SHARK','SPACE SHUTTLE','LAVA','CANDY'],
   monster:['CLASSIC','BLUE FLAMES','TIGER','ALIEN','GOLD'], jet:['CLASSIC','AIRLINER','STUNT','ROCKET','PAPER'],
   mech:['CLASSIC','TEDDY','KNIGHT','FROST','ROBO DOG'], dragon:['CLASSIC','RED','ICE','GOLD','CANDY'], ufo:['CLASSIC','COW PRINT','DISCO','PIZZA','RETRO']};
-const SKIN_EARN_JOB={snowcat:'blackrun',rotary:'summit',shovel:'driveway',pusher:'culdesac',blower:'maple',tractor:'lot',truck:'street',super:'airport',monster:'junkyard',jet:'motorway',mech:'site',dragon:'castle',ufo:'ranch'};
+const SKIN_EARN_JOB={loader:'containers',icebreaker:'icefield',snowcat:'blackrun',rotary:'summit',shovel:'driveway',pusher:'culdesac',blower:'maple',tractor:'lot',truck:'street',super:'airport',monster:'junkyard',jet:'motorway',mech:'site',dragon:'castle',ufo:'ranch'};
 for(const k in SKIN_NAMES)SKIN_NAMES[k].push('GOLD PAINT');
 // colours per skin: b=body, l=light, d=dark, a=accent, x=blade fill, xd=blade dark, xh=blade light; deco = extra detail drawn on top
 const SKIN_PAL={
+  loader:[{b:'#f5b82e',l:'#ffe07a',d:'#c4861a'},{b:'#3f86d6',l:'#7fbaf2',d:'#2a5fa8'},{b:'#7ccf3a',l:'#b6f07a',d:'#4f9a22'},{b:'#3a3f52',l:'#5f6880',d:'#23273a'},{b:'#ff6fb0',l:'#ffb0d6',d:'#c23a7c'}],
+  icebreaker:[{b:'#d8343c',l:'#ff6a6a',d:'#9a1f2a'},{b:'#2f6fc8',l:'#6fa8f0',d:'#1f4a8a'},{b:'#f07a1a',l:'#ffb060',d:'#b8501a'},{b:'#2a2a36',l:'#55607a',d:'#1b1f3b'},{b:'#2fb59a',l:'#7fe8d0',d:'#1d7a68'}],
   snowcat:[{b:'#d8364b',l:'#ff7a8a',d:'#9c2a45',x:'#c6d0dc',xd:'#8793a8',xh:'#ffffff'},{b:'#2f8a4a',l:'#6fd07a',d:'#1f6a33',x:'#ffc727',xd:'#e29a1c',xh:'#ffe27a',deco:'stripe'},{b:'#1f2f5a',l:'#3f5fae',d:'#121c3a',x:'#c6d0dc',xd:'#8793a8',xh:'#ffffff',deco:'lights'},{b:'#ffc727',l:'#ffe27a',d:'#c98a12',x:'#2a2a36',xd:'#1b1f3b',xh:'#55607a',deco:'cross'},{b:'#e8f6ff',l:'#ffffff',d:'#9fd4f4',x:'#7ad3ff',xd:'#3f86d6',xh:'#d8f2ff',deco:'flake'}],
   rotary:[{b:'#f07a1a',l:'#ffb060',d:'#b8501a',x:'#ffc727',xd:'#c98a12',xh:'#ffe27a'},{b:'#ffc727',l:'#ffe27a',d:'#c98a12',x:'#2a2a36',xd:'#1b1f3b',xh:'#55607a',deco:'chevron'},{b:'#f4f8ff',l:'#ffffff',d:'#9fb8d8',x:'#3f86d6',xd:'#2a5fa8',xh:'#7fbaf2',deco:'flake'},{b:'#2a2a36',l:'#55607a',d:'#1b1f3b',x:'#e03a4e',xd:'#a82639',xh:'#ff7a8a',deco:'flames'},{b:'#c6ccd6',l:'#ffffff',d:'#8793a8',x:'#e8eef7',xd:'#9aa6ba',xh:'#ffffff',deco:'chrome'}],
   shovel:[{x:'#c98d4a',xd:'#8a5a2c'},{x:'#2a2a36',xd:'#1b1f3b',deco:'tape'},{x:'#2a2a36',xd:'#1b1f3b',deco:'egg'},{x:'#c6d9f3',xd:'#8793a8',deco:'shine'},{x:'#ffffff',xd:'#e03a4e',deco:'stripes'}],
@@ -672,7 +677,7 @@ const save={coins:0,tool:0,mlv:{},lv:{speed:0,size:0,value:0,bumper:0,helpers:0}
 function loadSave(){try{let s=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');
   if(!s&&RV){const ix=id=>TOOLS.findIndex(t=>t.id===id),AR=['suburbs','farm','city','themepark','harbour','ski','pass','north'],
     P={themepark:{m:'super',lv:[4,4,2],coins:5e5},ski:{m:'snowcat',lv:[6,6,5],coins:1e7},pass:{m:'rotary',lv:[4,3,2],coins:2.7e6},north:{m:'rotary',lv:[6,6,5],coins:2.6e7}}[RV],done=AR.slice(0,AR.indexOf(RV));
-    s={v:6,tv:2,tut:true,coins:P.coins,tool:ix(P.m),use:ix(P.m),gems:40,mlv:{},lv:{speed:0,size:0,value:20,bumper:0,helpers:20},stars:[],best:[],story:{},tolls:{},areaSeen:done.length,rvStage:RV};
+    s={v:6,tv:3,tut:true,coins:P.coins,tool:ix(P.m),use:ix(P.m),gems:40,mlv:{},lv:{speed:0,size:0,value:20,bumper:0,helpers:20},stars:[],best:[],story:{},tolls:{},areaSeen:done.length,rvStage:RV};
     for(let i=0;i<=ix(P.m);i++)s.mlv[TOOLS[i].id]=i===ix(P.m)?{speed:P.lv[0],size:P.lv[1],bumper:P.lv[2]}:{speed:6,size:6,bumper:5};
     for(const a of done)s.story[a]=true;LEVELS.forEach((L,i)=>{if(done.includes(L.area)){s.stars[i]=2;s.best[i]=70;if(L.toll)s.tolls[L.id]=true;}});}
   if(!s&&REVIEW_MODE){s={v:6,tut:true,story:{suburbs:true},coins:4000,tool:2,use:2,gems:20,mlv:{shovel:{speed:3,size:3,bumper:1},pusher:{speed:6,size:6,bumper:2},blower:{speed:1,size:1,bumper:0}},lv:{speed:0,size:0,value:6,bumper:0,helpers:3},stars:[],best:[]};
@@ -680,6 +685,9 @@ function loadSave(){try{let s=JSON.parse(localStorage.getItem(SAVE_KEY)||'null')
     if(/[?&]review=all/.test(location.search)){s.tool=7;s.use=7;s.coins=5e7;s.tv=2;s.areaSeen=7;s.tolls={retreat:true,stadium:true};s.story={suburbs:true,farm:true,city:true,themepark:true,harbour:true,ski:true,pass:true,north:true};LEVELS.forEach((L,i)=>{if(L.area!=='secret'){s.stars[i]=1;s.best[i]=40;}});}}
   if(s){
   if(!s.tv){if(s.tool>=6)s.tool+=2;if(s.use!=null&&s.use>=6)s.use+=2;if(s.gold!=null&&s.gold>=6)s.gold+=2;s.tv=2;}
+  if(s.tv===2){const OLD=['shovel','pusher','blower','tractor','truck','super','snowcat','rotary','monster','jet','mech','dragon','ufo'],mv=i=>(Number.isInteger(i)&&i>=0&&i<OLD.length)?Math.max(0,TOOLS.findIndex(t=>t.id===OLD[i])):i;
+    if(Number.isInteger(s.tool)&&s.tool>=8&&s.tool<OLD.length){s.rides=(s.rides&&typeof s.rides==='object')?s.rides:{};for(let j=8;j<=s.tool;j++)s.rides[OLD[j]]=true;s.tool=7;if(s.mlv&&typeof s.mlv==='object')for(let j=8;j<OLD.length;j++){const q=s.mlv[OLD[j]];if(q&&typeof q==='object'){q.speed=0;q.size=0;}}}  // rides used to imply the whole ladder up to the Rotary
+    s.tool=mv(s.tool);if(s.use!=null)s.use=mv(s.use);if(s.gold!=null)s.gold=mv(s.gold);s.tv=3;}
   if(!s.v||s.v<6){const oldIds=(!s.v)?['driveway','maple','lot','street','airport']:['driveway','culdesac','maple','lot','street','airport'];
     for(const k of ['stars','best','fails'])if(Array.isArray(s[k])){const o=s[k],n=Array(NL).fill(0);oldIds.forEach((id,j)=>{const ni=LEVELS.findIndex(l=>l.id===id);if(ni>=0)n[ni]=o[j]||0;});s[k]=n;}
     s.v=6;if(s.tool>=0){/* tools unchanged */}}
@@ -687,7 +695,7 @@ function loadSave(){try{let s=JSON.parse(localStorage.getItem(SAVE_KEY)||'null')
   save.ach=Object.assign({},s.ach||{});save.stats=Object.assign({cells:0,gifts:0,dodges:0,gnome:0,neighbours:0},s.stats||{});save.hats=Object.assign({yellow:true},s.hats||{});save.outfits=Object.assign({classic:true},s.outfits||{});save.skin=Object.assign({},s.skin||{});save.skins=Object.assign({},s.skins||{});save.trails=Object.assign({classic:true},s.trails||{});save.treasures=Object.assign({},s.treasures||{});save.tolls=Object.assign({},s.tolls||{});
   for(const k of ['stars','best','fails']){const a=Array(NL).fill(0);(s[k]||[]).forEach((v,i)=>{if(i<NL)a[i]=v;});save[k]=a;}
   if(!s.mlv){const OLD={speed:[25,1.62],size:[35,1.64],bumper:[60,1.7]};let refund=0;for(const k in OLD){const n=save.lv[k]|0;for(let l=0;l<n;l++)refund+=Math.floor(OLD[k][0]*Math.pow(OLD[k][1],l));save.lv[k]=0;}
-    save.mlv={};if(refund>0){save.coins+=refund;save.upgRefund=refund;}}}}catch(e){}save.tv=2;sanitizeSave();}
+    save.mlv={};if(refund>0){save.coins+=refund;save.upgRefund=refund;}}}}catch(e){}save.tv=3;sanitizeSave();}
 function sanitizeSave(){const num=(v,d)=>(typeof v==='number'&&isFinite(v))?v:d,obj=v=>v&&typeof v==='object'&&!Array.isArray(v);
   save.coins=Math.max(0,num(save.coins,0));save.gems=Math.max(0,Math.floor(num(save.gems,0)));save.winters=Math.max(0,Math.floor(num(save.winters,0)));
   save.tool=Math.max(0,Math.min(TOOLS.length-1,Math.floor(num(save.tool,0))));{const r0=(save.rides&&typeof save.rides==='object')?save.rides:{},r={};for(let j=BASE_TOOLS;j<TOOLS.length;j++)if(r0[TOOLS[j].id]===true||j<=save.tool)r[TOOLS[j].id]=true;save.rides=r;
@@ -728,7 +736,7 @@ function levelOpen(i){return (DEV_MODE&&DEV.all)||(levelReach(i)&&levelGateOK(i)
 const WINTER_SLACK=60;   // stars you can skip before a New Winter opens
 function starsNeeded(){let n=0;for(let i=0;i<NL;i++)if((LEVELS[i].winter||1)<=winterNo())n+=3;return Math.max(3,n-WINTER_SLACK);}
 const isKidTool=id=>id==='shovel'||id==='pusher'||id==='blower';
-const VSPEC={tractor:{hw:8,hh:12,bt:5},truck:{hw:10,hh:18,bt:6},super:{hw:12,hh:22,bt:7},snowcat:{hw:13,hh:21,bt:7},rotary:{hw:13,hh:23,bt:8},monster:{hw:12,hh:16,bt:7},jet:{hw:11,hh:20,bt:6},mech:{hw:15,hh:13,bt:6},dragon:{hw:9,hh:19,bt:4},ufo:{hw:15,hh:15,bt:0}};
+const VSPEC={loader:{hw:13,hh:22,bt:8},icebreaker:{hw:14,hh:24,bt:7},tractor:{hw:8,hh:12,bt:5},truck:{hw:10,hh:18,bt:6},super:{hw:12,hh:22,bt:7},snowcat:{hw:13,hh:21,bt:7},rotary:{hw:13,hh:23,bt:8},monster:{hw:12,hh:16,bt:7},jet:{hw:11,hh:20,bt:6},mech:{hw:15,hh:13,bt:6},dragon:{hw:9,hh:19,bt:4},ufo:{hw:15,hh:15,bt:0}};
 const ZERO_LV={speed:0,size:0,value:0,bumper:0,helpers:0};
 function chal(){return !!(run&&run.challenge&&state==='play');}
 function drv(){return !!(run&&run.drive&&state==='play'&&!run.ended);}
@@ -2253,6 +2261,7 @@ function drawUfo(g,ox,oy,fr,c){
   for(let i=0;i<10;i++){const an=i/10*Math.PI*2+fr*0.3;R(g,Math.round(ox+Math.cos(an)*11),Math.round(oy+Math.sin(an)*11),2,2,(i+fr)%2?'#ffef7a':c.a);}
   g.fillStyle='rgba(0,0,0,0.25)';pixCircle(g,ox+1,oy+2,8);g.fillStyle=K;pixCircle(g,ox,oy,7);g.fillStyle='#8fd3ff';pixCircle(g,ox,oy,6);R(g,ox-4,oy-4,2,2,'#ffffff');R(g,ox-2,oy-2,4,4,curHat().c);}
 function drawVBlade(g,cx,y,bw,bt,tid,c){if(bt<=0)return;const x=cx-Math.floor(bw/2);c=c||skinPal(tid);
+  if(tid==='loader'){bladeLoader(g,cx,y,bw,bt,c);return;}if(tid==='icebreaker'){bladeIcebreaker(g,cx,y,bw,bt,c,c.fr);return;}
   const fill=c.x||c.d,dark=c.xd||K,hi=c.xh||c.l||'#ffffff';
   if(tid==='mech'){const half=Math.floor(bw/2),gap=6;for(const [sx,w] of [[x,half-gap/2],[cx+gap/2,half-gap/2]]){R(g,sx,y,w,bt,K);R(g,sx+1,y+1,w-2,bt-2,fill);R(g,sx+1,y+1,w-2,1,hi);R(g,sx+1,y+bt-2,w-2,1,dark);}return;}
   if(tid==='dragon'){for(let i=x+1;i<x+bw-1;i+=3)R(g,i,y+bt-2,2,2,'#e0c08a');return;}
@@ -2265,14 +2274,72 @@ function drawVBlade(g,cx,y,bw,bt,tid,c){if(bt<=0)return;const x=cx-Math.floor(bw
   if(c.deco==='fin'){for(let i=x+2;i<x+bw-2;i+=3)R(g,i,y+1,2,2,'#ffffff');}
   if(c.deco==='hazard'||c.deco==='tiger'){for(let i=x+2;i<x+bw-2;i+=4)R(g,i,y+1,2,bt-2,'#2a2a36');}
   R(g,cx-5,y+bt,2,2,K);R(g,cx+3,y+bt,2,2,K);}
-const VDRAW={tractor:(g,ox,oy,fr,c)=>drawTractor(g,ox,oy,c),truck:drawTruck,super:drawSuper,snowcat:drawSnowcat,rotary:drawRotary,monster:drawMonster,jet:drawJet,mech:drawMech,dragon:drawDragon,ufo:drawUfo};
+// ---------------- FRONT LOADER + ICEBREAKER ----------------
+const nmTyre=(g,tx,ty,w,h,fr)=>{R(g,tx,ty,w,h,K);R(g,tx+1,ty+1,w-2,h-2,'#2a2a36');for(let i=0;i<Math.floor(h/3);i++){const yy=ty+1+((i*3+fr)%(h-2));R(g,tx+1,yy,w-2,1,'#3c3f52');R(g,tx,yy,1,1,K);R(g,tx+w-1,yy,1,1,K);}R(g,tx+1,ty+1,w-2,1,'#55586a');};
+const nmTrack=(g,tx,ty,w,h,fr,cleat)=>{R(g,tx,ty,w,h,K);R(g,tx+1,ty+1,w-2,h-2,'#343a4c');for(let i=0;i<Math.floor(h/4)+1;i++){const yy=ty+1+((i*4+(fr%4))%(h-2));R(g,tx+1,yy,w-2,2,cleat||'#5f6880');}R(g,tx+1,ty+1,w-2,1,'#8793a8');};
+const nmPuff=(g,px,py,fr,n,dx)=>{for(let i=0;i<n;i++){const k=(i+fr)%n,yy=py-k*3,xx=px+Math.round(k*(dx||0.6));R(g,xx-1,yy-1,4,3,'rgba(214,222,236,'+(0.9-k*0.18).toFixed(2)+')');}};
+// ---- FRONT LOADER: articulated loader; yellow bucket on lift arms, 4 tall tyres, hinge in the middle, cab, striped counterweight
+function drawLoader(g,ox,oy,fr,c){const x=ox-13,y=oy-22,on=fr%2===0;
+  // lift arms (body colour) from the bucket back to the front frame
+  for(const ax of [x+3,x+20]){R(g,ax,y-3,4,13,K);R(g,ax+1,y-2,2,11,c.b);R(g,ax+1,y-2,1,11,c.l);}
+  R(g,x+3,y+3,20,3,K);R(g,x+4,y+4,18,1,c.d);
+  nmTyre(g,x-4,y+3,8,14,fr);nmTyre(g,x+22,y+3,8,14,fr);
+  // front frame
+  R(g,x+5,y+6,16,12,K);R(g,x+6,y+7,14,10,c.b);R(g,x+6,y+7,14,1,c.l);R(g,x+18,y+8,2,8,c.d);
+  R(g,x+6,y+8,3,2,'#ffef7a');R(g,x+17,y+8,3,2,'#ffef7a');R(g,x+11,y+6,4,9,K);R(g,x+12,y+7,2,7,'#55607a');R(g,x+12,y+7,1,7,'#9aa6ba');
+  // hinge: a narrow neck with a pivot pin and a striped guard
+  R(g,x+8,y+17,10,6,K);R(g,x+9,y+18,8,4,'#2a2a36');R(g,x+9,y+19,8,2,'#ffc727');for(let i=0;i<4;i++)R(g,x+9+i*2,y+19,1,2,'#2a2a36');R(g,x+12,y+17,2,6,'#c6d0dc');
+  nmTyre(g,x-4,y+29,8,14,fr);nmTyre(g,x+22,y+29,8,14,fr);
+  // rear frame with the cab (black safety frame round the glass)
+  R(g,x+3,y+22,20,21,K);R(g,x+4,y+23,18,19,c.b);R(g,x+4,y+23,18,1,c.l);R(g,x+4,y+23,1,19,c.l);R(g,x+20,y+24,1,17,c.d);
+  R(g,x+5,y+23,16,12,K);R(g,x+6,y+24,14,4,'#8fd3ff');R(g,x+7,y+24,3,2,'#d8f2ff');R(g,x+12,y+25,3,2,curHat().c);R(g,x+6,y+29,14,5,'#3a3f52');R(g,x+6,y+29,14,1,'#55607a');
+  R(g,x+12,y+30,2,2,on?'#ffb43a':'#c45a10');if(on){R(g,x+11,y+30,1,1,'#ffe0a0');R(g,x+14,y+31,1,1,'#ffe0a0');}
+  // engine hood with louvres, exhaust stack
+  R(g,x+6,y+36,14,6,K);R(g,x+7,y+37,12,4,c.d);for(let i=0;i<4;i++)R(g,x+8+i*3,y+37,1,4,'#2a2a36');
+  R(g,x+17,y+33,4,4,K);R(g,x+18,y+34,2,2,'#1b1f3b');if(!on)nmPuff(g,x+19,y+31,fr,3,0.8);
+  // counterweight
+  R(g,x+2,y+42,22,5,K);for(let i=0;i<20;i++)R(g,x+3+i,y+43,1,3,((i>>1)%2)?'#2a2a36':'#ffc727');}
+function bladeLoader(g,cx,y,bw,bt,c){const x=cx-Math.floor(bw/2);// bucket: yellow back wall, steel floor, cutting edge with teeth
+  R(g,x,y,bw,bt,K);R(g,x+1,y+1,bw-2,bt-2,c.b);R(g,x+1,y+bt-3,bw-2,1,c.d);R(g,x+3,y+2,bw-6,bt-5,'#8793a8');R(g,x+3,y+2,bw-6,1,'#c6d0dc');R(g,x+3,y+bt-4,bw-6,1,'#55607a');
+  for(let i=x+3;i<=x+bw-5;i+=5){R(g,i,y-2,3,3,K);R(g,i+1,y-1,1,2,'#e8eef8');}R(g,x+1,y+1,1,bt-2,c.l);}
+// ---- ICEBREAKER: a red ice-ship on tracks; a long pointed bow throws a bow wave, white bridge, funnel, stern helipad
+function drawIcebreaker(g,ox,oy,fr,c){const x=ox-14,y=oy-24,on=fr%2===0;
+  nmTrack(g,x-2,y+18,5,28,fr);nmTrack(g,x+25,y+18,5,28,fr);
+  const hw=r=>r<20?Math.max(1,Math.round(14*Math.sqrt(r/20))):r>44?14-(r-44):14;
+  for(let r=0;r<48;r++){const w=hw(r);R(g,ox-w-1,y+r,w*2+2,1,K);}
+  for(let r=1;r<47;r++){const w=hw(r)-1;if(w<0)continue;R(g,ox-w-1,y+r,w*2+2,1,c.b);R(g,ox-w-1,y+r,1,1,'#5a1018');R(g,ox+w,y+r,1,1,'#5a1018');if(w>1){R(g,ox-w,y+r,1,1,c.l);R(g,ox+w-1,y+r,1,1,c.d);}}
+  // fore deck: grey deck plate, anchor winch, chain
+  for(let r=8;r<46;r++){const w=hw(r)-3;if(w>0)R(g,ox-w-1,y+r,w*2+2,1,'#9aa6ba');}for(let r=10;r<45;r+=3){const w=hw(r)-3;if(w>0)R(g,ox-w-1,y+r,w*2+2,1,'#8793a8');}
+  R(g,ox-1,y+3,2,8,'#5a1018');R(g,ox-3,y+11,6,3,K);R(g,ox-2,y+12,4,1,'#c6d0dc');
+  // superstructure: white deckhouse + bridge with a window band
+  R(g,x+5,y+17,18,14,K);R(g,x+6,y+18,16,12,'#f4f8ff');R(g,x+6,y+18,16,1,'#ffffff');R(g,x+20,y+19,2,10,'#c6d0dc');
+  R(g,x+6,y+19,16,4,K);R(g,x+7,y+20,14,2,'#8fd3ff');R(g,x+8,y+20,3,1,'#d8f2ff');R(g,x+13,y+20,3,2,curHat().c);
+  R(g,x+12,y+25,4,3,K);R(g,x+13,y+26,2,1,on?'#ff4a4a':'#7a1f33');
+  // funnel
+  R(g,x+10,y+31,8,6,K);R(g,x+11,y+32,6,4,c.b);R(g,x+11,y+33,6,1,'#ffffff');R(g,x+12,y+32,4,1,'#2a2a36');nmPuff(g,x+13,y+30,fr,4,0.9);
+  // lifeboats
+  for(const lx of [x+3,x+22]){R(g,lx,y+24,4,8,K);R(g,lx+1,y+25,2,6,'#ff8a1a');R(g,lx+1,y+25,2,1,'#ffc06a');}
+  // round helipad with a helicopter
+  R(g,x+7,y+37,14,9,K);R(g,x+8,y+38,12,7,'#3f6a4a');R(g,x+9,y+38,10,7,'#4a7a56');R(g,x+10,y+39,8,5,'#ffffff');R(g,x+11,y+40,6,3,'#4a7a56');
+  R(g,x+12,y+38,4,7,K);R(g,x+13,y+39,2,5,'#ffc727');R(g,x+13,y+39,2,1,'#fff3a0');R(g,x+13,y+44,2,3,K);
+  if(on){R(g,x+7,y+41,15,1,'#1b1f3b');R(g,x+14,y+36,1,10,'#1b1f3b');}else for(let d=-6;d<=6;d++){R(g,x+14+d,y+41+Math.round(d*0.6),1,1,'#1b1f3b');R(g,x+14+d,y+41-Math.round(d*0.6),1,1,'#1b1f3b');}}
+function bladeIcebreaker(g,cx,y,bw,bt,c,fr){// a heavy steel V-plow on the bow: the apex cuts in front, the arms sweep back, ice flies off the tips
+  const half=Math.floor(bw/2),ph=(fr||0)%2,drop=bt+1;
+  for(let i=0;i<=half;i++){const yy=y+Math.round(i*drop/half);R(g,cx-i-1,yy-1,1,6,K);R(g,cx+i,yy-1,1,6,K);}
+  for(let i=0;i<half;i++){const yy=y+Math.round(i*drop/half);R(g,cx-i-1,yy,1,4,'#9aa6ba');R(g,cx+i,yy,1,4,'#7a869c');R(g,cx-i-1,yy,1,1,'#ffffff');R(g,cx+i,yy,1,1,'#d8e0ea');
+    R(g,cx-i-1,yy+2,1,1,c.b);R(g,cx+i,yy+2,1,1,c.d);if(i%5===2){R(g,cx-i-1,yy+3,1,1,'#55607a');R(g,cx+i,yy+3,1,1,'#3c4558');}}
+  R(g,cx-1,y-2,2,2,K);R(g,cx-1,y-1,2,1,'#ffffff');
+  for(const sd of [-1,1]){const tx=cx+(sd<0?-half-2:half+1),ty=y+drop;for(let k=0;k<4;k++){R(g,tx+sd*(k+((k+ph)%2)),ty-k-ph,1,1,k%2?'#bfe6ff':'#ffffff');}
+    R(g,tx+sd*2,ty-3-ph,2,2,'#bfe6ff');R(g,tx+sd*2,ty-3-ph,1,1,'#ffffff');R(g,tx+sd*(4+ph),ty+1,1,1,'#ffffff');}}
+
+const VDRAW={loader:drawLoader,icebreaker:drawIcebreaker,tractor:(g,ox,oy,fr,c)=>drawTractor(g,ox,oy,c),truck:drawTruck,super:drawSuper,snowcat:drawSnowcat,rotary:drawRotary,monster:drawMonster,jet:drawJet,mech:drawMech,dragon:drawDragon,ufo:drawUfo};
 function vehicleSprite(tid,bw,pl,fr,si){
   si=si==null?skinIdx(tid):si;const key=tid+'|'+bw+'|'+pl+'|'+(fr%2)+'|'+save.outfit+save.hat+'|'+si+'|'+(isGold(tid)?1:0)+(isMk2(tid)?'m':'');let v=vcache.get(key);if(v)return v;
   const c=skinPal(tid,si),sp=VSPEC[tid],pileH=sp.bt?pl*2:0,tail=tid==='super'?14:tid==='snowcat'?8:tid==='rotary'?10:tid==='dragon'?8:4;
   const cw=Math.max(bw,sp.hw*2+24)+6,ch=pileH+sp.bt+sp.hh*2+tail+10;
   const cv2=mk(cw,ch),g=cv2.getContext('2d'),ox=Math.floor(cw/2),oy=pileH+sp.bt+sp.hh+6;
   VDRAW[tid](g,ox,oy,fr,tid==='rotary'?Object.assign({},c,{pl:Math.min(6,pl)}):tid==='mech'?Object.assign({},c,{bw}):c);
-  drawVBlade(g,ox,oy-sp.hh-sp.bt,bw,sp.bt,tid,tid==='rotary'?Object.assign({},c,{fr}):c);if(pl>0&&sp.bt&&tid!=='rotary')drawPile(g,ox,oy-sp.hh-sp.bt,bw-4,pileH,'up');
+  drawVBlade(g,ox,oy-sp.hh-sp.bt,bw,sp.bt,tid,tid==='rotary'||tid==='icebreaker'?Object.assign({},c,{fr}):c);if(pl>0&&sp.bt&&tid!=='rotary'&&tid!=='icebreaker')drawPile(g,ox,oy-sp.hh-sp.bt,bw-4,pileH,'up');
   if(isMk2(tid)){const bx=ox-4,by=oy+sp.hh-9;R(g,bx,by,9,6,K);R(g,bx+1,by+1,7,4,'#ffd23f');R(g,bx+1,by+1,7,1,'#fff3a0');R(g,bx+3,by+2,1,3,'#8a5a00');R(g,bx+5,by+2,1,3,'#8a5a00');}
   v={c:cv2,ox,oy};if(vcache.size>200)vcache.clear();vcache.set(key,v);return v;}
 function drawToolHead(g,x,y,w,h,tid,si){const c=skinPal(tid,si),fill=c.x,dark=c.xd,hz=w>h;
@@ -2423,7 +2490,7 @@ function hitFx(){const fp=footprint(tool().id,P.x,P.y,P.f),cx=[fp.x+fp.w/2,fp.x+
   particles.push({x:cx,y:cy-2,vx:0,vy:0,z:0,vz:0,life:0.3,t:0,kind:'pow'});for(let k=0;k<5;k++)particles.push({x:cx,y:cy,vx:rnd(-26,26)-dx*30,vy:rnd(-18,18)-dy*24,z:3,vz:rnd(30,60),life:0.45,t:0,kind:'snow'});HITSTOP=0.06;}
 let HITSTOP=0;
 function hit(kind,spill){
-  if(P.inv>0)return;hitFx();const red=bumperRed();const bmp=curLv().bumper>0;P.inv=INVULN;P.stun=(kind==='ob'?STUN_OB:STUN_HZ)*red*(tool().id==='rotary'?0.5:1);shake=0.25*red;if(run.combo>=2&&!(run.crackT>0)){run.combo=Math.floor(run.combo/2);run.comboProg=0;run.crackT=COMBO_CRACK;run.comboT=Math.max(run.comboT,COMBO_KEEP+P.stun);run.cHalf=(run.cHalf||0)+1;sfx('cfade');}else{if(run.combo>=2){run.cBonk=(run.cBonk||0)+1;sfx('cend');if(run.combo>=5)addFloat(P.x,P.y-30,'COMBO LOST','#ff8a98',1.0);}run.combo=0;run.comboProg=0;run.crackT=0;}run.hits++;sfx(kind==='ob'?'bump':'hit',0,bmp?{vol:0.35+0.55*red,rate:0.8+0.2*red}:undefined);buzz(bmp?Math.round(45*red):45);
+  if(P.inv>0)return;hitFx();const red=bumperRed();const bmp=curLv().bumper>0;P.inv=INVULN;P.stun=(kind==='ob'?STUN_OB:STUN_HZ)*red*(tool().id==='rotary'||tool().id==='icebreaker'?0.5:1);shake=0.25*red;if(run.combo>=2&&!(run.crackT>0)){run.combo=Math.floor(run.combo/2);run.comboProg=0;run.crackT=COMBO_CRACK;run.comboT=Math.max(run.comboT,COMBO_KEEP+P.stun);run.cHalf=(run.cHalf||0)+1;sfx('cfade');}else{if(run.combo>=2){run.cBonk=(run.cBonk||0)+1;sfx('cend');if(run.combo>=5)addFloat(P.x,P.y-30,'COMBO LOST','#ff8a98',1.0);}run.combo=0;run.comboProg=0;run.crackT=0;}run.hits++;sfx(kind==='ob'?'bump':'hit',0,bmp?{vol:0.35+0.55*red,rate:0.8+0.2*red}:undefined);buzz(bmp?Math.round(45*red):45);
   if(kind==='ob'){addFloat(P.x,P.y-27,bmp?'BUMPER!':'BONK!',bmp?'#ffd23f':'#ff9aa8');if(bmp)bumperFx();if(G.lastOb&&G.lastOb.src===SPR.gnome){save.stats.gnome++;if(save.stats.gnome>=5)award('gnome');}return;}
   const lose=Math.min(save.coins,Math.floor(run.earned*spill*red)),saved=Math.min(save.coins,Math.floor(run.earned*spill))-lose;if(bmp&&saved>=1){const bs='BUMPER SAVED '+fmt(saved),bw2=textW(bs)/2+2;addFloat(clamp(P.x,bw2,W-bw2),P.y-31,bs,'#ffd23f',1.2);bumperFx();}
   if(lose>=1){save.coins-=lose;run.earned-=lose;const n=Math.max(3,Math.min(8,Math.ceil(lose/2)));
@@ -2445,8 +2512,8 @@ function updatePlay(dt){
     tvx=dir.x*full*dir.m;tvy=dir.y*full*dir.m;}
   // ice: once the snow is scraped off an ice patch, you slide
   const fi=(clamp(Math.floor(P.y/2),0,G.rows-1))*G.cols+clamp(Math.floor(P.x/2),0,G.cols-1),onIce=G.type[fi]===T_ICE&&G.depth[fi]<CLEAR_T;
-  if(onIce&&tid==='snowcat'&&!run.iceShown){run.iceShown=true;addFloat(P.x,P.y-22,'TRACKS: NO SLIDING','#9fd8ff',1.2);}
-  if(onIce&&tid!=='snowcat'){const k=Math.min(1,dt*1.4);P.vx+=(tvx-P.vx)*k;P.vy+=(tvy-P.vy)*k;if(!run.iceShown){run.iceShown=true;addFloat(P.x,P.y-22,'ICE! SLIPPERY','#9fd8ff',1.2);}}
+  if(onIce&&(tid==='snowcat'||tid==='icebreaker')&&!run.iceShown){run.iceShown=true;addFloat(P.x,P.y-22,'TRACKS: NO SLIDING','#9fd8ff',1.2);}
+  if(onIce&&tid!=='snowcat'&&tid!=='icebreaker'){const k=Math.min(1,dt*1.4);P.vx+=(tvx-P.vx)*k;P.vy+=(tvy-P.vy)*k;if(!run.iceShown){run.iceShown=true;addFloat(P.x,P.y-22,'ICE! SLIPPERY','#9fd8ff',1.2);}}
   else{P.vx=tvx;P.vy=tvy;}
   if(P.stun>0&&!onIce){P.vx=0;P.vy=0;}
   const mx=P.vx*dt,my=P.vy*dt;
@@ -2485,7 +2552,7 @@ function updatePlay(dt){
   // scrape / engine loops follow what you're doing
   run.scrapeLvl=(run.scrapeLvl||0)+(Math.min(1,got*(isKidTool(tid)?0.5:0.18))-(run.scrapeLvl||0))*Math.min(1,dt*12);
   loopSet(isKidTool(tid)?'scrape_s':'scrape_l',run.scrapeLvl*0.55,0.9+0.2*Math.min(1,Math.hypot(P.vx,P.vy)/full));
-  if(!isKidTool(tid)){const sr=Math.min(1,Math.hypot(P.vx,P.vy)/full);loopSet('engine',0.16+0.22*sr,(tid==='tractor'?1.1:tid==='truck'?0.85:tid==='snowcat'?0.66:tid==='rotary'?0.6:0.75)+0.45*sr);}
+  if(!isKidTool(tid)){const sr=Math.min(1,Math.hypot(P.vx,P.vy)/full);loopSet('engine',0.16+0.22*sr,(tid==='tractor'?1.1:tid==='truck'?0.85:tid==='snowcat'?0.66:tid==='rotary'?0.6:tid==='icebreaker'?0.5:tid==='loader'?0.8:0.75)+0.45*sr);}
   if(run.time<10&&!run.hurry){run.hurry=true;}
   if(run.time<=5.5){const s2=Math.ceil(run.time);if(s2!==run.lastTick&&s2>0){run.lastTick=s2;sfx('tick');}}
   {const red=COMBO_KEEP*0.35;if(run.combo>=2&&run.comboT>=red&&run.comboT-dt<red)sfx('cfade');}
