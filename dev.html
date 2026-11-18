@@ -74,17 +74,23 @@ const TOOLS=[
   {id:'ufo',    name:'UFO',        cost:1.8e9,   width:48, speed:136,value:50,   winter:6, trick:'FLOATS, BEAMS COWS'},
 ];
 const BASE_TOOLS=10;
-const UFO_GRIP=3.2;   // how fast the UFO's speed follows your finger (ice is 1.4; ground machines are instant)
+const UFO_GRIP=5;   // how fast the UFO's speed follows your finger (ice is 1.4; ground machines are instant)
+// buildings block the UFO; it floats over everything else
+const bldMark=fn=>function(){const c=fn.apply(this,arguments);if(c&&typeof c==='object')c.bld=1;return c;};
+houseSprite=bldMark(houseSprite);smallHouseSprite=bldMark(smallHouseSprite);cabinSprite=bldMark(cabinSprite);barnSprite=bldMark(barnSprite);churchSprite=bldMark(churchSprite);siloSprite=bldMark(siloSprite);buildingSprite=bldMark(buildingSprite);bigBuilding=bldMark(bigBuilding);mansionSprite=bldMark(mansionSprite);storeSprite=bldMark(storeSprite);kioskSprite=bldMark(kioskSprite);towerSprite=bldMark(towerSprite);chaletSprite=bldMark(chaletSprite);castleSprite=bldMark(castleSprite);clockTowerSprite=bldMark(clockTowerSprite);greenhouseSprite=bldMark(greenhouseSprite);shedSprite=bldMark(shedSprite);hutSprite=bldMark(hutSprite);lighthouseSprite=bldMark(lighthouseSprite);liftStationSprite=bldMark(liftStationSprite);museumSprite=bldMark(museumSprite);officeSprite=bldMark(officeSprite);pagodaSprite=bldMark(pagodaSprite);startHutSprite=bldMark(startHutSprite);templeSprite=bldMark(templeSprite);warehouseSprite=bldMark(warehouseSprite);worksSprite=bldMark(worksSprite);windmillSprite=bldMark(windmillSprite);iglooPropSprite=bldMark(iglooPropSprite);grandstandSprite=bldMark(grandstandSprite);arcadeSprite=bldMark(arcadeSprite);boothSprite=bldMark(boothSprite);bigTopSprite=bldMark(bigTopSprite);marqueeSprite=bldMark(marqueeSprite);spireSprite=bldMark(spireSprite);
+function ufoLocked(){if(save&&save.tool>=toolIdx('icebreaker'))save.ibEver=true;return !(save&&save.ibEver);}  // the UFO comes after the Icebreaker
+const UFO_BEAM=0.75;   // the UFO's beam is this much narrower than a normal ride, and not sped up to make up for it
+//   // how fast the UFO's speed follows your finger (ice is 1.4; ground machines are instant)
 function owns(i){return i>=0&&i<TOOLS.length&&(i<BASE_TOOLS?i<=save.tool:!!(save.rides&&save.rides[TOOLS[i].id])||i<=save.tool);}  // (save.tool past the ladder: only test scripts)
-function rideNextIdx(){for(let i=BASE_TOOLS;i<TOOLS.length;i++)if(!owns(i))return i;return -1;}
+function rideNextIdx(){for(let i=BASE_TOOLS;i<TOOLS.length;i++)if(!owns(i))return TOOLS[i].id==='ufo'&&ufoLocked()?-1:i;return -1;}
 function ridesOwned(){let n=0;for(let i=BASE_TOOLS;i<TOOLS.length;i++)if(owns(i))n++;return n;}
 const RIDE_BOOST=1.15,RIDE_WIDE={monster:1.04,jet:0.92,mech:1.12,dragon:0.86,ufo:1};
 // what a ride is built on: the fastest-clearing regular machine you own and the best coins per cell, upgrades and Mk II in
 function rideBase(){let w=8,sp=32,rate=0,v=1,bump=0;for(let j=0;j<=Math.min(save.tool,BASE_TOOLS-1);j++){const t=TOOLS[j],m=mLv(t.id),ms=mspec(t.id),mk=isMk2(t.id),
   wj=Math.min(80,Math.round(t.width*(1+ms.sizePer*m.size))),sj=t.speed*(1+ms.speedPer*m.speed)*(mk?MK2_SPEED:1);if(wj*sj>rate){rate=wj*sj;w=wj;sp=sj;}v=Math.max(v,t.value*(mk?MK2_COINS:1));bump=Math.max(bump,m.bumper||0);}
   return {w,sp,v,bump};}
-function rideTool(i){const t=TOOLS[i],b=rideBase(),w=Math.max(8,Math.min(80,Math.round(b.w*Math.sqrt(RIDE_BOOST)*(RIDE_WIDE[t.id]||1))));
-  return Object.assign({},t,{width:w,speed:Math.round(RIDE_BOOST*b.w*b.sp/w*10)/10,value:Math.round(b.v*RIDE_BOOST*100)/100,ride:true,bump:b.bump});}
+function rideTool(i){const t=TOOLS[i],b=rideBase(),ufo=t.id==='ufo',w=Math.max(8,Math.min(80,Math.round(b.w*Math.sqrt(RIDE_BOOST)*(ufo?UFO_BEAM:(RIDE_WIDE[t.id]||1)))));
+  return Object.assign({},t,{width:w,speed:ufo?Math.round(Math.sqrt(RIDE_BOOST)*b.sp*10)/10:Math.round(RIDE_BOOST*b.w*b.sp/w*10)/10,value:Math.round(b.v*RIDE_BOOST*100)/100,ride:true,bump:b.bump});}
 const MACHINE_UPG=['speed','size','bumper'],MUP_LV=6,MUP_BUMP=5,MUP_GROWTH=1.45,MUP_COST=0.06;
 const _mspec={};
 const MCAPS={super:[1.15,1.3,6.5e6],loader:[1.08,1.06],rotary:[1.15,1.25,7.2e7]};  // [speed cap, width cap, upgrade price base]
@@ -359,7 +365,7 @@ function outfitSet(id,hatId){const key=id+'|'+(hatId||'');if(kidCache[key])retur
 function kidSet(){return outfitSet(save.outfit,save.hat);}
 // ownership helpers
 function skinIdx(tid){return save.skin[tid]||0;}
-function skinOwned(tid,i){return i===0||(i===5&&!!save.pro)||!!save.skins[tid+':'+i];}
+function skinOwned(tid,i){return i===0||(i===5&&(!!save.pro||(TOOLS[toolIdx(tid)]&&toolIdx(tid)>=BASE_TOOLS&&mastLv(tid)>=MAST_PTS.length)))||!!save.skins[tid+':'+i];}
 function isGold(tid){return save.gold>=0&&TOOLS[save.gold]&&TOOLS[save.gold].id===tid;}
 const GOLD_PAL={b:'#ffd23f',l:'#fff08a',d:'#c98a12',a:'#ffe27a',x:'#ffd23f',xd:'#c98a12',xh:'#fff08a'};
 function skinPal(tid,i){i=i==null?skinIdx(tid):i;const base=SKIN_PAL[tid][0],sk=SKIN_PAL[tid][i]||base;const p=Object.assign({},base,sk);if((i===0&&isGold(tid))||i===5)Object.assign(p,GOLD_PAL,{gold:true});return p;}
@@ -738,7 +744,7 @@ function levelOpen(i){return (DEV_MODE&&DEV.all)||(levelReach(i)&&levelGateOK(i)
 const WINTER_SLACK=60;   // stars you can skip before a New Winter opens
 function starsNeeded(){let n=0;for(let i=0;i<NL;i++)if((LEVELS[i].winter||1)<=winterNo())n+=3;return Math.max(3,n-WINTER_SLACK);}
 const isKidTool=id=>id==='shovel'||id==='pusher'||id==='blower';
-const VSPEC={loader:{hw:12,hh:22,bt:8},icebreaker:{hw:14,hh:24,bt:7},tractor:{hw:8,hh:12,bt:5},truck:{hw:10,hh:18,bt:6},super:{hw:12,hh:22,bt:7},snowcat:{hw:13,hh:21,bt:7},rotary:{hw:13,hh:23,bt:8},monster:{hw:12,hh:16,bt:7},jet:{hw:11,hh:20,bt:6},mech:{hw:15,hh:13,bt:6},dragon:{hw:9,hh:19,bt:4},ufo:{hw:15,hh:15,bt:0}};
+const VSPEC={loader:{hw:12,hh:22,bt:8},icebreaker:{hw:14,hh:24,bt:7},tractor:{hw:8,hh:12,bt:5},truck:{hw:10,hh:18,bt:6},super:{hw:12,hh:22,bt:7},snowcat:{hw:13,hh:21,bt:7},rotary:{hw:13,hh:23,bt:8},monster:{hw:12,hh:16,bt:7},jet:{hw:11,hh:20,bt:6},mech:{hw:15,hh:13,bt:6},dragon:{hw:9,hh:19,bt:4},ufo:{hw:11,hh:11,bt:0}};
 const ZERO_LV={speed:0,size:0,value:0,bumper:0,helpers:0};
 function chal(){return !!(run&&run.challenge&&state==='play');}
 function drv(){return !!(run&&run.drive&&state==='play'&&!run.ended);}
@@ -750,7 +756,15 @@ function weeklyState(){const wk=weekNo();if(!save.weekly||save.weekly.week!==wk)
 function bladeCells(t){t=t||tool();return Math.min(80,Math.round(t.width*(1+mspec(t.id).sizePer*(chal()||t.ride?0:mLv(t.id).size))));}
 function moveSpeed(){return tool().speed*(1+mspec(tool().id).speedPer*curLv().speed)*(isMk2(tool().id)&&!chal()&&!drv()&&!msn()?MK2_SPEED:1);}
 function treasureCount(){return Object.keys(save.treasures||{}).length;}
-function valueMult(){return tool().value*(isMk2(tool().id)&&!chal()?MK2_COINS:1)*(1+UPG.value.per*curLv().value)*(1+FROST_PER*(save.frost||0))*(save.pro?SHOP.pro.mult:1)*(1+TREASURE_BONUS*treasureCount());}
+const MAST_PTS=[4,12,28,52,88],MAST_PER=0.02,MAST_GEMS=[10,10,15,15,25];
+function mastPts(tid){return (save.mastery&&save.mastery[tid])||0;}
+function mastLv(tid){const p=mastPts(tid);let l=0;while(l<MAST_PTS.length&&p>=MAST_PTS[l])l++;return l;}
+function mastFrac(tid){const l=mastLv(tid);if(l>=MAST_PTS.length)return 1;const a=l?MAST_PTS[l-1]:0;return (mastPts(tid)-a)/(MAST_PTS[l]-a);}
+function mastAdd(tid,pts){save.mastery=save.mastery||{};const l0=mastLv(tid);save.mastery[tid]=mastPts(tid)+pts;const l1=mastLv(tid);
+  for(let l=l0+1;l<=l1;l++){save.gems=(save.gems||0)+MAST_GEMS[l-1];const nm=SHORT_NAME[tid]||TOOLS[toolIdx(tid)].name;
+    showToast(l>=MAST_PTS.length?nm+' MASTERED! GOLD PAINT':nm+' MASTERY '+l+': +'+Math.round(MAST_PER*l*100)+'% COINS','#ffd23f');try{track('mastery_up',{ride:tid,level:l});}catch(e){}}
+  if(l1>l0){sfx('fanfare');persist();}}
+function valueMult(){return (tool().ride?1+MAST_PER*mastLv(tool().id):1)*tool().value*(isMk2(tool().id)&&!chal()?MK2_COINS:1)*(1+UPG.value.per*curLv().value)*(1+FROST_PER*(save.frost||0))*(save.pro?SHOP.pro.mult:1)*(1+TREASURE_BONUS*treasureCount());}
 function frostGain(){return 5+Math.floor(Math.sqrt((save.winterCoins||0)/1e6));}
 function bestPay(){let v=1;LEVELS.forEach((L,i)=>{if(levelOpen(i))v=Math.max(v,L.value);});return v;}
 function todayKey(){const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();}
@@ -818,6 +832,8 @@ function bright(sp){const base=lookBase();if(!base)return sp;let m=BRC.get(sp);i
 function smallOb(o){return o.crush||(o.spr.width<=16&&o.spr.height<=20);}
 const SHC=new WeakMap(),OLC=new WeakMap();
 function shadowOf(sp){let c=SHC.get(sp);if(c)return c;c=document.createElement('canvas');c.width=sp.width;c.height=sp.height;const x=c.getContext('2d');x.drawImage(sp,0,0);x.globalCompositeOperation='source-in';x.fillStyle='rgb(34,56,118)';x.fillRect(0,0,c.width,c.height);SHC.set(sp,c);return c;}
+const TNC=new Map();function tintOf(sp,col){let m=TNC.get(col);if(!m){m=new WeakMap();TNC.set(col,m);}let c=m.get(sp);if(c)return c;c=document.createElement('canvas');c.width=sp.width;c.height=sp.height;const x=c.getContext('2d');x.drawImage(sp,0,0);x.globalCompositeOperation='source-in';x.fillStyle=col;x.fillRect(0,0,c.width,c.height);m.set(sp,c);return c;}
+function ufoGlowA(o){const dx=Math.max(o.x-P.x,0,P.x-(o.x+o.w)),dy=Math.max(o.y-P.y,0,P.y-(o.y+o.h));return clamp(1-(Math.hypot(dx,dy)-8)/42,0,1);}
 function outlineOf(sp){let c=OLC.get(sp);if(c)return c;const m=shadowOf(sp);c=document.createElement('canvas');c.width=sp.width+2;c.height=sp.height+2;const x=c.getContext('2d');
   for(const [dx,dy] of [[0,1],[2,1],[1,0],[1,2]])x.drawImage(m,dx,dy);x.globalCompositeOperation='source-in';x.fillStyle='#0b1838';x.fillRect(0,0,c.width,c.height);OLC.set(sp,c);return c;}
 // a soft pool of shadow exactly where a solid thing meets the ground (like the dip snow makes round a tree trunk)
@@ -1810,7 +1826,7 @@ function buildLevel(idx){
   const g={def:L,idx,cols,rows,pw,ph,depth:new Float32Array(cols*rows),type:new Uint8Array(cols*rows),mark:new Uint8Array(cols*rows),
     obstacles:[],scenery:[],over:[],decor:[],hazards:[],spawners:[],lights:[],presents:[],neighbours:[],pullBlocks:[],start:{x:90,y:60},clearable:0,cleared:0};
   const setT=(t,x,y,w,h)=>{for(let cy=Math.max(0,Math.floor(y/2));cy<Math.min(rows,Math.ceil((y+h)/2));cy++)for(let cx=Math.max(0,Math.floor(x/2));cx<Math.min(cols,Math.ceil((x+w)/2));cx++)g.type[cy*cols+cx]=t;};
-  const ob=(sprC,sx,sy,fx,fy,fw,fh)=>{const fz=frostOf(sprC),o={spr:fz,src:sprC,sx,sy:sy-(fz.padTop||0),x:sx+fx,y:sy+fy,w:fw,h:fh};o.base=o.y+o.h;g.obstacles.push(o);return o;};
+  const ob=(sprC,sx,sy,fx,fy,fw,fh)=>{const fz=frostOf(sprC),o={spr:fz,src:sprC,sx,sy:sy-(fz.padTop||0),x:sx+fx,y:sy+fy,w:fw,h:fh,bld:!!(sprC&&sprC.bld)};o.base=o.y+o.h;g.obstacles.push(o);return o;};
   const fits=(sprC,sx,sy,m=2)=>{const fz=frostOf(sprC),hh=fz.height-(fz.padTop||0);return !g.obstacles.some(o=>{const oy=o.sy+(o.spr.padTop||0);return o.sx<sx+fz.width+m&&sx-m<o.sx+o.spr.width&&oy<sy+hh+m&&sy-m<o.sy+o.spr.height;});};
   const cutSegs=(x,w,a0,a1,rects,gapT,gapB,minL)=>{let segs=[[a0,a1]];for(const [bx,by,bw,bh] of rects){if(x+w<=bx||x>=bx+bw)continue;const t=by-gapT,u=by+bh+gapB;segs=segs.flatMap(([a,c])=>c<=t||a>=u?[[a,c]]:[[a,Math.min(c,t)],[Math.max(a,u),c]].filter(([p,q])=>q-p>=minL));}return segs;};
   const setCircle=(t,cx,cy,r)=>{for(let cy2=Math.max(0,Math.floor((cy-r)/2));cy2<=Math.min(rows-1,Math.floor((cy+r)/2));cy2++)for(let cx2=Math.max(0,Math.floor((cx-r)/2));cx2<=Math.min(cols-1,Math.floor((cx+r)/2));cx2++){const dx=cx2*2+1-cx,dy=cy2*2+1-cy;if(dx*dx+dy*dy<=r*r)g.type[cy2*cols+cx2]=t;}};
@@ -2482,7 +2498,7 @@ function insideMap(r){const m=new Map();if(tool().id==='ufo')return m;
   return m;}
 function blockedBy(r){
   if(r.x<0||r.y<0||r.x+r.w>G.pw||r.y+r.h>G.ph)return 'wall';
-  if(tool().id==='ufo')return null;
+  if(tool().id==='ufo'){for(const o of G.obstacles)if(o.bld&&overlap(r,o)&&!ignOK(r,o,o)){G.lastOb=o;return 'ob';}return null;}
   for(const cw of G.cows)if(cw.state==='graze'){const bx={x:cw.x-5,y:cw.y-3,w:10,h:5};if(overlap(r,bx)&&!ignOK(r,cw,bx,1)){G.lastOb=cw;return 'ob';}}
   for(const o of G.obstacles)if(overlap(r,o)&&!ignOK(r,o,o)){G.lastOb=o;return 'ob';}
   if(wildHit(r)){G.lastOb=null;return 'ob';}
@@ -2515,7 +2531,7 @@ function updatePlay(dt){
   // ice: once the snow is scraped off an ice patch, you slide
   const fi=(clamp(Math.floor(P.y/2),0,G.rows-1))*G.cols+clamp(Math.floor(P.x/2),0,G.cols-1),onIce=G.type[fi]===T_ICE&&G.depth[fi]<CLEAR_T;
   if(onIce&&(tid==='snowcat'||tid==='icebreaker')&&!run.iceShown){run.iceShown=true;addFloat(P.x,P.y-22,'TRACKS: NO SLIDING','#9fd8ff',1.2);}
-  if(tid==='ufo'){const k=Math.min(1,dt*UFO_GRIP);P.vx+=(tvx-P.vx)*k;P.vy+=(tvy-P.vy)*k;if(!run.hoverShown){run.hoverShown=true;addFloat(P.x,P.y-22,'HOVERING: IT DRIFTS!','#7fe08a',1.4);}}
+  if(tid==='ufo'){const k=Math.min(1,dt*UFO_GRIP);P.vx+=(tvx-P.vx)*k;P.vy+=(tvy-P.vy)*k;if(!run.hoverShown){run.hoverShown=true;if((save.ufoTips||0)<3){save.ufoTips=(save.ufoTips||0)+1;addFloat(G.pw/2,P.y-34,'FLOATS OVER SMALL STUFF','#7fe08a',2.6);addFloat(G.pw/2,P.y-25,'BUILDINGS BLOCK IT!','#ff8fb0',2.6);}}}
   else if(onIce&&tid!=='snowcat'&&tid!=='icebreaker'){const k=Math.min(1,dt*1.4);P.vx+=(tvx-P.vx)*k;P.vy+=(tvy-P.vy)*k;if(!run.iceShown){run.iceShown=true;addFloat(P.x,P.y-22,'ICE! SLIPPERY','#9fd8ff',1.2);}}
   else{P.vx=tvx;P.vy=tvy;}
   if(P.stun>0&&(!onIce||tid==='ufo')){P.vx=0;P.vy=0;}
@@ -2525,8 +2541,8 @@ function updatePlay(dt){
         if(tid==='monster'&&o.crush){crushOb(o);continue;}if(tid==='mech'&&o.push&&shoveOb(o,dx?Math.sign(dx)*2:0,dy?Math.sign(dy)*2:0))continue;break;}return b;};
     const slide=(ax,mv)=>{const N=Math.max(5,Math.round(((VSPEC[tid]||{}).hw||6)*0.75)),sp=Math.abs(mv);for(let d=1;d<=N;d++)for(const sg of [1,-1]){const ox=ax==='x'?0:sg*d,oy=ax==='x'?sg*d:0;
         if(!blockedBy(footprint(tid,P.x+ox,P.y+oy,P.f))&&!blockedBy(footprint(tid,P.x+ox+(ax==='x'?mv:0),P.y+oy+(ax==='y'?mv:0),P.f))){const st=Math.min(d,Math.max(sp,0.35));if(ax==='x')P.y+=sg*st;else P.x+=sg*st;return true;}}return false;};
-    let b=tryMove(mx,0);if(!b)P.x+=mx;else if(!(CORNERS&&b==='ob'&&Math.abs(my)<Math.abs(mx)*0.5&&slide('x',mx))){if(Math.abs(P.vx)>full*0.5&&b==='ob'&&P.bumpCd<=0){P.bumpCd=0.8;hit('ob');}P.vx=0;}
-    b=tryMove(0,my);if(!b)P.y+=my;else if(!(CORNERS&&b==='ob'&&Math.abs(mx)<Math.abs(my)*0.5&&slide('y',my))){if(Math.abs(P.vy)>full*0.5&&b==='ob'&&P.bumpCd<=0){P.bumpCd=0.8;hit('ob');}P.vy=0;}
+    let b=tryMove(mx,0);if(!b)P.x+=mx;else if(!(CORNERS&&b==='ob'&&Math.abs(my)<Math.abs(mx)*0.5&&slide('x',mx))){if(Math.abs(P.vx)>full*0.5&&b==='ob'&&P.bumpCd<=0){P.bumpCd=0.8;hit('ob');if(tid==='ufo')addFloat(clamp(P.x,34,G.pw-34),P.y-24,'TOO BIG!','#ff8fb0',0.9);}P.vx=tid==='ufo'?-P.vx*0.35:0;}
+    b=tryMove(0,my);if(!b)P.y+=my;else if(!(CORNERS&&b==='ob'&&Math.abs(mx)<Math.abs(my)*0.5&&slide('y',my))){if(Math.abs(P.vy)>full*0.5&&b==='ob'&&P.bumpCd<=0){P.bumpCd=0.8;hit('ob');if(tid==='ufo')addFloat(clamp(P.x,34,G.pw-34),P.y-24,'TOO BIG!','#ff8fb0',0.9);}P.vy=tid==='ufo'?-P.vy*0.35:0;}
     if(tid==='mech'&&moving){run.stepT=(run.stepT||0)-dt;if(run.stepT<=0){run.stepT=0.42;P.step=(P.step|0)+1;sfx('stomp',0,{vol:0.4});}}
     const sp=Math.hypot(P.vx,P.vy);moving=sp>2;P.walkT+=dt*sp/10;P.bob=moving&&!onIce?(Math.floor(P.walkT*2)%2):0;
   } else P.bob=0;
@@ -2938,7 +2954,8 @@ function maxPlate(x,y,w,h,big,lbl){R(b,x+1,y,w-2,h,K);R(b,x,y+1,w,h-2,K);R(b,x+1
 function priceRow(ico,str,cx,y,col,opt){const tw=ico.width+2+textW(str),sx=Math.round(cx-tw/2);b.drawImage(ico,sx,y);text(b,str,sx+ico.width+2,y,col,opt);}
 function drawUpgrades(){
   woodBg();drawHeaderGems(2,2,50);drawHeaderCoins(W-74,2,72);sign('UPGRADES',22);
-  {const u=useIdx();if(u>=BASE_TOOLS){const ride=TOOLS[u],m=TOOLS[save.tool],mn=SHORT_NAME[m.id]||m.name,rn=SHORT_NAME[ride.id]||ride.name;let t=rn+' USES YOUR '+mn+' UPGRADES';if(textW(t)>164)t=rn+' USES THE '+mn+"'S";if(textW(t)>164)t='YOUR RIDE USES THESE';R(b,8,36,164,9,'rgba(19,48,107,0.85)');text(b,t,W/2,37,'#ffd23f',{align:'center',outline:null});}}
+  {const u=useIdx();if(u>=BASE_TOOLS){const ride=TOOLS[u],m=TOOLS[save.tool],mn=SHORT_NAME[m.id]||m.name,rn=SHORT_NAME[ride.id]||ride.name;let t=rn+' USES YOUR '+mn+' UPGRADES';if(textW(t)>164)t=rn+' USES THE '+mn+"'S";if(textW(t)>164)t='YOUR RIDE USES THESE';R(b,8,36,164,9,'rgba(19,48,107,0.85)');text(b,t,W/2,37,'#ffd23f',{align:'center',outline:null});}
+    else{const m=TOOLS[u],mn=SHORT_NAME[m.id]||m.name,ml=mLv(m.id),fresh=save.tool>0&&!ml.speed&&!ml.size&&!ml.bumper;let t=mn+(fresh?': FRESH UPGRADES':' UPGRADES');if(textW(t)>164)t=fresh?'NEW MACHINE: FRESH UPGRADES':'THIS MACHINE\'S UPGRADES';R(b,8,36,164,9,'rgba(19,48,107,0.85)');text(b,t,W/2,37,fresh?'#7fe08a':'#ffd23f',{align:'center',outline:null});}}
   const rows=[['speed',upIcon('speed')],['size',upIcon('size')],['bumper',upIcon('bumper')],['value',upIcon('value')],['helpers',upIcon('helpers')]];
   rows.forEach(([k,ico],i)=>{const y=45+i*48,x=4,w=172,h=44;const u=UPG[k],lv=lvOf(k),max=lv>=upMax(k),cost=upgCost(k),afford=save.coins>=cost;
     if(max)card(x,y,w,h,'#fff8e6','#f2b81a');else card(x,y,w,h);if(max)R(b,x+2,y+2,w-4,1,'#ffe9a8');R(b,x+4,y+4,34,36,K);R(b,x+5,y+5,32,34,max?'#ffefc2':'#cfe3f8');b.drawImage(ico,x+21-Math.floor(ico.width/2),y+22-Math.floor(ico.height/2));
@@ -4037,14 +4054,16 @@ function drawGarage(){
       const isNext=i===nr;card(x,y,w,ch,'#1b1530',isNext?'#c4a0f5':'#3a2f60');R(b,x+4,y+3,28,26,K);R(b,x+5,y+4,26,24,isNext?'#2a2150':'#14102a');
       if(isNext)drawSpot(x+18,y+4,y+28,2,12,0.35);drawRideSil(t.id,x+6,y+5,22,isNext?'#c4a0f5':'#3a2f60',isNext);
       if(isNext){text(b,t.name,x+37,y+5,'#ffd23f',{outline:null});text(b,t.trick,x+37,y+14,'#c4a0f5',{outline:null});text(b,'TAP TO PEEK',x+37,y+23,'#7d6ab8',{outline:null});}
+      else if(t.id==='ufo'&&ufoLocked()){text(b,'LEGENDARY RIDE',x+37,y+6,'#ffd23f',{outline:null});text(b,'AFTER ICEBREAKER',x+37,y+15,'#c4a0f5',{outline:null});}
       else{text(b,'???',x+37,y+6,'#7d6ab8',{outline:null});text(b,'A WILD RIDE',x+37,y+15,'#5a4a90',{outline:null});}
-      const sw=textW('WINTER '+t.winter)+6;R(b,x+w-sw-5,y+9,sw+2,13,isNext?'#e03a4e':'#3a2f60');R(b,x+w-sw-4,y+10,sw,11,isNext?'#1b1530':'#14102a');text(b,'WINTER '+t.winter,x+w-sw/2-4,y+13,isNext?'#ff8a98':'#5a4a90',{align:'center',outline:null});
+      const sw=textW('WINTER '+t.winter)+6;if(!(t.id==='ufo'&&ufoLocked())){R(b,x+w-sw-5,y+9,sw+2,13,isNext?'#e03a4e':'#3a2f60');R(b,x+w-sw-4,y+10,sw,11,isNext?'#1b1530':'#14102a');text(b,'WINTER '+t.winter,x+w-sw/2-4,y+13,isNext?'#ff8a98':'#5a4a90',{align:'center',outline:null});}
       btn('ride'+i,x,y,w,ch,()=>{ridePeek=t.id;sfx('click');});y+=h;continue;}
     const owned=owns(i),next=wild?i===nr:i===save.tool+1,afford=save.coins>=t.cost,cur=i===use,gold=isGold(t.id),RT=wild?rideTool(i):null;
     card(x,y,w,ch,cur?'#fff6d8':owned?'#eef3fb':wild?'#e6dcf6':'#d8dee8',cur?'#ffd23f':wild?'#b07aff':'#9fc0e8');R(b,x+4,y+3,28,26,K);R(b,x+5,y+4,26,24,'#cfe3f8');
     if(owned||next)drawToolIcon(t.id,x+5,y+4,24,owned?skinIdx(t.id):0);else{b.globalAlpha=0.35;drawToolIcon(t.id,x+5,y+4,24);b.globalAlpha=1;}
     const T2=(cur&&!chal())?tool():RT||t;text(b,(gold?'GOLDEN ':'')+t.name+(isMk2(t.id)?' MK II':''),x+37,y+5,gold?'#a8740a':'#13306b',{outline:null});
-    text(b,t.trick||('WIDTH '+bladeCells(T2)+'  SPEED '+T2.speed),x+37,y+14,wild?'#7a4fc8':'#4f6fa0',{outline:null});text(b,!owned&&!next?'AFTER '+TOOLS[i-1].name:wild?'BEST MACHINE +15%':'x'+(cur?T2.value:t.value)+' COINS',x+37,y+22,!owned&&!next?'#8a6a40':'#4f6fa0',{outline:null});
+    if(wild&&owned){const ml=mastLv(t.id),px=x+41+textW(t.name);for(let k=0;k<5;k++){R(b,px+k*6,y+4,5,5,K);R(b,px+k*6+1,y+5,3,3,k<ml?'#ffd23f':'#d6caee');if(k<ml)R(b,px+k*6+1,y+5,3,1,'#fff08a');}if(ml<5){R(b,px,y+10,29,1,'#cbbbe8');R(b,px,y+10,Math.round(29*mastFrac(t.id)),1,'#8a50d0');}}
+    text(b,t.trick||('WIDTH '+bladeCells(T2)+'  SPEED '+T2.speed),x+37,y+14,wild?'#7a4fc8':'#4f6fa0',{outline:null});text(b,!owned&&!next?'AFTER '+TOOLS[i-1].name:wild?(t.id==='ufo'?(owned&&mastLv(t.id)?'THIN BEAM MASTERY +'+2*mastLv(t.id)+'%':'COINS +15%, THIN BEAM'):(owned&&mastLv(t.id)?'BEST +15% MASTERY +'+2*mastLv(t.id)+'%':'BEST MACHINE +15%')):'x'+(cur?T2.value:t.value)+' COINS',x+37,y+22,!owned&&!next?'#8a6a40':'#4f6fa0',{outline:null});
     if(owned){if(cur){R(b,x+w-38,y+3,34,11,'#1f7a33');text(b,'IN USE',x+w-21,y+5,'#ffffff',{align:'center',outline:null});}else button('use'+i,x+w-38,y+2,34,13,'green','USE',()=>equip(i));
       button('sk'+i,x+w-38,y+16,34,13,'purple','SKINS',()=>{skinFor=t.id;skinSel=skinIdx(t.id);sfx('click');});btn('card'+i,x,y,w-40,ch,()=>{skinFor=t.id;skinSel=skinIdx(t.id);sfx('click');});}
     else if(next){button('tool',x+w-46,y+3,42,26,afford?'orange':'grey',null,wild?()=>buyRideCoins(i):buyTool);text(b,'BUY',x+w-25,y+7,'#ffffff',{align:'center'});priceRow(SPR.coinS,fmt(t.cost),x+w-25,y+17,afford?'#ffffff':'#ffd0d6');}
@@ -4065,6 +4084,7 @@ function drawRidePeek(){const tid=ridePeek,ti=toolIdx(tid),t=TOOLS[ti],isNext=ti
   if(isNext){text(b,t.trick,W/2,180,'#c4a0f5',{align:'center',outline:null});const pn=(save.parts||{})[t.id]||0,afterRot=save.tool>=toolIdx('rotary');text(b,afterRot?'PARTS FOUND: '+pn+' OF 3':'PARTS DROP AFTER THE ROTARY',W/2,192,'#ffd23f',{align:'center'});
     const ts=totalStars(),need=starsNeeded();text(b,'OR EARN '+need+' STARS AND',W/2,206,'#ffffff',{align:'center',outline:null});text(b,'START WINTER '+t.winter,W/2,215,'#ffffff',{align:'center',outline:null});
     R(b,40,226,100,7,K);R(b,41,227,98,5,'#14102a');R(b,41,227,Math.round(98*Math.min(1,ts/need)),5,'#ffd23f');text(b,ts+'/'+need,W/2,236,'#ffd23f',{align:'center',outline:null});}
+  else if(tid==='ufo'&&ufoLocked()){text(b,'THE LEGENDARY RIDE',W/2,184,'#ffd23f',{align:'center',outline:null});text(b,'UNLOCKS AFTER',W/2,200,'#ffffff',{align:'center',outline:null});text(b,'THE ICEBREAKER',W/2,210,'#ffffff',{align:'center',outline:null});}
   else{text(b,'A WILD RIDE FOR WINTER '+t.winter,W/2,184,'#ffd23f',{align:'center',outline:null});text(b,'KEEP PLOWING TO',W/2,200,'#ffffff',{align:'center',outline:null});text(b,'FIND OUT WHAT IT IS...',W/2,210,'#ffffff',{align:'center',outline:null});}
   if(sale){const pr=SHOP.rides[t.id];button('pkgem',20,246,72,18,(save.gems||0)>=pr[1]?'purple':'grey',pr[1]+' GEMS',()=>{if(buyRide(ti,true))ridePeek=null;});button('pkclose',96,246,64,18,'blue','DONE',()=>{ridePeek=null;sfx('click');});}
   else button('pkclose',54,246,72,18,'blue','DONE',()=>{ridePeek=null;sfx('click');});}
@@ -4394,7 +4414,7 @@ function drawPlay(){
   const ents=[];
   for(const cw of G.cows){if(cw.y<top||cw.y>bot)continue;ents.push({base:cw.y+3,draw:()=>{const cx2=Math.round(cw.x),cy2=Math.round(cw.y);if(cw.z>0){b.fillStyle='rgba(30,40,80,0.25)';b.fillRect(cx2-5,cy2+1,10,3);}
     const cyo=cy2-10-Math.round(cw.z)+(cw.state==='graze'&&cw.vx?Math.floor(cw.t*4)%2:0);if(lkOutline()||LOOK==='e')b.drawImage(outlineOf(cw.flip?COWL:COW),cx2-9,cyo-1);b.drawImage(bright(cw.flip?COWL:COW),cx2-8,cyo);if(cw.state==='beam'&&Math.floor(tNow*6)%2)text(b,'MOO?',cx2,cy2-21-Math.round(cw.z),'#ffffff',{align:'center'});}});}
-  for(const o of G.obstacles)if(o.sy+o.spr.height>top&&o.sy<bot){ents.push({base:o.base,draw:()=>{if(lkOutline()||(LOOK==='e'&&smallOb(o)))b.drawImage(outlineOf(o.spr),o.sx-1,o.sy-1);b.drawImage(bright(o.spr),o.sx,o.sy);}});wildOcc(o.sx-1,o.sy-1,o.spr.width+2,o.spr.height+2,o.base,ents);}
+  for(const o of G.obstacles)if(o.sy+o.spr.height>top&&o.sy<bot){ents.push({base:o.base,draw:()=>{const ga=tid==='ufo'&&o.bld?ufoGlowA(o)*(0.6+0.4*Math.sin(tNow*7)):0;if(ga>0){b.globalAlpha=ga;const rim=tintOf(outlineOf(o.spr),'#ff4f7e');for(const [dx,dy] of [[-2,-1],[0,-1],[-1,-2],[-1,0]])b.drawImage(rim,o.sx+dx,o.sy+dy);b.globalAlpha=1;}else if(lkOutline()||(LOOK==='e'&&smallOb(o)))b.drawImage(outlineOf(o.spr),o.sx-1,o.sy-1);b.drawImage(bright(o.spr),o.sx,o.sy);if(ga>0){b.globalAlpha=ga*0.38;b.drawImage(tintOf(o.spr,'#ff8fb0'),o.sx,o.sy);b.globalAlpha=1;}}});wildOcc(o.sx-1,o.sy-1,o.spr.width+2,o.spr.height+2,o.base,ents);}
   for(const o of G.scenery)if(o.sy+o.spr.height>top&&o.sy<bot){ents.push({base:o.base,draw:()=>{if(lkOutline())b.drawImage(outlineOf(o.spr),o.sx-1,o.sy-1);b.drawImage(bright(o.spr),o.sx,o.sy);}});wildOcc(o.sx-1,o.sy-1,o.spr.width+2,o.spr.height+2,o.base,ents);}
   for(const hz of G.hazards){if(hz.kind!=='skier'&&(hz.y+40<top||hz.y-40>bot))continue;const hx=Math.round(hz.x),hy=Math.round(hz.y);
     if(hz.kind==='dog')ents.push({base:hz.y+hz.h,draw:()=>b.drawImage(hz.spr||(hz.vx>=0?SPR.dog:SPR.dogL),hx-1,hy-4+(Math.floor(hz.t*8)%2))});
@@ -4708,7 +4728,8 @@ window.addEventListener('unhandledrejection',e=>trackErr('promise: '+(e.reason&&
 const phJob=()=>{const L=G&&G.def;return L?{job:L.id,area:L.area}:{};};
 {const o=startLevel;startLevel=function(idx,opts){const r=o.apply(this,arguments);try{const L=LEVELS[idx];PH.jobT=Date.now();PH.frames=0;PH.slow=0;
   track('job_start',{job:L.id,area:L.area,job_no:L.area==='secret'?null:jobNo(idx),attempt:(save.fails[idx]||0)+1,stars_before:save.stars[idx]||0,weekly:!!(opts&&opts.challenge),mission:missionOn(idx),boss:!!L.boss});}catch(e){}return r;};}
-{const o=endRound;endRound=function(){const was=run&&run.ended;const r=o.apply(this,arguments);try{if(run&&!was&&run.res&&!run.phDone){run.phDone=true;const R2=run.res;
+{const o=endRound;endRound=function(){const was=run&&run.ended;const r=o.apply(this,arguments);try{if(run&&!was&&run.res&&!run.mastDone){run.mastDone=true;const t=tool();if(t&&t.ride&&!run.challenge&&!run.drive&&!run.mission)mastAdd(t.id,1+(run.res.stars||0));}}catch(e){}
+  try{if(run&&!was&&run.res&&!run.phDone){run.phDone=true;const R2=run.res;
   track('job_end',Object.assign(phJob(),{combo_halved:run.cHalf||0,combo_best:+(1+0.1*(run.cBest||0)).toFixed(1),combo_avg:run.cG?+(run.cW/run.cG).toFixed(2):1,combo_bonks:run.cBonk||0,combo_fades:run.cFade||0,pct:Math.round(R2.pct),stars:R2.stars,all_clear:!!R2.allClear,earned:Math.round(run.earned||0),bonus:Math.round(R2.bonus||0),hits:run.hits||0,gifts:run.gifts||0,continue_used:!!run.contUsed,time_left:Math.round(run.time||0),secs:Math.round((Date.now()-PH.jobT)/1000),slow_frames_pct:PH.frames?Math.round(PH.slow/PH.frames*100):null,weekly:!!run.challenge,score:R2.challenge?R2.challenge.score:null,swept:!!run.swept,unreach_pct:G&&G.ncN?Math.round(G.ncN/(G.clearable+G.ncN)*1000)/10:0}));}}catch(e){}return r;};}
 for(const [nm,get,set] of [['map',()=>goMap,f=>goMap=f],['garage',()=>goGarage,f=>goGarage=f],['upgrades',()=>goUpgrades,f=>goUpgrades=f]]){const o=get();set(function(){try{if(state==='play'&&run&&!run.ended)track('job_quit',Object.assign(phJob(),{pct:G?Math.round(G.cleared/G.clearable*100):null,secs:Math.round((Date.now()-PH.jobT)/1000)}));if(state!==nm)track('screen',{name:nm,from:state});}catch(e){}return o.apply(this,arguments);});}
 {const o=buyUpg;buyUpg=function(k){const c0=save.coins;const r=o.apply(this,arguments);try{if(save.coins<c0)track('upgrade_buy',{kind:k,machine:curMachine(),level:lvOf(k),cost:Math.round(c0-save.coins)});}catch(e){}return r;};}

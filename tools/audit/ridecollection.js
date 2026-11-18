@@ -24,7 +24,8 @@ const BASE = process.env.BASE || 'http://127.0.0.1:8765/index6.html';
       for(let i=BASE_TOOLS;i<TOOLS.length;i++){save.use=i;_tc.k='';row[TOOLS[i].id]=Math.round(100*rate()/r0)+'%/'+Math.round(100*valueMult()/v0)+'% w'+bladeCells()+' s'+Math.round(moveSpeed());}
       out.push(row);}return out;})()`);
   for (const r of sc) console.log(JSON.stringify(r));
-  ok(sc.every(r => ['monster', 'jet', 'mech', 'dragon', 'ufo'].every(id => { const [a, b] = r[id].split(' ')[0].split('/').map(x => parseInt(x)); return a >= 111 && a <= 119 && b === 115; })), 'every ride clears ~15% faster (rounding of width) and earns exactly 15% more than the best machine');
+  ok(sc.every(r => ['monster', 'jet', 'mech', 'dragon'].every(id => { const [a, b] = r[id].split(' ')[0].split('/').map(x => parseInt(x)); return a >= 111 && a <= 119 && b === 115; })), 'every ride clears ~15% faster (rounding of width) and earns exactly 15% more than the best machine');
+  ok(sc.every(r => { const [a, b] = r.ufo.split(' ')[0].split('/').map(x => parseInt(x)); return a >= 82 && a <= 90 && b === 115; }), 'the UFO (p130) clears ~86% of the best machine with its thin beam, and earns 15% more');
   // 3. Super Plow owner: test drive tease, drive is scaled, offer after the run, buy with gems, owns it without skipping machines
   await EV(`(()=>{save.rides={};save.tool=toolIdx('super');save.use=save.tool;const q=mLv('super');q.speed=3;q.size=3;save.ridePass=false;save.rideSeen={};save.parts={};save.gems=500;_tc.k='';})()`);
   const t = await EV(`(()=>{let keys=0,parts=0;for(let k=0;k<40;k++){const g=buildLevel(lvIdx('carousel'));if(g.driveKey)keys++;if(g.part)parts++;}return {tease:teaseRideIdx(),parts:nextRideIdx(),keys,partsN:parts,sale:rideForSale()};})()`);
