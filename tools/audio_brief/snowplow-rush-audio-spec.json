@@ -27,14 +27,14 @@
       "priority": "A",
       "when": "CLEAN SWEEP! at 98%: the last snow melts away in a ring and the job ends.",
       "prompt": "Magical cozy winter sweep: a soft rising whoosh of powdery snow swirling outward, ending in a bright sparkling glockenspiel arpeggio in D major, cheerful toy-like video game reward, dry, no reverb tail, the sound happens right at the start, then silence",
-      "takes": 3,
+      "takes": 1,
       "files": [
-        "sweep_1.wav",
-        "sweep_2.wav",
-        "sweep_3.wav"
+        "sweep_1.wav"
       ],
       "request_seconds": 2,
-      "trim_to": 1.8
+      "trim_to": 1.8,
+      "make": true,
+      "batch": 1
     },
     {
       "name": "treasure",
@@ -44,14 +44,14 @@
       "priority": "A",
       "when": "Finding a treasure in the snow.",
       "prompt": "Treasure discovered: a warm music box and glockenspiel flourish rising in D major with a sparkle at the end, cozy winter, toy-like, short and joyful, no reverb tail, the sound happens right at the start, then silence",
-      "takes": 3,
+      "takes": 1,
       "files": [
-        "treasure_1.wav",
-        "treasure_2.wav",
-        "treasure_3.wav"
+        "treasure_1.wav"
       ],
       "request_seconds": 2,
-      "trim_to": 1.5
+      "trim_to": 1.5,
+      "make": true,
+      "batch": 1
     },
     {
       "name": "pow",
@@ -61,14 +61,14 @@
       "priority": "A",
       "when": "The punch under a crash (plays on top of the bump sound).",
       "prompt": "Short cartoon impact thump, soft and puffy like crashing into a big snowbank, with a quick muffled pop, toy-like and playful, not violent, very short, no reverb, the sound happens right at the start, then silence",
-      "takes": 3,
+      "takes": 1,
       "files": [
-        "pow_1.wav",
-        "pow_2.wav",
-        "pow_3.wav"
+        "pow_1.wav"
       ],
       "request_seconds": 1,
-      "trim_to": 0.25
+      "trim_to": 0.25,
+      "make": true,
+      "batch": 1
     },
     {
       "name": "swipe",
@@ -78,14 +78,14 @@
       "priority": "A",
       "when": "Jobs, Upgrades and Garage pages sliding across.",
       "prompt": "Very short soft swipe whoosh, like a card sliding quickly across a table, airy and light, subtle UI sound, no click, the sound happens right at the start, then silence",
-      "takes": 3,
+      "takes": 1,
       "files": [
-        "swipe_1.wav",
-        "swipe_2.wav",
-        "swipe_3.wav"
+        "swipe_1.wav"
       ],
       "request_seconds": 1,
-      "trim_to": 0.25
+      "trim_to": 0.25,
+      "make": true,
+      "batch": 1
     },
     {
       "name": "bookopen",
@@ -95,14 +95,14 @@
       "priority": "A",
       "when": "Opening the Treasure Book.",
       "prompt": "Old leather-bound book opening: a soft leather creak and a gentle paper flutter, cozy, close-up, short, dry, the sound happens right at the start, then silence",
-      "takes": 3,
+      "takes": 1,
       "files": [
-        "bookopen_1.wav",
-        "bookopen_2.wav",
-        "bookopen_3.wav"
+        "bookopen_1.wav"
       ],
       "request_seconds": 1,
-      "trim_to": 0.6
+      "trim_to": 0.6,
+      "make": true,
+      "batch": 1
     },
     {
       "name": "crack",
@@ -112,14 +112,14 @@
       "priority": "A",
       "when": "First bump halves your combo and the bar blinks CAREFUL!",
       "prompt": "Small cartoon ice crack: a quick crisp crackle of thin ice with a tiny falling two-note blip, light and playful, a warning not a failure, very short, dry, the sound happens right at the start, then silence",
-      "takes": 3,
+      "takes": 1,
       "files": [
-        "crack_1.wav",
-        "crack_2.wav",
-        "crack_3.wav"
+        "crack_1.wav"
       ],
       "request_seconds": 1,
-      "trim_to": 0.4
+      "trim_to": 0.4,
+      "make": true,
+      "batch": 1
     },
     {
       "name": "testdrive",
@@ -129,14 +129,14 @@
       "priority": "A",
       "when": "Grabbing a test-drive key: you jump into a Wild Ride for 15 s.",
       "prompt": "Exciting transformation: a quick rising whoosh into a big cartoon engine rev with a bright sparkle at the top, energetic but cozy and toy-like, video game power-up, no voice, dry, the sound happens right at the start, then silence",
-      "takes": 3,
+      "takes": 1,
       "files": [
-        "testdrive_1.wav",
-        "testdrive_2.wav",
-        "testdrive_3.wav"
+        "testdrive_1.wav"
       ],
       "request_seconds": 2,
-      "trim_to": 1.2
+      "trim_to": 1.2,
+      "make": true,
+      "batch": 1
     },
     {
       "name": "newmachine",
@@ -146,14 +146,14 @@
       "priority": "A",
       "when": "Buying a new machine in the Garage.",
       "prompt": "Big cozy unveiling: a chunky toy engine starting up and revving twice, then a bright glockenspiel and brass flourish in D major, triumphant but warm and toy-like, video game unlock, no voice, dry, the sound happens right at the start, then silence",
-      "takes": 3,
+      "takes": 1,
       "files": [
-        "newmachine_1.wav",
-        "newmachine_2.wav",
-        "newmachine_3.wav"
+        "newmachine_1.wav"
       ],
       "request_seconds": 2,
-      "trim_to": 1.5
+      "trim_to": 1.5,
+      "make": true,
+      "batch": 1
     },
     {
       "name": "dizzy",
@@ -163,14 +163,12 @@
       "priority": "B",
       "when": "After a crash, while stars circle your head.",
       "prompt": "Cartoon dizzy stars: three or four soft twinkling bell chirps circling around, slightly wobbly pitch, light and funny, kids game, quiet",
-      "takes": 3,
-      "files": [
-        "dizzy_1.wav",
-        "dizzy_2.wav",
-        "dizzy_3.wav"
-      ],
+      "takes": 0,
+      "files": [],
       "request_seconds": 1,
-      "trim_to": 1.0
+      "trim_to": 1.0,
+      "make": false,
+      "made_from": "glint, pitched in a circle"
     },
     {
       "name": "confetti",
@@ -180,14 +178,14 @@
       "priority": "B",
       "when": "Opening a gift: confetti and coins burst out.",
       "prompt": "Small party popper pop followed by light paper confetti fluttering, cheerful and soft, short, kids game, no voice, the sound happens right at the start, then silence",
-      "takes": 3,
+      "takes": 1,
       "files": [
-        "confetti_1.wav",
-        "confetti_2.wav",
-        "confetti_3.wav"
+        "confetti_1.wav"
       ],
       "request_seconds": 1,
-      "trim_to": 0.6
+      "trim_to": 0.6,
+      "make": true,
+      "batch": 3
     },
     {
       "name": "glint",
@@ -197,14 +195,14 @@
       "priority": "B",
       "when": "At 90%, sparkles appear on the last snow patches.",
       "prompt": "Single soft magical glint, a tiny high bell sparkle with a shimmer, gentle, short, in D major, video game hint sound, the sound happens right at the start, then silence",
-      "takes": 3,
+      "takes": 1,
       "files": [
-        "glint_1.wav",
-        "glint_2.wav",
-        "glint_3.wav"
+        "glint_1.wav"
       ],
       "request_seconds": 1,
-      "trim_to": 0.5
+      "trim_to": 0.5,
+      "make": true,
+      "batch": 3
     },
     {
       "name": "lookcloser",
@@ -214,14 +212,12 @@
       "priority": "B",
       "when": "Tapping a treasure to open its close-up card.",
       "prompt": "Soft magical reveal shimmer, a quick rising sparkle with a light bell, gentle, short, in D major, UI sound, the sound happens right at the start, then silence",
-      "takes": 3,
-      "files": [
-        "lookcloser_1.wav",
-        "lookcloser_2.wav",
-        "lookcloser_3.wav"
-      ],
+      "takes": 0,
+      "files": [],
       "request_seconds": 1,
-      "trim_to": 0.5
+      "trim_to": 0.5,
+      "make": false,
+      "made_from": "glint, rising"
     },
     {
       "name": "page",
@@ -231,14 +227,14 @@
       "priority": "B",
       "when": "Flipping to the next or previous treasure.",
       "prompt": "Single paper page turn, crisp but soft, close microphone, short, dry, the sound happens right at the start, then silence",
-      "takes": 3,
+      "takes": 1,
       "files": [
-        "page_1.wav",
-        "page_2.wav",
-        "page_3.wav"
+        "page_1.wav"
       ],
       "request_seconds": 1,
-      "trim_to": 0.3
+      "trim_to": 0.3,
+      "make": true,
+      "batch": 3
     },
     {
       "name": "maxed",
@@ -248,14 +244,12 @@
       "priority": "B",
       "when": "Tapping a maxed-out upgrade (MAXED OUT!).",
       "prompt": "Satisfying golden ding, a bright bell strike with a short shimmer, like a completed achievement, in D major, short and clean, the sound happens right at the start, then silence",
-      "takes": 3,
-      "files": [
-        "maxed_1.wav",
-        "maxed_2.wav",
-        "maxed_3.wav"
-      ],
+      "takes": 0,
+      "files": [],
       "request_seconds": 1,
-      "trim_to": 0.6
+      "trim_to": 0.6,
+      "make": false,
+      "made_from": "star1 note"
     },
     {
       "name": "part",
@@ -265,14 +259,14 @@
       "priority": "B",
       "when": "Picking up a Wild Ride part in a job.",
       "prompt": "Treasure pickup with a mechanical twist: a chunky toy metal clank, then a quick bright sparkle and a rising two-note chime in D major, cozy, short, dry, the sound happens right at the start, then silence",
-      "takes": 3,
+      "takes": 1,
       "files": [
-        "part_1.wav",
-        "part_2.wav",
-        "part_3.wav"
+        "part_1.wav"
       ],
       "request_seconds": 1,
-      "trim_to": 0.8
+      "trim_to": 0.8,
+      "make": true,
+      "batch": 3
     },
     {
       "name": "mk2",
@@ -282,14 +276,12 @@
       "priority": "B",
       "when": "Buying a machine's Mk II upgrade.",
       "prompt": "Golden power-up: a deep engine rev rising into a shimmering gold chime chord in D major, triumphant but short, toy-like, dry, the sound happens right at the start, then silence",
-      "takes": 3,
-      "files": [
-        "mk2_1.wav",
-        "mk2_2.wav",
-        "mk2_3.wav"
-      ],
+      "takes": 0,
+      "files": [],
       "request_seconds": 2,
-      "trim_to": 1.4
+      "trim_to": 1.4,
+      "make": false,
+      "made_from": "newmachine + treasure"
     },
     {
       "name": "collect",
@@ -299,14 +291,14 @@
       "priority": "B",
       "when": "Collecting the helpers' coins on the welcome-back card.",
       "prompt": "A cascade of coins pouring onto a pile, bright and satisfying, ending in a soft bell ding in D major, cozy video game reward, dry",
-      "takes": 3,
+      "takes": 1,
       "files": [
-        "collect_1.wav",
-        "collect_2.wav",
-        "collect_3.wav"
+        "collect_1.wav"
       ],
       "request_seconds": 1,
-      "trim_to": 1.0
+      "trim_to": 1.0,
+      "make": true,
+      "batch": 3
     },
     {
       "name": "shiphorn",
@@ -316,14 +308,14 @@
       "priority": "B",
       "when": "The Icebreaker: when you buy it and when a job starts with it.",
       "prompt": "Deep friendly ship horn, two short warm toots like a cartoon tugboat, round and soft, not scary, clean and dry, the sound happens right at the start, then silence",
-      "takes": 3,
+      "takes": 1,
       "files": [
-        "shiphorn_1.wav",
-        "shiphorn_2.wav",
-        "shiphorn_3.wav"
+        "shiphorn_1.wav"
       ],
       "request_seconds": 2,
-      "trim_to": 1.2
+      "trim_to": 1.2,
+      "make": true,
+      "batch": 3
     },
     {
       "name": "bookclose",
@@ -333,14 +325,12 @@
       "priority": "C",
       "when": "Closing the Treasure Book.",
       "prompt": "Book closing softly: a muffled leather thump with a light paper swish, short, dry, the sound happens right at the start, then silence",
-      "takes": 3,
-      "files": [
-        "bookclose_1.wav",
-        "bookclose_2.wav",
-        "bookclose_3.wav"
-      ],
+      "takes": 0,
+      "files": [],
       "request_seconds": 1,
-      "trim_to": 0.4
+      "trim_to": 0.4,
+      "make": false,
+      "made_from": "bookopen"
     },
     {
       "name": "streak",
@@ -350,14 +340,12 @@
       "priority": "C",
       "when": "Claiming the daily streak reward.",
       "prompt": "Daily reward: a quick rising run of five glockenspiel notes in D major ending on a soft chord, joyful, cozy winter, toy-like, dry, the sound happens right at the start, then silence",
-      "takes": 3,
-      "files": [
-        "streak_1.wav",
-        "streak_2.wav",
-        "streak_3.wav"
-      ],
+      "takes": 0,
+      "files": [],
       "request_seconds": 2,
-      "trim_to": 1.2
+      "trim_to": 1.2,
+      "make": false,
+      "made_from": "star1 note, five-note run"
     },
     {
       "name": "scoop",
@@ -367,14 +355,14 @@
       "priority": "C",
       "when": "The Front Loader: when you buy it and when a job starts with it.",
       "prompt": "Toy construction loader: a short hydraulic whine lifting a bucket, then a soft chunky clunk, playful and clean, dry, the sound happens right at the start, then silence",
-      "takes": 3,
+      "takes": 1,
       "files": [
-        "scoop_1.wav",
-        "scoop_2.wav",
-        "scoop_3.wav"
+        "scoop_1.wav"
       ],
       "request_seconds": 1,
-      "trim_to": 0.8
+      "trim_to": 0.8,
+      "make": true,
+      "batch": 3
     },
     {
       "name": "icecrunch",
@@ -384,14 +372,14 @@
       "priority": "C",
       "when": "Loops while the Icebreaker drives over cleared ice.",
       "prompt": "Steady crunching of thin ice under heavy tracks, crisp crackles over a soft low rumble, even and continuous with no big hits, cozy not harsh, seamless loop",
-      "takes": 3,
+      "takes": 1,
       "files": [
-        "icecrunch_1.wav",
-        "icecrunch_2.wav",
-        "icecrunch_3.wav"
+        "icecrunch_1.wav"
       ],
       "request_seconds": 2,
-      "trim_to": 2.0
+      "trim_to": 2.0,
+      "make": true,
+      "batch": 3
     },
     {
       "name": "vo_sweep",
@@ -401,12 +389,12 @@
       "priority": "A",
       "when": "Plays with sweep: the job auto-finishes at 98%.",
       "prompt": "Say exactly: \"Clean sweep!\"",
-      "takes": 3,
+      "takes": 1,
       "files": [
-        "vo_sweep_1.wav",
-        "vo_sweep_2.wav",
-        "vo_sweep_3.wav"
-      ]
+        "vo_sweep_1.wav"
+      ],
+      "make": true,
+      "batch": 4
     },
     {
       "name": "vo_treasure",
@@ -416,12 +404,12 @@
       "priority": "A",
       "when": "Plays with treasure: a treasure found in the snow.",
       "prompt": "Say exactly: \"Treasure!\"",
-      "takes": 3,
+      "takes": 1,
       "files": [
-        "vo_treasure_1.wav",
-        "vo_treasure_2.wav",
-        "vo_treasure_3.wav"
-      ]
+        "vo_treasure_1.wav"
+      ],
+      "make": true,
+      "batch": 4
     },
     {
       "name": "vo_goldrush",
@@ -431,12 +419,12 @@
       "priority": "A",
       "when": "Plays when the Gold Rush gift starts (double coins).",
       "prompt": "Say exactly: \"Gold rush!\"",
-      "takes": 3,
+      "takes": 1,
       "files": [
-        "vo_goldrush_1.wav",
-        "vo_goldrush_2.wav",
-        "vo_goldrush_3.wav"
-      ]
+        "vo_goldrush_1.wav"
+      ],
+      "make": true,
+      "batch": 4
     },
     {
       "name": "vo_combo",
@@ -446,12 +434,12 @@
       "priority": "A",
       "when": "Plays when a combo reaches 5.",
       "prompt": "Say exactly: \"Combo!\"",
-      "takes": 3,
+      "takes": 1,
       "files": [
-        "vo_combo_1.wav",
-        "vo_combo_2.wav",
-        "vo_combo_3.wav"
-      ]
+        "vo_combo_1.wav"
+      ],
+      "make": true,
+      "batch": 4
     },
     {
       "name": "vo_spun",
@@ -461,12 +449,12 @@
       "priority": "A",
       "when": "Plays when a boss's chaser catches you.",
       "prompt": "Say exactly: \"Spun out!\"",
-      "takes": 3,
+      "takes": 1,
       "files": [
-        "vo_spun_1.wav",
-        "vo_spun_2.wav",
-        "vo_spun_3.wav"
-      ]
+        "vo_spun_1.wav"
+      ],
+      "make": true,
+      "batch": 4
     },
     {
       "name": "vo_winter",
@@ -476,14 +464,16 @@
       "priority": "A",
       "when": "Plays when a New Winter starts.",
       "prompt": "Say exactly: \"New winter!\"",
-      "takes": 3,
+      "takes": 1,
       "files": [
-        "vo_winter_1.wav",
-        "vo_winter_2.wav",
-        "vo_winter_3.wav"
-      ]
+        "vo_winter_1.wav"
+      ],
+      "make": true,
+      "batch": 4
     }
   ],
   "lengths": "Fish Audio takes whole seconds (1 s minimum). Ask for request_seconds; the sound plays at the very start and the rest is silence. Deliver it untrimmed: it's trimmed to trim_to when it goes into the game.",
-  "music": "Not made in Fish Audio (its generator does ambience, foley and impacts, not music). The music is made separately."
+  "music": "Not made in Fish Audio (its generator does ambience, foley and impacts, not music). The music is made separately.",
+  "takes": "One take per sound. A second take only for a sound that comes back wrong, and only after the account owner OKs it.",
+  "budget": "Hard limit 1,000,000 Fish credits for the whole game; use as few as possible. Quote each batch before generating."
 }
