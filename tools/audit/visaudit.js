@@ -26,10 +26,10 @@ fs.mkdirSync(out+'/maps',{recursive:true});
    for(const it of items)stamp(it.spr,it.sx,it.sy);
    const finds=[];
    // 1) loose ends on spanning overhead things
-   const H=['lights','banner','lant','gantry','finish','parkgate','garch','icearch','canopy','shed','tunnel','bough'],V=['gondola','liftline'];
+   const H=['lights','banner','lant'],V=['gondola','liftline'];
    for(const o of G.over){if(!o.spr||!o.spr.width)continue;const a=alpha(o.spr),w=o.spr.width,h=o.spr.height,sx=Math.round(o.sx),sy=Math.round(o.sy);
      const near=(X,Y,r)=>{if(X<=2||X>=pw-3||Y<=2||Y>=ph-3)return 'edge';for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){const xx=X+dx,yy=Y+dy;if(xx>=0&&xx<pw&&yy>=0&&yy<ph&&solid[yy*pw+xx])return 'prop';}
-       if(o.posts&&o.posts.some(([px,py])=>Math.abs(px-X)<=2&&Math.abs(py-Y)<=4))return 'post';for(const q of G.over)if(q!==o&&q.spr){const qa=alpha(q.spr),qx=Math.round(q.sx),qy=Math.round(q.sy);for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){const lx=X+dx-qx,ly=Y+dy-qy;if(lx>=0&&ly>=0&&lx<q.spr.width&&ly<q.spr.height&&qa[ly*q.spr.width+lx])return 'over';}}return null;};
+       if(o.posts&&o.posts.some(([px,py])=>Math.abs(px-X)<=2&&Math.abs(py-Y)<=4))return 'post';if(o.terms&&o.terms.some(([px,py])=>Math.abs(px-X)<=14&&Math.abs(py-Y)<=4))return 'station';for(const q of G.over)if(q!==o&&q.spr){const qa=alpha(q.spr),qx=Math.round(q.sx),qy=Math.round(q.sy);for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){const lx=X+dx-qx,ly=Y+dy-qy;if(lx>=0&&ly>=0&&lx<q.spr.width&&ly<q.spr.height&&qa[ly*q.spr.width+lx])return 'over';}}return null;};
      let ends=[];
      if(H.includes(o.k)){let x0=-1,x1=-1;for(let x=0;x<w&&x0<0;x++)for(let y=0;y<h;y++)if(a[y*w+x]){x0=x;break;}for(let x=w-1;x>=0&&x1<0;x--)for(let y=0;y<h;y++)if(a[y*w+x]){x1=x;break;}
        const topY=x=>{for(let y=0;y<h;y++)if(a[y*w+x])return y;return 0;};if(x0>=0)ends.push([sx+x0,sy+topY(x0)],[sx+x1,sy+topY(x1)]);}
