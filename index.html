@@ -267,7 +267,7 @@ const SHOP={ // TEST MODE: prices are shown but nothing is charged
   bags:[{id:'b1',name:'BAG OF COINS',runs:5,cost:30},{id:'b2',name:'SACK OF COINS',runs:25,cost:120},{id:'b3',name:'TRUCKLOAD',runs:60,cost:250}],
   adGems:5,adGemsPerDay:3,      // free gems from an optional ad, 3 times a day
   premium:{price:'$4.99',was:'$7.99',coinRuns:25,shedS:43200},
-  starter:{price:'$1.99',gems:200,coinRuns:10},
+  starter:{price:'$1.99',gems:250,coinRuns:10},
   rides:{monster:['$1.99',200],jet:['$2.49',250],mech:['$2.99',300],dragon:['$3.49',350],ufo:['$3.99',400]},
   ridePass:{price:'$9.99'},driveSecs:15,driveChance:0.2,
   dailyGems:5,trophyGems:10,    // free gems from daily jobs and trophies
@@ -2421,7 +2421,7 @@ function drawLoading(){if(!pendingStart)return;pendingStart.f++;const L=LEVELS[p
   panel(26,126,128,48,'#13306b','#9fd8ff');const nm=(L&&L.name)||'';text(b,nm,W/2,136,'#ffffff',{align:'center',scale:textW(nm,2)<=116?2:1});
   text(b,'GETTING THE PLOW READY',W/2,156,'#9fd8ff',{align:'center',outline:null});for(let k=0;k<3;k++)R(b,W/2-6+k*5,165,3,3,k===Math.floor(tNow*6)%3?'#ffd23f':'#4f6fa0');}
 const OVC=new Map();
-function startLevel(idx,opts){if(!(opts&&opts.challenge))save.lastJob=LEVELS[idx].id;weeklyOpen=false;storyOpen=null;jobInfo=-1;skinFor=null;ridePeek=null;rideReveal=null;outfitsOpen=false;trailsOpen=false;bookOpen=false;dailyOpen=false;winterOpen=false;shopOpen=false;trophiesOpen=false;
+function startLevel(idx,opts){offerOpen=null;if(!(opts&&opts.challenge))save.lastJob=LEVELS[idx].id;weeklyOpen=false;storyOpen=null;jobInfo=-1;skinFor=null;ridePeek=null;rideReveal=null;outfitsOpen=false;trailsOpen=false;bookOpen=false;dailyOpen=false;winterOpen=false;shopOpen=false;trophiesOpen=false;
   G=buildLevel(idx);P={x:G.start.x,y:G.start.y,f:2,stun:0,inv:0,bob:0,walkT:0,load:0,bumpCd:0,fr:0,frT:0};
   run={time:G.def.time,earned:0,combo:0,comboProg:0,comboT:0,pending:0,pendT:0,ended:false,moved:false,snowAcc:0,res:null,sprayAcc:0,
     squallT:G.def.squall?G.def.squall*0.6:0,squall:null,gold:0,hits:0,gifts:0,boost:save.boostNext,adUsed:false,iceShown:false,nbT:0,challenge:opts&&opts.challenge||null};
@@ -2435,10 +2435,30 @@ function goMap(){checkTrophyProg();if(!TEST_MODE){const n=save.fbRuns||0,k=n>=30
     else if(dailyNew()&&dailyOn())dailyOpen='new';
     else if(run&&run.dailyDone&&!run.dailyShown&&dailyReadyCount()>0){dailyOpen='claim';run.dailyShown=true;}
     else{save.story=save.story||{};for(const ar of AREA_SEQ){if(save.story[ar]||!STORY[ar])continue;const first=LEVELS.findIndex(l=>l.area===ar);if(first>=0&&levelOpen(first)){storyOpen=ar;break;}}}}
+  if(!overlayOpen())offerPick();
   persist();}
 function titleGo(){sfx('click');const fresh=!save.privSeen;if(fresh){save.privSeen=true;track('privacy_notice',{choice:'title'});persist();}
   if(fresh&&!(save.fbRuns>0)&&!save.best.some(v=>v>0)){track('ftue_direct');startLevelUI(0);return;}goMap();}
-function overlayOpen(){return !!(ridePeek||rideReveal||settingsOpen||trophiesOpen||dailyOpen||winterOpen||adScreen||shopOpen||jobInfo>=0||skinFor||outfitsOpen||trailsOpen||bookOpen||weeklyOpen||(storyOpen&&state==='map'));}
+let offerOpen=null;
+function adCount(){const k=todayKey();if(!save.adDay||save.adDay.date!==k)save.adDay={date:k,n:0};save.adDay.n++;}
+function offerPick(){if(TEST_MODE&&!save.offerTest)return;if(!save.privSeen||offerOpen)return;const o=save.offers=save.offers||{},today=todayKey();if(o.last===today)return;
+  const ads=save.adDay&&save.adDay.date===today?save.adDay.n:0,runs=save.fbRuns||0;
+  if(!save.starter&&!o.starter&&(((save.sess||0)>=2&&runs>=5)||runs>=12)){offerOpen='starter';o.starter=true;}
+  else if(!save.pro&&(o.proN||0)<3&&ads>=5&&(o.proDay==null||dayIdx()-o.proDay>=3)){offerOpen='premium';o.proN=(o.proN||0)+1;o.proDay=dayIdx();}
+  if(offerOpen){o.last=today;track('offer_show',{kind:offerOpen,runs,sess:save.sess||0,ads});persist();}}
+function drawOffer(){const k=offerOpen,x=14,y=70,w=152,h=168;b.fillStyle='rgba(11,24,56,0.8)';b.fillRect(0,0,W,H);panel(x,y,w,h,'#13306b','#ffd23f');
+  const later=()=>{track('offer_tap',{kind:k,choice:'later'});offerOpen=null;sfx('click');};
+  const row=(ic,t,yy,c)=>{if(ic)b.drawImage(ic,x+22,yy);text(b,t,x+(ic?34:22),yy+1,c||'#ffffff',{outline:null});};
+  if(k==='starter'){text(b,'STARTER PACK',W/2,y+9,'#ffd23f',{align:'center',scale:2});R(b,W/2-24,y+27,48,9,'#e8283f');text(b,'2X VALUE',W/2,y+28,'#ffffff',{align:'center',outline:null});
+    row(SPR.gem,SHOP.starter.gems+' GEMS',y+46,'#ff8fc8');row(SPR.coin,fmt(runPay()*SHOP.starter.coinRuns)+' COINS ('+SHOP.starter.coinRuns+' RUNS)',y+60,'#ffd23f');row(SPR.star,'THE EXPLORER OUTFIT',y+74);
+    text(b,'ONE PER PLAYER. A THANK-YOU',W/2,y+92,'#9fc0e8',{align:'center',outline:null});text(b,'FOR PLAYING EARLY!',W/2,y+101,'#9fc0e8',{align:'center',outline:null});
+    button('ofbuy',x+26,y+116,w-52,20,'green',SHOP.starter.price,()=>{track('offer_tap',{kind:k,choice:'buy'});offerOpen=null;shopBuyStarter();},{scale:2});}
+  else{text(b,'PREMIUM',W/2,y+9,'#ffd23f',{align:'center',scale:2});text(b,'SKIP THE ADS, KEEP THE REWARDS',W/2,y+28,'#9fc0e8',{align:'center',outline:null});
+    row(SPR.trophy,'EVERY REWARD, NO AD',y+44);row(SPR.coin,'x2 COINS FOREVER',y+58,'#ffd23f');row(SPR.star,'GOLD PAINT, ALL MACHINES',y+72);row(null,'+ 12H HELPER SHED, COIN PACK',y+86,'#9fc0e8');
+    text(b,'PAY ONCE, KEEP IT FOR GOOD',W/2,y+101,'#9fc0e8',{align:'center',outline:null});
+    button('ofbuy',x+26,y+116,w-52,20,'gold',SHOP.premium.price,()=>{track('offer_tap',{kind:k,choice:'buy'});offerOpen=null;shopBuyPremium();},{scale:2});}
+  button('ofno',x+46,y+142,w-92,16,'navy','NOT NOW',later);}
+function overlayOpen(){return !!(ridePeek||rideReveal||settingsOpen||trophiesOpen||dailyOpen||winterOpen||adScreen||shopOpen||jobInfo>=0||skinFor||outfitsOpen||trailsOpen||bookOpen||weeklyOpen||(storyOpen&&state==='map')||(offerOpen&&state==='map'));}
 let privT=0;
 function drawPrivacyCard(dt){privT=Math.min(1,privT+(dt||0.016)*3.5);const e=1-Math.pow(1-privT,3),x=6,w=W-12,h=58,y=Math.round(NAV_Y-h-6+(1-e)*70);
   btn('privbg',x,y,w,h,()=>{});panel(x,y,w,h,'#13306b','#ffd23f');b.drawImage(SPR.frost,x+6,y+5);text(b,'ANONYMOUS PLAY DATA',x+18,y+6,'#ffd23f',{outline:null});
@@ -2473,7 +2493,7 @@ function update(dt){
   tNow+=dt;if(pressT>0)pressT-=dt;{if(FLY.disp==null)FLY.disp=save.coins;const d=save.coins-FLY.disp;if(Math.abs(d)<1)FLY.disp=save.coins;else FLY.disp+=d*Math.min(1,dt*7)+Math.sign(d)*Math.min(Math.abs(d),dt*3);if(FLY.bump>0)FLY.bump-=dt;if(state!=='play'){FLY.list=[];FLY.acc=0;FLY.burst=0;}}if(achQueue.length){achQueue[0].t-=dt;if(achQueue[0].t<=0)achQueue.shift();}if(toast){toast.t-=dt;if(toast.t<=0)toast=null;}if(confirmReset>0)confirmReset-=dt;
   if(state!=='title'&&!paused&&save.lv.helpers>0)save.coins+=helperIncome()*dt;
   for(const f of flakes){f.y+=f.s*dt;f.x+=Math.sin(tNow*1.3+f.ph)*4*dt;if(f.y>H){f.y=-2;f.x=Math.random()*W;}}
-  if(adScreen){adScreen.t-=dt;if(adScreen.t<=0){track('ad_watched',{kind:adScreen.gems?'free_gems':adScreen.onDone?'reward':'coins',screen:state});if(adScreen.onDone){const f=adScreen.onDone;adScreen=null;f();return;}if(adScreen.gems){save.gems=(save.gems||0)+adScreen.reward;showToast('+'+adScreen.reward+' GEMS','#ff8fc8');}else{save.coins+=adScreen.reward;showToast('+'+fmt(adScreen.reward)+' COINS','#ffd23f');}sfx('buy');adScreen=null;persist();}}
+  if(adScreen){adScreen.t-=dt;if(adScreen.t<=0){track('ad_watched',{kind:adScreen.gems?'free_gems':adScreen.onDone?'reward':'coins',screen:state});adCount();if(adScreen.onDone){const f=adScreen.onDone;adScreen=null;f();return;}if(adScreen.gems){save.gems=(save.gems||0)+adScreen.reward;showToast('+'+adScreen.reward+' GEMS','#ff8fc8');}else{save.coins+=adScreen.reward;showToast('+'+fmt(adScreen.reward)+' COINS','#ffd23f');}sfx('buy');adScreen=null;persist();}}
   if(mapFling){const F=mapFling,k=F.key;scrollY[k]=clamp((scrollY[k]||0)+F.v*dt,0,F.max);F.v*=Math.pow(0.03,dt);if(Math.abs(F.v)<8||scrollY[k]<=0||scrollY[k]>=F.max)mapFling=null;}
   if(state==='play'&&!paused&&!settingsOpen){if(HITSTOP>0)HITSTOP-=dt;else updatePlay(dt);}
   audioSync();
@@ -2865,6 +2885,7 @@ function draw(){const dtD=Math.min(0.05,Math.max(0,tNow-(draw.t==null?tNow:draw.
   if(trailsOpen)drawTrails();
   if(bookOpen)drawBook();
   if(storyOpen&&state==='map')drawStory();
+  if(offerOpen&&state==='map'&&!storyOpen)drawOffer();
   if(settingsOpen)drawSettings();
   if(trophiesOpen)drawTrophies();
   if(dailyOpen)drawDaily();
@@ -3981,6 +4002,8 @@ function drawMapChrome(){
     const t='NEW TREASURE!',tw=textW(t)+6;R(b,3,by-20-bob,tw,9,K);R(b,4,by-19-bob,tw-2,7,'#e0397a');text(b,t,6,by-18-bob,'#ffffff',{outline:null});}
   else if(tc)text(b,''+tc,24,by+10,'#ffd23f');
   if(dailyOn()){button('weekly',29,by,44,18,'gold','WEEKLY',()=>{weeklyOpen=true;weeklyTab=0;save.weeklySeen=weekNo();sfx('click');persist();});if(!weeklyState().claimed&&save.weeklySeen!==weekNo()){R(b,68,by-2,6,6,K);R(b,69,by-1,4,4,'#e8283f');}}
+  button('shopb',121,by,40,18,'green','SHOP',()=>{shopTab=0;save.offers=save.offers||{};save.offers.seenShop=true;openShop();});
+  if(dailyOn()&&!save.starter&&!(save.offers&&save.offers.seenShop)){R(b,156,by-2,6,6,K);R(b,157,by-1,4,4,'#e8283f');}
   // map / list toggle
   const tx=77,lv=save.mapView==='list';R(b,tx,by,40,18,K);R(b,tx+1,by+1,19,16,lv?'#1d4f9a':'#ffd23f');R(b,tx+20,by+1,19,16,lv?'#ffd23f':'#1d4f9a');R(b,tx+1,by+1,19,1,lv?'#3f6fb8':'#fff1a0');R(b,tx+20,by+1,19,1,lv?'#fff1a0':'#3f6fb8');
   {const x=tx+5,y=by+5,c1=lv?'#9fc0e8':'#13306b';R(b,x,y,10,8,c1);R(b,x+3,y,1,8,lv?'#1d4f9a':'#ffd23f');R(b,x+6,y,1,8,lv?'#1d4f9a':'#ffd23f');R(b,x+1,y+2,1,1,'#e03a4e');R(b,x+7,y+5,2,1,'#e03a4e');}
@@ -4328,16 +4351,16 @@ function restorePurchases(){sfx('click');const got=[];if(save.pro)got.push('PREM
 function drawShop(){b.fillStyle='rgba(11,24,56,0.82)';b.fillRect(0,0,W,H);panel(6,6,168,306,'#13306b','#ffd23f');
   text(b,'SHOP',W/2,13,'#ffffff',{align:'center',scale:2});text(b,'TEST MODE: NOTHING IS CHARGED',W/2,28,'#7fe08a',{align:'center',outline:null});
   R(b,12,36,156,13,'#0b1838');b.drawImage(SPR.coin,18,39);text(b,fmt(save.coins),28,40,'#ffd23f');b.drawImage(SPR.gem,100,39);text(b,fmt(save.gems||0),110,40,'#ff8fc8');
-  button('stab0',12,52,76,14,shopTab===0?'gold':'navy','OFFERS',()=>{shopTab=0;sfx('click');});
-  button('stab1',92,52,76,14,shopTab===1?'gold':'navy','COINS + RIDES',()=>{shopTab=1;sfx('click');});
+  button('stab0',12,52,76,14,shopTab===0?'gold':'navy','OFFERS',()=>{shopTab=0;track('shop_tab',{tab:'offers'});sfx('click');});
+  button('stab1',92,52,76,14,shopTab===1?'gold':'navy','COINS + RIDES',()=>{shopTab=1;track('shop_tab',{tab:'coins_rides'});sfx('click');});
   if(shopTab===0){
     {const y=70;card(12,y,156,66,save.pro?'#fff6d8':'#fffaf0','#ffd23f');b.drawImage(SPR.trophy,17,y+4);text(b,'PREMIUM',29,y+5,'#a8740a',{outline:null});
-      ['NO ADS, EVER','REWARDS WITHOUT ADS','x2 COINS FOREVER','GOLD PAINT, ALL MACHINES','COIN PACK + 12H HELPER SHED'].forEach((q,k)=>{R(b,17,y+17+k*9,3,3,'#33b24a');text(b,q,23,y+16+k*9,'#13306b',{outline:null});});
+      ['x2 COINS FOREVER','REWARDS WITHOUT ADS','GOLD PAINT, ALL MACHINES','12H HELPER SHED (WAS 6H)','+ '+SHOP.premium.coinRuns+' RUNS OF COINS NOW'].forEach((q,k)=>{R(b,17,y+17+k*9,3,3,'#33b24a');text(b,q,23,y+16+k*9,'#13306b',{outline:null});});
       if(save.pro)button('spro',124,y+6,40,16,'grey','OWNED',()=>sfx('click'));
-      else{text(b,SHOP.premium.was,144,y+5,'#9aa6ba',{align:'center',outline:null});R(b,134,y+8,21,1,'#e03a4e');button('spro',124,y+14,40,16,'gold',SHOP.premium.price,shopBuyPremium);text(b,'LAUNCH',144,y+33,'#e03a4e',{align:'center',outline:null});}}
+      else{button('spro',124,y+6,40,16,'gold',SHOP.premium.price,shopBuyPremium);text(b,'PAY ONCE',144,y+25,'#a8740a',{align:'center',outline:null});}}
     {const y=140;card(12,y,156,30,save.starter?'#eef3fb':'#eefaf0','#33b24a');b.drawImage(SPR.gem,17,y+5);text(b,'STARTER PACK',28,y+4,'#1f7a33',{outline:null});
       text(b,SHOP.starter.gems+' GEMS, COINS AND',28,y+12,'#4f6fa0',{outline:null});text(b,'THE EXPLORER OUTFIT',28,y+20,'#4f6fa0',{outline:null});
-      if(save.starter)button('sst',124,y+7,40,16,'grey','OWNED',()=>sfx('click'));else button('sst',124,y+7,40,16,'green',SHOP.starter.price,shopBuyStarter);}
+      if(save.starter)button('sst',124,y+7,40,16,'grey','OWNED',()=>sfx('click'));else{R(b,124,y+2,40,8,'#e8283f');text(b,'2X VALUE',144,y+3,'#ffffff',{align:'center',outline:null});button('sst',124,y+11,40,16,'green',SHOP.starter.price,shopBuyStarter);}}
     text(b,'GEMS',14,176,'#9fc0e8',{outline:null});
     SHOP.gems.forEach((g,i)=>{const x=12+i*53,y=184,w=50,h=46;card(x,y,w,h,'#eef3fb',g.tag?'#ffd23f':'#9fc0e8');
       if(g.tag){R(b,x+2,y+2,w-4,7,'#e8283f');text(b,g.tag,x+w/2,y+3,'#ffffff',{align:'center',outline:null});}
@@ -4644,7 +4667,7 @@ window.addEventListener('keyup',e=>{keys[e.key]=false;});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){if(state==='play'&&run&&!run.ended)paused=true;persist();if(AC)try{Promise.resolve(AC.suspend()).catch(()=>{});}catch(e){}}else if(AC)try{Promise.resolve(AC.resume()).catch(()=>{});}catch(e){}});
 setInterval(persist,5000);
 
-loadSave();
+loadSave();save.sess=(save.sess||0)+1;
 let offlineAway=0;{const away=(Date.now()-(save.last||Date.now()))/1000;if(save.lv.helpers>0&&away>30){offlineAway=away;offlineGain=helperIncome()*Math.min(offCap(),away)*OFFLINE_RATE*(save.pro?2:1);save.coins+=offlineGain;}}
 function fmtDur(sec){sec=Math.floor(sec);const d=Math.floor(sec/86400),h=Math.floor(sec%86400/3600),m=Math.floor(sec%3600/60);return d?d+'D'+(h?' '+h+'H':''):h?h+'H'+(m?' '+m+'M':''):Math.max(1,m)+'M';}
 // ---- title logo: drop-in with a bounce, smooth float, a glint sweep every few seconds with a sparkle ----
