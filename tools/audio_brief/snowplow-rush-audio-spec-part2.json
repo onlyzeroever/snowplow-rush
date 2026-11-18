@@ -6,13 +6,14 @@
   "style": "One consistent set: every sound must feel like it comes from the same world. Use the shared palette. Tonal sounds in D major (the North, boss and finale music in D minor). Effects are short and dry (no big reverb, a small room at most), start instantly with no silence at the front, and contain no music or voices unless the item asks for them.",
   "rights": "Use a Fish Audio paid plan: paid plans include commercial rights; the free tier's terms aren't stated.",
   "about": "Remakes every effect the game has today, so the whole game is one set. Same palette, style and packaging as part 1. Make part 2 after part 1 has been heard and approved.",
-  "order": "A effects first, then B, then C.",
+  "order": "1) the 8 priority-A effects, then send those to the account owner for Alex to hear in the game before going on; 2) the 6 voice lines (Fish Audio text to speech); 3) the B and C effects.",
   "deliver": {
     "zip": "snowplow-rush-audio-part2.zip",
     "format": "WAV, 44.1 kHz, 16-bit. WAV is lossless, and MP3 adds silence at the start and end that breaks seamless loops. The game's final MP3s are made from these.",
     "takes": "Deliver every take, numbered: <name>_1.wav, <name>_2.wav, <name>_3.wav. Don't pick a favourite; we choose by listening in the game.",
     "folders": {
-      "sfx/": "effects"
+      "sfx/": "effects",
+      "voice/": "voice lines"
     },
     "manifest": "manifest.csv in the zip root, one row per file: file,type,take,seconds_actual,prompt_used,notes",
     "problems": "If the tool can't make an item exactly as written, stop and tell the account owner. Don't swap in something else."
@@ -25,13 +26,15 @@
       "loop": false,
       "priority": "A",
       "when": "Every button tap.",
-      "prompt": "Soft rounded UI tap, a tiny wooden toy click with a hint of a high bell, very short, clean, cozy mobile game button, dry",
+      "prompt": "Soft rounded UI tap, a tiny wooden toy click with a hint of a high bell, very short, clean, cozy mobile game button, dry, the sound happens right at the start, then silence",
       "takes": 3,
       "files": [
         "click_1.wav",
         "click_2.wav",
         "click_3.wav"
-      ]
+      ],
+      "request_seconds": 1,
+      "trim_to": 0.12
     },
     {
       "name": "buy",
@@ -40,13 +43,15 @@
       "loop": false,
       "priority": "A",
       "when": "Buying an upgrade or anything in the shop.",
-      "prompt": "Cheerful purchase chime: a quick coin clink then two rising bright bell notes in D major, satisfying, cozy and toy-like, short, dry",
+      "prompt": "Cheerful purchase chime: a quick coin clink then two rising bright bell notes in D major, satisfying, cozy and toy-like, short, dry, the sound happens right at the start, then silence",
       "takes": 3,
       "files": [
         "buy_1.wav",
         "buy_2.wav",
         "buy_3.wav"
-      ]
+      ],
+      "request_seconds": 1,
+      "trim_to": 0.7
     },
     {
       "name": "coin",
@@ -55,13 +60,15 @@
       "loop": false,
       "priority": "A",
       "when": "Picking up coins in a job (the game varies the pitch).",
-      "prompt": "Single bright coin pickup ding, small and sparkly, a tiny bell with a coin clink, very short, video game, dry",
+      "prompt": "Single bright coin pickup ding, small and sparkly, a tiny bell with a coin clink, very short, video game, dry, the sound happens right at the start, then silence",
       "takes": 3,
       "files": [
         "coin_1.wav",
         "coin_2.wav",
         "coin_3.wav"
-      ]
+      ],
+      "request_seconds": 1,
+      "trim_to": 0.3
     },
     {
       "name": "bump",
@@ -70,13 +77,15 @@
       "loop": false,
       "priority": "A",
       "when": "Bumping into a prop.",
-      "prompt": "Soft cartoon bump into a snow-covered object, a puffy thud with a tiny wooden knock, playful, not painful, very short, dry",
+      "prompt": "Soft cartoon bump into a snow-covered object, a puffy thud with a tiny wooden knock, playful, not painful, very short, dry, the sound happens right at the start, then silence",
       "takes": 3,
       "files": [
         "bump_1.wav",
         "bump_2.wav",
         "bump_3.wav"
-      ]
+      ],
+      "request_seconds": 1,
+      "trim_to": 0.4
     },
     {
       "name": "hit",
@@ -85,13 +94,15 @@
       "loop": false,
       "priority": "A",
       "when": "Getting hit by a hazard: a car, a snowball, a dog.",
-      "prompt": "Cartoon hit by a snowball: a soft puffy splat-thump with a little comedic boing, not violent, short, dry",
+      "prompt": "Cartoon hit by a snowball: a soft puffy splat-thump with a little comedic boing, not violent, short, dry, the sound happens right at the start, then silence",
       "takes": 3,
       "files": [
         "hit_1.wav",
         "hit_2.wav",
         "hit_3.wav"
-      ]
+      ],
+      "request_seconds": 1,
+      "trim_to": 0.5
     },
     {
       "name": "combo",
@@ -100,13 +111,15 @@
       "loop": false,
       "priority": "A",
       "when": "Each combo step (the game raises the pitch step by step, so keep it one note).",
-      "prompt": "Single bright marimba note on D with a tiny sparkle, clean attack, short, video game combo counter, dry",
+      "prompt": "Single bright marimba note on D with a tiny sparkle, clean attack, short, video game combo counter, dry, the sound happens right at the start, then silence",
       "takes": 3,
       "files": [
         "combo_1.wav",
         "combo_2.wav",
         "combo_3.wav"
-      ]
+      ],
+      "request_seconds": 1,
+      "trim_to": 0.3
     },
     {
       "name": "go",
@@ -121,7 +134,9 @@
         "go_1.wav",
         "go_2.wav",
         "go_3.wav"
-      ]
+      ],
+      "request_seconds": 1,
+      "trim_to": 1.0
     },
     {
       "name": "win",
@@ -136,7 +151,9 @@
         "win_1.wav",
         "win_2.wav",
         "win_3.wav"
-      ]
+      ],
+      "request_seconds": 2,
+      "trim_to": 2.0
     },
     {
       "name": "end",
@@ -145,13 +162,15 @@
       "loop": false,
       "priority": "A",
       "when": "Job finished when the time runs out.",
-      "prompt": "Time's up: a friendly whistle toot and a soft bell phrase in D major that dips and then resolves, not sad, gently wraps up, short, dry",
+      "prompt": "Time's up: a friendly whistle toot and a soft bell phrase in D major that dips and then resolves, not sad, gently wraps up, short, dry, the sound happens right at the start, then silence",
       "takes": 3,
       "files": [
         "end_1.wav",
         "end_2.wav",
         "end_3.wav"
-      ]
+      ],
+      "request_seconds": 2,
+      "trim_to": 1.5
     },
     {
       "name": "star1",
@@ -160,13 +179,15 @@
       "loop": false,
       "priority": "A",
       "when": "First star appears on the results.",
-      "prompt": "First reward star appears: a single warm glockenspiel note on D with a soft sparkle, satisfying, short, dry",
+      "prompt": "First reward star appears: a single warm glockenspiel note on D with a soft sparkle, satisfying, short, dry, the sound happens right at the start, then silence",
       "takes": 3,
       "files": [
         "star1_1.wav",
         "star1_2.wav",
         "star1_3.wav"
-      ]
+      ],
+      "request_seconds": 1,
+      "trim_to": 0.8
     },
     {
       "name": "star2",
@@ -175,13 +196,15 @@
       "loop": false,
       "priority": "A",
       "when": "Second star.",
-      "prompt": "Second reward star: a single bright glockenspiel note on F sharp with a sparkle, a little brighter than the first, short, dry",
+      "prompt": "Second reward star: a single bright glockenspiel note on F sharp with a sparkle, a little brighter than the first, short, dry, the sound happens right at the start, then silence",
       "takes": 3,
       "files": [
         "star2_1.wav",
         "star2_2.wav",
         "star2_3.wav"
-      ]
+      ],
+      "request_seconds": 1,
+      "trim_to": 0.8
     },
     {
       "name": "star3",
@@ -196,7 +219,9 @@
         "star3_1.wav",
         "star3_2.wav",
         "star3_3.wav"
-      ]
+      ],
+      "request_seconds": 1,
+      "trim_to": 1.0
     },
     {
       "name": "gift",
@@ -211,7 +236,9 @@
         "gift_1.wav",
         "gift_2.wav",
         "gift_3.wav"
-      ]
+      ],
+      "request_seconds": 1,
+      "trim_to": 1.0
     },
     {
       "name": "engine",
@@ -226,7 +253,9 @@
         "engine_1.wav",
         "engine_2.wav",
         "engine_3.wav"
-      ]
+      ],
+      "request_seconds": 2,
+      "trim_to": 2.0
     },
     {
       "name": "scrape_l",
@@ -241,7 +270,9 @@
         "scrape_l_1.wav",
         "scrape_l_2.wav",
         "scrape_l_3.wav"
-      ]
+      ],
+      "request_seconds": 2,
+      "trim_to": 2.0
     },
     {
       "name": "scrape_s",
@@ -256,7 +287,9 @@
         "scrape_s_1.wav",
         "scrape_s_2.wav",
         "scrape_s_3.wav"
-      ]
+      ],
+      "request_seconds": 2,
+      "trim_to": 2.0
     },
     {
       "name": "deny",
@@ -265,13 +298,15 @@
       "loop": false,
       "priority": "B",
       "when": "Can't afford it or not allowed.",
-      "prompt": "Gentle no sound: two soft descending wooden blips, friendly not harsh, very short, cozy UI, dry",
+      "prompt": "Gentle no sound: two soft descending wooden blips, friendly not harsh, very short, cozy UI, dry, the sound happens right at the start, then silence",
       "takes": 3,
       "files": [
         "deny_1.wav",
         "deny_2.wav",
         "deny_3.wav"
-      ]
+      ],
+      "request_seconds": 1,
+      "trim_to": 0.3
     },
     {
       "name": "grab",
@@ -280,13 +315,15 @@
       "loop": false,
       "priority": "B",
       "when": "Grabbing spilled coins back.",
-      "prompt": "Quick light coin snatch, a soft whoosh into a tiny coin clink, very short, playful, dry",
+      "prompt": "Quick light coin snatch, a soft whoosh into a tiny coin clink, very short, playful, dry, the sound happens right at the start, then silence",
       "takes": 3,
       "files": [
         "grab_1.wav",
         "grab_2.wav",
         "grab_3.wav"
-      ]
+      ],
+      "request_seconds": 1,
+      "trim_to": 0.3
     },
     {
       "name": "spill",
@@ -295,13 +332,15 @@
       "loop": false,
       "priority": "B",
       "when": "Coins spilling out after a crash.",
-      "prompt": "A small handful of coins scattering onto snow, soft jingly tumble muffled by snow, short, playful, dry",
+      "prompt": "A small handful of coins scattering onto snow, soft jingly tumble muffled by snow, short, playful, dry, the sound happens right at the start, then silence",
       "takes": 3,
       "files": [
         "spill_1.wav",
         "spill_2.wav",
         "spill_3.wav"
-      ]
+      ],
+      "request_seconds": 1,
+      "trim_to": 0.6
     },
     {
       "name": "cfade",
@@ -310,13 +349,15 @@
       "loop": false,
       "priority": "B",
       "when": "Your combo is about to run out.",
-      "prompt": "Soft descending two-note warning blip on a muted glockenspiel, gentle, short, video game, dry",
+      "prompt": "Soft descending two-note warning blip on a muted glockenspiel, gentle, short, video game, dry, the sound happens right at the start, then silence",
       "takes": 3,
       "files": [
         "cfade_1.wav",
         "cfade_2.wav",
         "cfade_3.wav"
-      ]
+      ],
+      "request_seconds": 1,
+      "trim_to": 0.5
     },
     {
       "name": "cend",
@@ -325,13 +366,15 @@
       "loop": false,
       "priority": "B",
       "when": "Combo lost.",
-      "prompt": "Deflating combo: a short descending three-note toy xylophone slide with a soft puff, a little sad but cute, short, dry",
+      "prompt": "Deflating combo: a short descending three-note toy xylophone slide with a soft puff, a little sad but cute, short, dry, the sound happens right at the start, then silence",
       "takes": 3,
       "files": [
         "cend_1.wav",
         "cend_2.wav",
         "cend_3.wav"
-      ]
+      ],
+      "request_seconds": 1,
+      "trim_to": 0.6
     },
     {
       "name": "tick",
@@ -340,13 +383,15 @@
       "loop": false,
       "priority": "B",
       "when": "The last 5 seconds of a job, and some hazard timers.",
-      "prompt": "Single crisp clock tick, wooden and toy-like, very short, dry",
+      "prompt": "Single crisp clock tick, wooden and toy-like, very short, dry, the sound happens right at the start, then silence",
       "takes": 3,
       "files": [
         "tick_1.wav",
         "tick_2.wav",
         "tick_3.wav"
-      ]
+      ],
+      "request_seconds": 1,
+      "trim_to": 0.12
     },
     {
       "name": "warn",
@@ -355,13 +400,15 @@
       "loop": false,
       "priority": "B",
       "when": "A hazard is about to come in.",
-      "prompt": "Short friendly alert: two quick high soft beeps like a toy walkie-talkie, gets attention but not alarming, dry",
+      "prompt": "Short friendly alert: two quick high soft beeps like a toy walkie-talkie, gets attention but not alarming, dry, the sound happens right at the start, then silence",
       "takes": 3,
       "files": [
         "warn_1.wav",
         "warn_2.wav",
         "warn_3.wav"
-      ]
+      ],
+      "request_seconds": 1,
+      "trim_to": 0.3
     },
     {
       "name": "time",
@@ -370,13 +417,15 @@
       "loop": false,
       "priority": "B",
       "when": "A present that gives extra time.",
-      "prompt": "Magic time bonus: a quick clock wind-up followed by a bright sparkle chime in D major, short, playful, dry",
+      "prompt": "Magic time bonus: a quick clock wind-up followed by a bright sparkle chime in D major, short, playful, dry, the sound happens right at the start, then silence",
       "takes": 3,
       "files": [
         "time_1.wav",
         "time_2.wav",
         "time_3.wav"
-      ]
+      ],
+      "request_seconds": 1,
+      "trim_to": 0.8
     },
     {
       "name": "gold",
@@ -385,13 +434,15 @@
       "loop": false,
       "priority": "B",
       "when": "Gold Rush: double coins for a few seconds.",
-      "prompt": "Gold rush: a shimmering cascade of golden bells and coins rising in D major, exciting and sparkly, short, cozy, dry",
+      "prompt": "Gold rush: a shimmering cascade of golden bells and coins rising in D major, exciting and sparkly, short, cozy, dry, the sound happens right at the start, then silence",
       "takes": 3,
       "files": [
         "gold_1.wav",
         "gold_2.wav",
         "gold_3.wav"
-      ]
+      ],
+      "request_seconds": 2,
+      "trim_to": 1.2
     },
     {
       "name": "fanfare",
@@ -400,13 +451,15 @@
       "loop": false,
       "priority": "B",
       "when": "Big moments without their own sound (a Wild Ride is yours, and so on).",
-      "prompt": "Big reward fanfare: a bright toy trumpet and glockenspiel flourish in D major with a sleigh-bell shimmer, celebratory, short, dry",
+      "prompt": "Big reward fanfare: a bright toy trumpet and glockenspiel flourish in D major with a sleigh-bell shimmer, celebratory, short, dry, the sound happens right at the start, then silence",
       "takes": 3,
       "files": [
         "fanfare_1.wav",
         "fanfare_2.wav",
         "fanfare_3.wav"
-      ]
+      ],
+      "request_seconds": 2,
+      "trim_to": 1.5
     },
     {
       "name": "trophy",
@@ -415,13 +468,15 @@
       "loop": false,
       "priority": "B",
       "when": "A trophy unlocked.",
-      "prompt": "Trophy unlocked: a sparkling chime arpeggio rising in D major ending on a bell ding, proud and cozy, short, dry",
+      "prompt": "Trophy unlocked: a sparkling chime arpeggio rising in D major ending on a bell ding, proud and cozy, short, dry, the sound happens right at the start, then silence",
       "takes": 3,
       "files": [
         "trophy_1.wav",
         "trophy_2.wav",
         "trophy_3.wav"
-      ]
+      ],
+      "request_seconds": 2,
+      "trim_to": 1.5
     },
     {
       "name": "daily",
@@ -430,13 +485,15 @@
       "loop": false,
       "priority": "B",
       "when": "A daily goal completed.",
-      "prompt": "Task complete: a cheerful tick chime, two quick rising bell notes and a soft sparkle in D major, short, dry",
+      "prompt": "Task complete: a cheerful tick chime, two quick rising bell notes and a soft sparkle in D major, short, dry, the sound happens right at the start, then silence",
       "takes": 3,
       "files": [
         "daily_1.wav",
         "daily_2.wav",
         "daily_3.wav"
-      ]
+      ],
+      "request_seconds": 2,
+      "trim_to": 1.2
     },
     {
       "name": "squall",
@@ -445,13 +502,15 @@
       "loop": false,
       "priority": "B",
       "when": "A snow squall is coming.",
-      "prompt": "A gust of wintry wind rising quickly with swirling snow, a soft whoosh building up, cozy not scary, short, dry",
+      "prompt": "A gust of wintry wind rising quickly with swirling snow, a soft whoosh building up, cozy not scary, short, dry, the sound happens right at the start, then silence",
       "takes": 3,
       "files": [
         "squall_1.wav",
         "squall_2.wav",
         "squall_3.wav"
-      ]
+      ],
+      "request_seconds": 2,
+      "trim_to": 1.5
     },
     {
       "name": "flump",
@@ -460,13 +519,15 @@
       "loop": false,
       "priority": "B",
       "when": "The squall drops its snow; a snow cannon jams.",
-      "prompt": "A big soft pile of snow dropping: a heavy powdery flump, muffled and satisfying, short, dry",
+      "prompt": "A big soft pile of snow dropping: a heavy powdery flump, muffled and satisfying, short, dry, the sound happens right at the start, then silence",
       "takes": 3,
       "files": [
         "flump_1.wav",
         "flump_2.wav",
         "flump_3.wav"
-      ]
+      ],
+      "request_seconds": 1,
+      "trim_to": 0.5
     },
     {
       "name": "splat",
@@ -475,13 +536,15 @@
       "loop": false,
       "priority": "B",
       "when": "A snowball lands.",
-      "prompt": "Snowball splat on snow: a soft crunchy splat, playful, very short, dry",
+      "prompt": "Snowball splat on snow: a soft crunchy splat, playful, very short, dry, the sound happens right at the start, then silence",
       "takes": 3,
       "files": [
         "splat_1.wav",
         "splat_2.wav",
         "splat_3.wav"
-      ]
+      ],
+      "request_seconds": 1,
+      "trim_to": 0.3
     },
     {
       "name": "neighbour",
@@ -490,13 +553,15 @@
       "loop": false,
       "priority": "C",
       "when": "You cleared a neighbour's path and she walks out happy.",
-      "prompt": "A warm doorbell ding-dong in D major with a little sparkle, grateful and cozy, short, no voice, dry",
+      "prompt": "A warm doorbell ding-dong in D major with a little sparkle, grateful and cozy, short, no voice, dry, the sound happens right at the start, then silence",
       "takes": 3,
       "files": [
         "neighbour_1.wav",
         "neighbour_2.wav",
         "neighbour_3.wav"
-      ]
+      ],
+      "request_seconds": 2,
+      "trim_to": 1.2
     },
     {
       "name": "throw",
@@ -505,13 +570,15 @@
       "loop": false,
       "priority": "C",
       "when": "Someone throws a snowball.",
-      "prompt": "Quick snowball throw: a short airy whoosh with a tiny hand pat, very short, dry",
+      "prompt": "Quick snowball throw: a short airy whoosh with a tiny hand pat, very short, dry, the sound happens right at the start, then silence",
       "takes": 3,
       "files": [
         "throw_1.wav",
         "throw_2.wav",
         "throw_3.wav"
-      ]
+      ],
+      "request_seconds": 1,
+      "trim_to": 0.25
     },
     {
       "name": "whoosh",
@@ -520,13 +587,15 @@
       "loop": false,
       "priority": "C",
       "when": "A sled or skier rushing in.",
-      "prompt": "A fast sled whooshing past: a quick airy swoosh with a light snow hiss, short, dry",
+      "prompt": "A fast sled whooshing past: a quick airy swoosh with a light snow hiss, short, dry, the sound happens right at the start, then silence",
       "takes": 3,
       "files": [
         "whoosh_1.wav",
         "whoosh_2.wav",
         "whoosh_3.wav"
-      ]
+      ],
+      "request_seconds": 1,
+      "trim_to": 0.4
     },
     {
       "name": "carhorn",
@@ -535,13 +604,15 @@
       "loop": false,
       "priority": "C",
       "when": "A car or taxi honks (replaces horn.mp3; the Icebreaker's ship horn is horn.mp3 in part 1).",
-      "prompt": "Cartoon car horn: one short friendly honk like a toy car, bright, not aggressive, dry",
+      "prompt": "Cartoon car horn: one short friendly honk like a toy car, bright, not aggressive, dry, the sound happens right at the start, then silence",
       "takes": 3,
       "files": [
         "carhorn_1.wav",
         "carhorn_2.wav",
         "carhorn_3.wav"
-      ]
+      ],
+      "request_seconds": 1,
+      "trim_to": 0.4
     },
     {
       "name": "moo",
@@ -556,7 +627,9 @@
         "moo_1.wav",
         "moo_2.wav",
         "moo_3.wav"
-      ]
+      ],
+      "request_seconds": 1,
+      "trim_to": 1.0
     },
     {
       "name": "crunch",
@@ -565,13 +638,15 @@
       "loop": false,
       "priority": "C",
       "when": "The Monster Truck crushes junk.",
-      "prompt": "A monster truck crushing a small object: a chunky toy crunch with a little metal crumple, playful and satisfying, short, dry",
+      "prompt": "A monster truck crushing a small object: a chunky toy crunch with a little metal crumple, playful and satisfying, short, dry, the sound happens right at the start, then silence",
       "takes": 3,
       "files": [
         "crunch_1.wav",
         "crunch_2.wav",
         "crunch_3.wav"
-      ]
+      ],
+      "request_seconds": 1,
+      "trim_to": 0.8
     },
     {
       "name": "stomp",
@@ -580,13 +655,15 @@
       "loop": false,
       "priority": "C",
       "when": "The Mega Mech's footsteps; getting spun out by a chaser.",
-      "prompt": "A heavy toy robot footstep: a soft metallic stomp with a muffled snow thud, playful, short, dry",
+      "prompt": "A heavy toy robot footstep: a soft metallic stomp with a muffled snow thud, playful, short, dry, the sound happens right at the start, then silence",
       "takes": 3,
       "files": [
         "stomp_1.wav",
         "stomp_2.wav",
         "stomp_3.wav"
-      ]
+      ],
+      "request_seconds": 1,
+      "trim_to": 0.4
     },
     {
       "name": "jet",
@@ -601,7 +678,9 @@
         "jet_1.wav",
         "jet_2.wav",
         "jet_3.wav"
-      ]
+      ],
+      "request_seconds": 2,
+      "trim_to": 2.0
     },
     {
       "name": "fire",
@@ -616,7 +695,9 @@
         "fire_1.wav",
         "fire_2.wav",
         "fire_3.wav"
-      ]
+      ],
+      "request_seconds": 2,
+      "trim_to": 2.0
     },
     {
       "name": "beam",
@@ -631,7 +712,11 @@
         "beam_1.wav",
         "beam_2.wav",
         "beam_3.wav"
-      ]
+      ],
+      "request_seconds": 2,
+      "trim_to": 2.0
     }
-  ]
+  ],
+  "lengths": "Fish Audio takes whole seconds (1 s minimum). Ask for request_seconds; the sound plays at the very start and the rest is silence. Deliver it untrimmed: it's trimmed to trim_to when it goes into the game.",
+  "music": "Not made in Fish Audio (its generator does ambience, foley and impacts, not music). The music is made separately."
 }
