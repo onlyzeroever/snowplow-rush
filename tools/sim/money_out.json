@@ -1,0 +1,486 @@
+{
+ "conservative": {
+  "active_days_per_install": {
+   "30": 2.08,
+   "90": 2.54,
+   "365": 3.36
+  },
+  "ads_per_active_day": 0.0084,
+  "arppu_gross": 7.85,
+  "ltv": {
+   "30": 0.074,
+   "90": 0.08,
+   "365": 0.087
+  },
+  "ads": {
+   "30": 0.017,
+   "90": 0.021,
+   "365": 0.028
+  },
+  "iap": {
+   "30": 0.056,
+   "90": 0.059,
+   "365": 0.059
+  },
+  "per1000": [
+   [
+    "Free, never watches an ad",
+    594.0,
+    0.0,
+    0
+   ],
+   [
+    "Ad watcher",
+    396.0,
+    0.07,
+    28
+   ],
+   [
+    "Small buyer (~$5)",
+    7.0,
+    2.25,
+    16
+   ],
+   [
+    "Medium buyer (~$20)",
+    2.5,
+    11.25,
+    28
+   ],
+   [
+    "Big fan ($50+)",
+    0.5,
+    30.0,
+    15
+   ]
+  ],
+  "iap_spread_per1000": {
+   "p10": 22,
+   "p50": 53,
+   "p90": 104
+  },
+  "months": [
+   {
+    "installs_day": 50,
+    "dau": 168,
+    "month": 131
+   },
+   {
+    "installs_day": 300,
+    "dau": 1007,
+    "month": 784
+   },
+   {
+    "installs_day": 1000,
+    "dau": 3357,
+    "month": 2612
+   }
+  ]
+ },
+ "conservative+repeat": {
+  "active_days_per_install": {
+   "30": 2.08,
+   "90": 2.54,
+   "365": 3.36
+  },
+  "ads_per_active_day": 0.0084,
+  "arppu_gross": 9.6,
+  "ltv": {
+   "30": 0.082,
+   "90": 0.09,
+   "365": 0.1
+  },
+  "ads": {
+   "30": 0.017,
+   "90": 0.021,
+   "365": 0.028
+  },
+  "iap": {
+   "30": 0.065,
+   "90": 0.069,
+   "365": 0.072
+  },
+  "per1000": [
+   [
+    "Free, never watches an ad",
+    594.0,
+    0.0,
+    0
+   ],
+   [
+    "Ad watcher",
+    396.0,
+    0.07,
+    28
+   ],
+   [
+    "Small buyer (~$5)",
+    7.0,
+    2.25,
+    16
+   ],
+   [
+    "Medium buyer (~$20)",
+    2.5,
+    13.5,
+    34
+   ],
+   [
+    "Big fan ($50+)",
+    0.5,
+    45.0,
+    22
+   ]
+  ],
+  "iap_spread_per1000": {
+   "p10": 24,
+   "p50": 63,
+   "p90": 133
+  },
+  "months": [
+   {
+    "installs_day": 50,
+    "dau": 168,
+    "month": 150
+   },
+   {
+    "installs_day": 300,
+    "dau": 1007,
+    "month": 902
+   },
+   {
+    "installs_day": 1000,
+    "dau": 3357,
+    "month": 3006
+   }
+  ]
+ },
+ "base": {
+  "active_days_per_install": {
+   "30": 2.94,
+   "90": 3.89,
+   "365": 5.6
+  },
+  "ads_per_active_day": 0.02,
+  "arppu_gross": 10.34,
+  "ltv": {
+   "30": 0.217,
+   "90": 0.243,
+   "365": 0.277
+  },
+  "ads": {
+   "30": 0.059,
+   "90": 0.078,
+   "365": 0.112
+  },
+  "iap": {
+   "30": 0.159,
+   "90": 0.165,
+   "365": 0.165
+  },
+  "per1000": [
+   [
+    "Free, never watches an ad",
+    490.0,
+    0.0,
+    0
+   ],
+   [
+    "Ad watcher",
+    490.0,
+    0.23,
+    112
+   ],
+   [
+    "Small buyer (~$5)",
+    13.0,
+    2.8,
+    36
+   ],
+   [
+    "Medium buyer (~$20)",
+    5.4,
+    14.4,
+    78
+   ],
+   [
+    "Big fan ($50+)",
+    1.6,
+    32.0,
+    51
+   ]
+  ],
+  "iap_spread_per1000": {
+   "p10": 89,
+   "p50": 156,
+   "p90": 250
+  },
+  "months": [
+   {
+    "installs_day": 50,
+    "dau": 280,
+    "month": 416
+   },
+   {
+    "installs_day": 300,
+    "dau": 1680,
+    "month": 2496
+   },
+   {
+    "installs_day": 1000,
+    "dau": 5599,
+    "month": 8320
+   }
+  ]
+ },
+ "base+repeat": {
+  "active_days_per_install": {
+   "30": 2.94,
+   "90": 3.89,
+   "365": 5.6
+  },
+  "ads_per_active_day": 0.02,
+  "arppu_gross": 14.62,
+  "ltv": {
+   "30": 0.253,
+   "90": 0.291,
+   "365": 0.346
+  },
+  "ads": {
+   "30": 0.059,
+   "90": 0.078,
+   "365": 0.112
+  },
+  "iap": {
+   "30": 0.194,
+   "90": 0.213,
+   "365": 0.234
+  },
+  "per1000": [
+   [
+    "Free, never watches an ad",
+    490.0,
+    0.0,
+    0
+   ],
+   [
+    "Ad watcher",
+    490.0,
+    0.23,
+    112
+   ],
+   [
+    "Small buyer (~$5)",
+    13.0,
+    2.8,
+    36
+   ],
+   [
+    "Medium buyer (~$20)",
+    5.4,
+    17.6,
+    95
+   ],
+   [
+    "Big fan ($50+)",
+    1.6,
+    64.0,
+    102
+   ]
+  ],
+  "iap_spread_per1000": {
+   "p10": 109,
+   "p50": 215,
+   "p90": 379
+  },
+  "months": [
+   {
+    "installs_day": 50,
+    "dau": 280,
+    "month": 519
+   },
+   {
+    "installs_day": 300,
+    "dau": 1680,
+    "month": 3112
+   },
+   {
+    "installs_day": 1000,
+    "dau": 5599,
+    "month": 10375
+   }
+  ]
+ },
+ "hopeful": {
+  "active_days_per_install": {
+   "30": 3.96,
+   "90": 5.68,
+   "365": 8.75
+  },
+  "ads_per_active_day": 0.042,
+  "arppu_gross": 12.4,
+  "ltv": {
+   "30": 0.508,
+   "90": 0.594,
+   "365": 0.724
+  },
+  "ads": {
+   "30": 0.166,
+   "90": 0.238,
+   "365": 0.368
+  },
+  "iap": {
+   "30": 0.341,
+   "90": 0.356,
+   "365": 0.356
+  },
+  "per1000": [
+   [
+    "Free, never watches an ad",
+    386.0,
+    0.0,
+    0
+   ],
+   [
+    "Ad watcher",
+    579.0,
+    0.64,
+    368
+   ],
+   [
+    "Small buyer (~$5)",
+    21.0,
+    3.28,
+    69
+   ],
+   [
+    "Medium buyer (~$20)",
+    10.5,
+    16.4,
+    172
+   ],
+   [
+    "Big fan ($50+)",
+    3.5,
+    32.8,
+    115
+   ]
+  ],
+  "iap_spread_per1000": {
+   "p10": 239,
+   "p50": 347,
+   "p90": 488
+  },
+  "months": [
+   {
+    "installs_day": 50,
+    "dau": 438,
+    "month": 1085
+   },
+   {
+    "installs_day": 300,
+    "dau": 2626,
+    "month": 6512
+   },
+   {
+    "installs_day": 1000,
+    "dau": 8755,
+    "month": 21707
+   }
+  ]
+ },
+ "hopeful+repeat": {
+  "active_days_per_install": {
+   "30": 3.96,
+   "90": 5.68,
+   "365": 8.75
+  },
+  "ads_per_active_day": 0.042,
+  "arppu_gross": 19.9,
+  "ltv": {
+   "30": 0.605,
+   "90": 0.734,
+   "365": 0.939
+  },
+  "ads": {
+   "30": 0.166,
+   "90": 0.238,
+   "365": 0.368
+  },
+  "iap": {
+   "30": 0.439,
+   "90": 0.495,
+   "365": 0.571
+  },
+  "per1000": [
+   [
+    "Free, never watches an ad",
+    386.0,
+    0.0,
+    0
+   ],
+   [
+    "Ad watcher",
+    579.0,
+    0.64,
+    368
+   ],
+   [
+    "Small buyer (~$5)",
+    21.0,
+    3.28,
+    69
+   ],
+   [
+    "Medium buyer (~$20)",
+    10.5,
+    20.5,
+    215
+   ],
+   [
+    "Big fan ($50+)",
+    3.5,
+    82.0,
+    287
+   ]
+  ],
+  "iap_spread_per1000": {
+   "p10": 338,
+   "p50": 545,
+   "p90": 833
+  },
+  "months": [
+   {
+    "installs_day": 50,
+    "dau": 438,
+    "month": 1408
+   },
+   {
+    "installs_day": 300,
+    "dau": 2626,
+    "month": 8449
+   },
+   {
+    "installs_day": 1000,
+    "dau": 8755,
+    "month": 28165
+   }
+  ]
+ },
+ "levers": {
+  "D1 +8 pts (22->30%), D7 4->6%, D30 1.2->1.8%": 0.336,
+  "Ads seen per day 1.2->2.0": 0.188,
+  "Buyers 1.0%->2.0% of installs": 0.719,
+  "eCPM $7->$10 (more US/UK/iOS players)": 0.121,
+  "Repeat buys (passes, packs, offers) vs one-offs only": 0.151
+ },
+ "breakeven": {
+  "conservative": 0.09,
+  "conservative+repeat": 0.1,
+  "base": 0.28,
+  "base+repeat": 0.35,
+  "hopeful": 0.72,
+  "hopeful+repeat": 0.94
+ },
+ "levers_base_ltv365": 0.1
+}
