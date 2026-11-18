@@ -4056,7 +4056,7 @@ function drawMapChrome(){
   {const x=tx+5,y=by+5,c1=lv?'#9fc0e8':'#13306b';R(b,x,y,10,8,c1);R(b,x+3,y,1,8,lv?'#1d4f9a':'#ffd23f');R(b,x+6,y,1,8,lv?'#1d4f9a':'#ffd23f');R(b,x+1,y+2,1,1,'#e03a4e');R(b,x+7,y+5,2,1,'#e03a4e');}
   {const x=tx+24,y=by+5,c1=lv?'#13306b':'#9fc0e8';for(let k=0;k<3;k++){R(b,x,y+k*3,2,2,c1);R(b,x+3,y+k*3,8,2,c1);}}
   btn('vmap',tx,by,20,18,()=>{if(save.mapView!=='map'){save.mapView='map';sfx('click');persist();}});btn('vlist',tx+20,by,20,18,()=>{if(save.mapView!=='list'){save.mapView='list';sfx('click');persist();}});
-  if(save.lv.helpers>0){const ft='+'+fmtR(helperIncome())+'/S',fw=textW(ft)+17,bx=W-fw-6;panel(bx,by+3,fw,13,'#13306b','#4f8fdc');const hx=bx+4,hy=by+6;R(b,hx+2,hy,3,1,'#ffffff');R(b,hx+1,hy+1,5,1,'#ffffff');R(b,hx,hy+2,7,1,'#ffffff');R(b,hx+1,hy+3,5,4,'#3f86d6');R(b,hx+3,hy+5,1,2,'#ffd23f');text(b,ft,bx+11+(fw-11)/2,by+7,'#9fd8ff',{align:'center',outline:null});btn('gohome',bx,by+1,fw,17,()=>{sfx('click');goHome();});}}
+  if(save.lv.helpers>0){const ft='+'+fmtR(helperIncome())+'/S',fw=textW(ft)+17,bx=W-fw-6;panel(bx,by-17,fw,13,'#13306b','#4f8fdc');const hx=bx+4,hy=by-14;R(b,hx+2,hy,3,1,'#ffffff');R(b,hx+1,hy+1,5,1,'#ffffff');R(b,hx,hy+2,7,1,'#ffffff');R(b,hx+1,hy+3,5,4,'#3f86d6');R(b,hx+3,hy+5,1,2,'#ffd23f');text(b,ft,bx+11+(fw-11)/2,by-13,'#9fd8ff',{align:'center',outline:null});btn('gohome',bx,by-19,fw,17,()=>{sfx('click');goHome();});}}
 // ---- job card ----
 function drawJobInfo(){const i=jobInfo,L=LEVELS[i],st=nodeState(i),open=st==='open'||st==='fresh',avail=st!=='mystery',wild=L.area==='secret';
   b.fillStyle='rgba(11,24,56,0.72)';b.fillRect(0,0,W,H);panel(12,40,156,214,wild?'#1f1840':'#13306b',wild?'#c4a0f5':'#ffd23f');

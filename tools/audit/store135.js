@@ -32,6 +32,11 @@ let fails = 0; const ok = (c, m) => { console.log((c ? 'ok   ' : 'FAIL ') + m); 
   ok(r.adCount === 1, 'ads are counted per day');
   await EV(`(offerOpen=null,state='map',1)`); await p.waitForTimeout(300);
   ok((await p.evaluate(() => window.__UI.list().map(u => u.id || u))).includes('shopb'), 'SHOP button on the map');
+  // Alex, Nov 19: the helpers' +x/S badge covered the SHOP button
+  await EV(`(()=>{save.lv.helpers=6;offerOpen=null;storyOpen=null;dailyOpen=false;state='map';return 1;})()`); await p.waitForTimeout(300);
+  const rects = await p.evaluate(() => window.__UI.rects().filter(r => r[0] === 'shopb' || r[0] === 'gohome'));
+  const A = rects.find(r => r[0] === 'shopb'), B = rects.find(r => r[0] === 'gohome');
+  ok(A && B && !(A[1] < B[1] + B[3] && A[1] + A[3] > B[1] && A[2] < B[2] + B[4] && A[2] + A[4] > B[2]), 'SHOP button and helpers badge do not overlap ' + JSON.stringify(rects));
   ok(errs.length === 0, 'no errors ' + JSON.stringify(errs.slice(0, 3)));
   console.log(fails ? 'FAILS ' + fails : 'ALL OK'); await b.close(); process.exit(fails ? 1 : 0);
 })();

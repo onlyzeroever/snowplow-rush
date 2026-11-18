@@ -9,8 +9,10 @@ let fails = 0; const ok = (c, m) => { console.log((c ? 'ok   ' : 'FAIL ') + m); 
   const ids = p => p.evaluate(() => window.__UI.list().map(u => u.id || u));
   // no event: no banner
   let p = await page(''); await p.evaluate(c => window.__EV(c), setup); await p.waitForTimeout(400);
-  ok(!(await ids(p)).includes('evbanner'), 'no event scheduled: no banner');
-  ok((await p.evaluate(() => window.__EV('EVENTS.length'))) === 0, 'live schedule is empty');
+  const live = JSON.parse(await p.evaluate(() => window.__EV('JSON.stringify({n:EVENTS.length,on:!!evNow()})')));
+  const fileN = JSON.parse(require('fs').readFileSync(__dirname + '/../../events.json', 'utf8')).length;
+  ok(live.n === fileN, 'schedule file read: ' + live.n + ' event(s)');
+  ok((await ids(p)).includes('evbanner') === live.on, 'banner only while an event is on (' + (live.on ? 'on now' : 'none on now') + ')');
   await p.context().close();
   // test event
   p = await page('&event=blizzard'); const EV = c => p.evaluate(c => window.__EV(c), c);
