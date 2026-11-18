@@ -1,0 +1,514 @@
+{
+  "game": "Snowplow Rush",
+  "part": 1,
+  "version": "2026-11-18",
+  "palette": "Shared sound palette for the whole game: glockenspiel, celesta, marimba, sleigh bells, soft felt piano, warm toy brass, plucky bass, wooden toy percussion, and puffy snow foley. Cozy, warm, toy-like winter; never harsh, metallic, realistic or scary.",
+  "style": "One consistent set: every sound must feel like it comes from the same world. Use the shared palette. Tonal sounds in D major (the North, boss and finale music in D minor). Effects are short and dry (no big reverb, a small room at most), start instantly with no silence at the front, and contain no music or voices unless the item asks for them.",
+  "voice": "One voice for all six lines: a cheerful, bright, friendly cartoon announcer, excited but never shouty, cleared for commercial use (never a copy of a real person). Each line under 1 second, no music or effects behind it.",
+  "rights": "Use a Fish Audio paid plan: paid plans include commercial rights; the free tier's terms aren't stated.",
+  "order": "1) the 8 priority-A effects, then send those to the account owner for Alex to hear in the game before going on; 2) music_job; 3) the other 4 tracks, written with the same palette and given music_job as the reference track wherever the tool takes one; 4) the 6 voice lines; 5) the B and C effects.",
+  "deliver": {
+    "zip": "snowplow-rush-audio.zip",
+    "format": "WAV, 44.1 kHz, 16-bit. WAV is lossless, and MP3 adds silence at the start and end that breaks seamless loops. The game's final MP3s are made from these.",
+    "takes": "Deliver every take, numbered: <name>_1.wav, <name>_2.wav, <name>_3.wav. Don't pick a favourite; we choose by listening in the game.",
+    "folders": {
+      "sfx/": "effects",
+      "music/": "music",
+      "voice/": "voice lines"
+    },
+    "manifest": "manifest.csv in the zip root, one row per file: file,type,take,seconds_actual,prompt_used,notes",
+    "problems": "If the tool can't make an item exactly as written, stop and tell the account owner. Don't swap in something else."
+  },
+  "items": [
+    {
+      "name": "sweep",
+      "type": "sfx",
+      "seconds": 1.8,
+      "loop": false,
+      "priority": "A",
+      "when": "CLEAN SWEEP! at 98%: the last snow melts away in a ring and the job ends.",
+      "prompt": "Magical cozy winter sweep: a soft rising whoosh of powdery snow swirling outward, ending in a bright sparkling glockenspiel arpeggio in D major, cheerful toy-like video game reward, dry, no reverb tail",
+      "takes": 3,
+      "files": [
+        "sweep_1.wav",
+        "sweep_2.wav",
+        "sweep_3.wav"
+      ]
+    },
+    {
+      "name": "treasure",
+      "type": "sfx",
+      "seconds": 1.5,
+      "loop": false,
+      "priority": "A",
+      "when": "Finding a treasure in the snow.",
+      "prompt": "Treasure discovered: a warm music box and glockenspiel flourish rising in D major with a sparkle at the end, cozy winter, toy-like, short and joyful, no reverb tail",
+      "takes": 3,
+      "files": [
+        "treasure_1.wav",
+        "treasure_2.wav",
+        "treasure_3.wav"
+      ]
+    },
+    {
+      "name": "pow",
+      "type": "sfx",
+      "seconds": 0.25,
+      "loop": false,
+      "priority": "A",
+      "when": "The punch under a crash (plays on top of the bump sound).",
+      "prompt": "Short cartoon impact thump, soft and puffy like crashing into a big snowbank, with a quick muffled pop, toy-like and playful, not violent, very short, no reverb",
+      "takes": 3,
+      "files": [
+        "pow_1.wav",
+        "pow_2.wav",
+        "pow_3.wav"
+      ]
+    },
+    {
+      "name": "swipe",
+      "type": "sfx",
+      "seconds": 0.25,
+      "loop": false,
+      "priority": "A",
+      "when": "Jobs, Upgrades and Garage pages sliding across.",
+      "prompt": "Very short soft swipe whoosh, like a card sliding quickly across a table, airy and light, subtle UI sound, no click",
+      "takes": 3,
+      "files": [
+        "swipe_1.wav",
+        "swipe_2.wav",
+        "swipe_3.wav"
+      ]
+    },
+    {
+      "name": "bookopen",
+      "type": "sfx",
+      "seconds": 0.6,
+      "loop": false,
+      "priority": "A",
+      "when": "Opening the Treasure Book.",
+      "prompt": "Old leather-bound book opening: a soft leather creak and a gentle paper flutter, cozy, close-up, short, dry",
+      "takes": 3,
+      "files": [
+        "bookopen_1.wav",
+        "bookopen_2.wav",
+        "bookopen_3.wav"
+      ]
+    },
+    {
+      "name": "crack",
+      "type": "sfx",
+      "seconds": 0.4,
+      "loop": false,
+      "priority": "A",
+      "when": "First bump halves your combo and the bar blinks CAREFUL!",
+      "prompt": "Small cartoon ice crack: a quick crisp crackle of thin ice with a tiny falling two-note blip, light and playful, a warning not a failure, very short, dry",
+      "takes": 3,
+      "files": [
+        "crack_1.wav",
+        "crack_2.wav",
+        "crack_3.wav"
+      ]
+    },
+    {
+      "name": "testdrive",
+      "type": "sfx",
+      "seconds": 1.2,
+      "loop": false,
+      "priority": "A",
+      "when": "Grabbing a test-drive key: you jump into a Wild Ride for 15 s.",
+      "prompt": "Exciting transformation: a quick rising whoosh into a big cartoon engine rev with a bright sparkle at the top, energetic but cozy and toy-like, video game power-up, no voice, dry",
+      "takes": 3,
+      "files": [
+        "testdrive_1.wav",
+        "testdrive_2.wav",
+        "testdrive_3.wav"
+      ]
+    },
+    {
+      "name": "newmachine",
+      "type": "sfx",
+      "seconds": 1.5,
+      "loop": false,
+      "priority": "A",
+      "when": "Buying a new machine in the Garage.",
+      "prompt": "Big cozy unveiling: a chunky toy engine starting up and revving twice, then a bright glockenspiel and brass flourish in D major, triumphant but warm and toy-like, video game unlock, no voice, dry",
+      "takes": 3,
+      "files": [
+        "newmachine_1.wav",
+        "newmachine_2.wav",
+        "newmachine_3.wav"
+      ]
+    },
+    {
+      "name": "dizzy",
+      "type": "sfx",
+      "seconds": 1.0,
+      "loop": false,
+      "priority": "B",
+      "when": "After a crash, while stars circle your head.",
+      "prompt": "Cartoon dizzy stars: three or four soft twinkling bell chirps circling around, slightly wobbly pitch, light and funny, kids game, quiet",
+      "takes": 3,
+      "files": [
+        "dizzy_1.wav",
+        "dizzy_2.wav",
+        "dizzy_3.wav"
+      ]
+    },
+    {
+      "name": "confetti",
+      "type": "sfx",
+      "seconds": 0.6,
+      "loop": false,
+      "priority": "B",
+      "when": "Opening a gift: confetti and coins burst out.",
+      "prompt": "Small party popper pop followed by light paper confetti fluttering, cheerful and soft, short, kids game, no voice",
+      "takes": 3,
+      "files": [
+        "confetti_1.wav",
+        "confetti_2.wav",
+        "confetti_3.wav"
+      ]
+    },
+    {
+      "name": "glint",
+      "type": "sfx",
+      "seconds": 0.5,
+      "loop": false,
+      "priority": "B",
+      "when": "At 90%, sparkles appear on the last snow patches.",
+      "prompt": "Single soft magical glint, a tiny high bell sparkle with a shimmer, gentle, short, in D major, video game hint sound",
+      "takes": 3,
+      "files": [
+        "glint_1.wav",
+        "glint_2.wav",
+        "glint_3.wav"
+      ]
+    },
+    {
+      "name": "lookcloser",
+      "type": "sfx",
+      "seconds": 0.5,
+      "loop": false,
+      "priority": "B",
+      "when": "Tapping a treasure to open its close-up card.",
+      "prompt": "Soft magical reveal shimmer, a quick rising sparkle with a light bell, gentle, short, in D major, UI sound",
+      "takes": 3,
+      "files": [
+        "lookcloser_1.wav",
+        "lookcloser_2.wav",
+        "lookcloser_3.wav"
+      ]
+    },
+    {
+      "name": "page",
+      "type": "sfx",
+      "seconds": 0.3,
+      "loop": false,
+      "priority": "B",
+      "when": "Flipping to the next or previous treasure.",
+      "prompt": "Single paper page turn, crisp but soft, close microphone, short, dry",
+      "takes": 3,
+      "files": [
+        "page_1.wav",
+        "page_2.wav",
+        "page_3.wav"
+      ]
+    },
+    {
+      "name": "maxed",
+      "type": "sfx",
+      "seconds": 0.6,
+      "loop": false,
+      "priority": "B",
+      "when": "Tapping a maxed-out upgrade (MAXED OUT!).",
+      "prompt": "Satisfying golden ding, a bright bell strike with a short shimmer, like a completed achievement, in D major, short and clean",
+      "takes": 3,
+      "files": [
+        "maxed_1.wav",
+        "maxed_2.wav",
+        "maxed_3.wav"
+      ]
+    },
+    {
+      "name": "part",
+      "type": "sfx",
+      "seconds": 0.8,
+      "loop": false,
+      "priority": "B",
+      "when": "Picking up a Wild Ride part in a job.",
+      "prompt": "Treasure pickup with a mechanical twist: a chunky toy metal clank, then a quick bright sparkle and a rising two-note chime in D major, cozy, short, dry",
+      "takes": 3,
+      "files": [
+        "part_1.wav",
+        "part_2.wav",
+        "part_3.wav"
+      ]
+    },
+    {
+      "name": "mk2",
+      "type": "sfx",
+      "seconds": 1.4,
+      "loop": false,
+      "priority": "B",
+      "when": "Buying a machine's Mk II upgrade.",
+      "prompt": "Golden power-up: a deep engine rev rising into a shimmering gold chime chord in D major, triumphant but short, toy-like, dry",
+      "takes": 3,
+      "files": [
+        "mk2_1.wav",
+        "mk2_2.wav",
+        "mk2_3.wav"
+      ]
+    },
+    {
+      "name": "collect",
+      "type": "sfx",
+      "seconds": 1.0,
+      "loop": false,
+      "priority": "B",
+      "when": "Collecting the helpers' coins on the welcome-back card.",
+      "prompt": "A cascade of coins pouring onto a pile, bright and satisfying, ending in a soft bell ding in D major, cozy video game reward, dry",
+      "takes": 3,
+      "files": [
+        "collect_1.wav",
+        "collect_2.wav",
+        "collect_3.wav"
+      ]
+    },
+    {
+      "name": "shiphorn",
+      "type": "sfx",
+      "seconds": 1.2,
+      "loop": false,
+      "priority": "B",
+      "when": "The Icebreaker: when you buy it and when a job starts with it.",
+      "prompt": "Deep friendly ship horn, two short warm toots like a cartoon tugboat, round and soft, not scary, clean and dry",
+      "takes": 3,
+      "files": [
+        "shiphorn_1.wav",
+        "shiphorn_2.wav",
+        "shiphorn_3.wav"
+      ]
+    },
+    {
+      "name": "bookclose",
+      "type": "sfx",
+      "seconds": 0.4,
+      "loop": false,
+      "priority": "C",
+      "when": "Closing the Treasure Book.",
+      "prompt": "Book closing softly: a muffled leather thump with a light paper swish, short, dry",
+      "takes": 3,
+      "files": [
+        "bookclose_1.wav",
+        "bookclose_2.wav",
+        "bookclose_3.wav"
+      ]
+    },
+    {
+      "name": "streak",
+      "type": "sfx",
+      "seconds": 1.2,
+      "loop": false,
+      "priority": "C",
+      "when": "Claiming the daily streak reward.",
+      "prompt": "Daily reward: a quick rising run of five glockenspiel notes in D major ending on a soft chord, joyful, cozy winter, toy-like, dry",
+      "takes": 3,
+      "files": [
+        "streak_1.wav",
+        "streak_2.wav",
+        "streak_3.wav"
+      ]
+    },
+    {
+      "name": "scoop",
+      "type": "sfx",
+      "seconds": 0.8,
+      "loop": false,
+      "priority": "C",
+      "when": "The Front Loader: when you buy it and when a job starts with it.",
+      "prompt": "Toy construction loader: a short hydraulic whine lifting a bucket, then a soft chunky clunk, playful and clean, dry",
+      "takes": 3,
+      "files": [
+        "scoop_1.wav",
+        "scoop_2.wav",
+        "scoop_3.wav"
+      ]
+    },
+    {
+      "name": "icecrunch",
+      "type": "sfx",
+      "seconds": 2.0,
+      "loop": true,
+      "priority": "C",
+      "when": "Loops while the Icebreaker drives over cleared ice.",
+      "prompt": "Steady crunching of thin ice under heavy tracks, crisp crackles over a soft low rumble, even and continuous with no big hits, cozy not harsh, seamless loop",
+      "takes": 3,
+      "files": [
+        "icecrunch_1.wav",
+        "icecrunch_2.wav",
+        "icecrunch_3.wav"
+      ]
+    },
+    {
+      "name": "music_job",
+      "type": "music",
+      "seconds": 74,
+      "loop": true,
+      "priority": "A",
+      "when": "During every job (32 bars at 104 BPM).",
+      "prompt": "Upbeat playful winter game music, 104 BPM, D major, plucky bass, sleigh-bell shaker, bright glockenspiel and marimba melody, warm and fun, energetic but never stressful, no vocals, seamless loop",
+      "takes": 2,
+      "files": [
+        "music_job_1.wav",
+        "music_job_2.wav"
+      ]
+    },
+    {
+      "name": "music_menu",
+      "type": "music",
+      "seconds": 90,
+      "loop": true,
+      "priority": "B",
+      "when": "Map, Upgrades, Garage, shop (32 bars at 82 BPM).",
+      "prompt": "Cozy lo-fi winter music, 82 BPM, D major, soft electric piano, gentle bells, light vinyl crackle, warm and calm, no vocals, seamless loop",
+      "takes": 2,
+      "files": [
+        "music_menu_1.wav",
+        "music_menu_2.wav"
+      ]
+    },
+    {
+      "name": "music_north",
+      "type": "music",
+      "seconds": 74,
+      "loop": true,
+      "priority": "B",
+      "when": "Frozen North jobs and the Ice Palace (32 bars at 104 BPM).",
+      "prompt": "Adventurous winter game music, 104 BPM, D minor, driving taiko-style drums, plucked strings, icy bells, a little epic but still playful, no vocals, seamless loop",
+      "takes": 2,
+      "files": [
+        "music_north_1.wav",
+        "music_north_2.wav"
+      ]
+    },
+    {
+      "name": "music_boss",
+      "type": "music",
+      "seconds": 69,
+      "loop": true,
+      "priority": "C",
+      "when": "The 7 area boss jobs, while the chaser hunts you (32 bars at 112 BPM). One shared boss track; the Ice Palace has its own finale.",
+      "prompt": "Tense but playful chase music for a cozy winter game, 112 BPM, D minor, bouncy staccato strings, ticking woodblock, cheeky bassoon, quick sleigh bells, mischievous rather than scary, no vocals, seamless loop",
+      "takes": 2,
+      "files": [
+        "music_boss_1.wav",
+        "music_boss_2.wav"
+      ]
+    },
+    {
+      "name": "music_finale",
+      "type": "music",
+      "seconds": 80,
+      "loop": true,
+      "priority": "B",
+      "when": "The Ice Palace, the final boss job (32 bars at 96 BPM).",
+      "prompt": "Grand but cozy finale music for a winter game's last boss, 96 BPM, D minor lifting to D major in the second half, bold low strings and taiko drums, soaring glockenspiel and celesta melody, sleigh bells, toy brass, epic and triumphant rather than scary, no vocals, seamless loop",
+      "takes": 2,
+      "files": [
+        "music_finale_1.wav",
+        "music_finale_2.wav"
+      ]
+    },
+    {
+      "name": "vo_sweep",
+      "type": "voice",
+      "seconds": 1.0,
+      "loop": false,
+      "priority": "A",
+      "when": "Plays with sweep: the job auto-finishes at 98%.",
+      "prompt": "Say exactly: \"Clean sweep!\"",
+      "takes": 3,
+      "files": [
+        "vo_sweep_1.wav",
+        "vo_sweep_2.wav",
+        "vo_sweep_3.wav"
+      ]
+    },
+    {
+      "name": "vo_treasure",
+      "type": "voice",
+      "seconds": 1.0,
+      "loop": false,
+      "priority": "A",
+      "when": "Plays with treasure: a treasure found in the snow.",
+      "prompt": "Say exactly: \"Treasure!\"",
+      "takes": 3,
+      "files": [
+        "vo_treasure_1.wav",
+        "vo_treasure_2.wav",
+        "vo_treasure_3.wav"
+      ]
+    },
+    {
+      "name": "vo_goldrush",
+      "type": "voice",
+      "seconds": 1.0,
+      "loop": false,
+      "priority": "A",
+      "when": "Plays when the Gold Rush gift starts (double coins).",
+      "prompt": "Say exactly: \"Gold rush!\"",
+      "takes": 3,
+      "files": [
+        "vo_goldrush_1.wav",
+        "vo_goldrush_2.wav",
+        "vo_goldrush_3.wav"
+      ]
+    },
+    {
+      "name": "vo_combo",
+      "type": "voice",
+      "seconds": 1.0,
+      "loop": false,
+      "priority": "A",
+      "when": "Plays when a combo reaches 5.",
+      "prompt": "Say exactly: \"Combo!\"",
+      "takes": 3,
+      "files": [
+        "vo_combo_1.wav",
+        "vo_combo_2.wav",
+        "vo_combo_3.wav"
+      ]
+    },
+    {
+      "name": "vo_spun",
+      "type": "voice",
+      "seconds": 1.0,
+      "loop": false,
+      "priority": "A",
+      "when": "Plays when a boss's chaser catches you.",
+      "prompt": "Say exactly: \"Spun out!\"",
+      "takes": 3,
+      "files": [
+        "vo_spun_1.wav",
+        "vo_spun_2.wav",
+        "vo_spun_3.wav"
+      ]
+    },
+    {
+      "name": "vo_winter",
+      "type": "voice",
+      "seconds": 1.0,
+      "loop": false,
+      "priority": "A",
+      "when": "Plays when a New Winter starts.",
+      "prompt": "Say exactly: \"New winter!\"",
+      "takes": 3,
+      "files": [
+        "vo_winter_1.wav",
+        "vo_winter_2.wav",
+        "vo_winter_3.wav"
+      ]
+    }
+  ]
+}
