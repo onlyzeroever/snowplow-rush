@@ -2421,10 +2421,10 @@ function drawLoading(){if(!pendingStart)return;pendingStart.f++;const L=LEVELS[p
   panel(26,126,128,48,'#13306b','#9fd8ff');const nm=(L&&L.name)||'';text(b,nm,W/2,136,'#ffffff',{align:'center',scale:textW(nm,2)<=116?2:1});
   text(b,'GETTING THE PLOW READY',W/2,156,'#9fd8ff',{align:'center',outline:null});for(let k=0;k<3;k++)R(b,W/2-6+k*5,165,3,3,k===Math.floor(tNow*6)%3?'#ffd23f':'#4f6fa0');}
 const OVC=new Map();
-function startLevel(idx,opts){offerOpen=null;if(!(opts&&opts.challenge))save.lastJob=LEVELS[idx].id;weeklyOpen=false;storyOpen=null;jobInfo=-1;skinFor=null;ridePeek=null;rideReveal=null;outfitsOpen=false;trailsOpen=false;bookOpen=false;dailyOpen=false;winterOpen=false;shopOpen=false;trophiesOpen=false;
-  G=buildLevel(idx);P={x:G.start.x,y:G.start.y,f:2,stun:0,inv:0,bob:0,walkT:0,load:0,bumpCd:0,fr:0,frT:0};
+function startLevel(idx,opts){offerOpen=null;evOpen=false;if(!(opts&&opts.challenge))save.lastJob=LEVELS[idx].id;weeklyOpen=false;storyOpen=null;jobInfo=-1;skinFor=null;ridePeek=null;rideReveal=null;outfitsOpen=false;trailsOpen=false;bookOpen=false;dailyOpen=false;winterOpen=false;shopOpen=false;trophiesOpen=false;
+  G=evBuild(idx,opts);P={x:G.start.x,y:G.start.y,f:2,stun:0,inv:0,bob:0,walkT:0,load:0,bumpCd:0,fr:0,frT:0};
   run={time:G.def.time,earned:0,combo:0,comboProg:0,comboT:0,pending:0,pendT:0,ended:false,moved:false,snowAcc:0,res:null,sprayAcc:0,
-    squallT:G.def.squall?G.def.squall*0.6:0,squall:null,gold:0,hits:0,gifts:0,boost:save.boostNext,adUsed:false,iceShown:false,nbT:0,challenge:opts&&opts.challenge||null};
+    squallT:G.def.squall?G.def.squall*0.6:0,squall:null,gold:0,hits:0,gifts:0,boost:save.boostNext,adUsed:false,iceShown:false,nbT:0,challenge:opts&&opts.challenge||null,event:opts&&opts.event||null};
   save.boostNext=false;P.vx=0;P.vy=0;if(run.challenge&&G.driveKey)G.driveKey=null;if(run.challenge)G.part=null;if(!run.challenge&&missionOn(idx)){run.mission=LEVELS[idx].tool;run.rideT=null;G.driveKey=null;G.part=null;_tc.k='';addFloat(P.x,P.y-30,'MISSION: 2 STARS KEEPS IT','#ffd23f',2.2);}
   markReach(G);camY=clamp(P.y-VIEW_H*0.55,0,Math.max(0,G.ph-VIEW_H));particles=[];floats=[];pickups=[];paused=false;joy=null;dpad=null;settingsOpen=false;state='play';sfx('go');stopLoops();playMusic('job');musicRate(1);musicDuck(1);
   if(run.boost)addFloat(P.x,P.y-24,'BOOST! +25% SPEED','#9fd8ff',1.6);}
@@ -2458,7 +2458,52 @@ function drawOffer(){const k=offerOpen,x=14,y=70,w=152,h=168;b.fillStyle='rgba(1
     text(b,'PAY ONCE, KEEP IT FOR GOOD',W/2,y+101,'#9fc0e8',{align:'center',outline:null});
     button('ofbuy',x+26,y+116,w-52,20,'gold',SHOP.premium.price,()=>{track('offer_tap',{kind:k,choice:'buy'});offerOpen=null;shopBuyPremium();},{scale:2});}
   button('ofno',x+46,y+142,w-92,16,'navy','NOT NOW',later);}
-function overlayOpen(){return !!(ridePeek||rideReveal||settingsOpen||trophiesOpen||dailyOpen||winterOpen||adScreen||shopOpen||jobInfo>=0||skinFor||outfitsOpen||trailsOpen||bookOpen||weeklyOpen||(storyOpen&&state==='map')||(offerOpen&&state==='map'));}
+const EVENT_DEFS={
+  blizzard:{name:'BLIZZARD WEEKEND',sub:'HEAVY SNOW, DOUBLE COINS',mod:{snow:1.6,value:2},prize:{trail:'rainbow',gems:100},col:'#9fd8ff'},
+  presents:{name:'PRESENT HUNT',sub:'PRESENTS EVERYWHERE',mod:{presents:4},prize:{trail:'sparkle',gems:60},col:'#ff8fc8'}};
+const EV_STEPS=[30,80,150,230,320,420,530,650,780,950],EV_REW=[{c:2},{g:10},{c:3},{g:15},{c:4},{g:20},{c:5},{g:25},{c:8},{prize:1}];
+let EVENTS=[],evOpen=false;
+(function evLoad(){const q=new URLSearchParams(location.search).get('event');
+  if(q&&EVENT_DEFS[q]){const t=Date.now();EVENTS.push({id:'test-'+q,kind:q,start:t-1000,end:t+72*3600e3,test:true});return;}
+  try{fetch('/events.json?d='+new Date().toDateString().replace(/ /g,''),{cache:'no-store'}).then(r=>r.ok?r.json():[]).then(a=>{if(!Array.isArray(a))return;
+    for(const e of a){if(!e||!EVENT_DEFS[e.kind])continue;const st=new Date(e.start).getTime(),en=new Date(e.end).getTime();if(isFinite(st)&&isFinite(en)&&en>st)EVENTS.push({id:String(e.id||e.start),kind:e.kind,start:st,end:en});}}).catch(()=>{});}catch(e){}})();
+function evNow(){const t=Date.now();return EVENTS.find(e=>t>=e.start&&t<e.end)||null;}
+function evSave(ev){if(!save.ev||save.ev.id!==ev.id)save.ev={id:ev.id,flakes:0,got:0,runs:0};return save.ev;}
+function evJobs(ev){const open=[];LEVELS.forEach((L,i)=>{if(!L.tool&&!L.boss&&L.id!=='farm_old'&&levelOpen(i))open.push(i);});if(!open.length)return [0];
+  const top=Math.max(...open.map(i=>AREA_SEQ.indexOf(LEVELS[i].area))),pool=open.filter(i=>AREA_SEQ.indexOf(LEVELS[i].area)>=top-1);
+  let h=0;for(const ch of ev.id+ev.kind)h=(h*31+ch.charCodeAt(0))>>>0;const out=[];for(let k=0;k<pool.length&&out.length<3;k++){const i=pool[(h+k*7)%pool.length];if(!out.includes(i))out.push(i);}
+  for(const i of pool)if(out.length<3&&!out.includes(i))out.push(i);return out;}
+function evBuild(idx,opts){const ev=opts&&opts.event?EVENTS.find(e=>e.id===opts.event):null;if(!ev)return buildLevel(idx);
+  const L=LEVELS[idx],m=EVENT_DEFS[ev.kind].mod,c=Object.assign({},L);if(m.snow)c.snowfall=L.snowfall*m.snow;if(m.presents)c.presents=Math.round(L.presents*m.presents);if(m.value)c.value=L.value*m.value;
+  LEVELS[idx]=c;try{return buildLevel(idx);}finally{LEVELS[idx]=L;}}
+function evReward(k){const r=EV_REW[k];if(r.c){const a=runPay()*r.c;save.coins+=a;return '+'+fmt(a)+' COINS';}if(r.g){save.gems=(save.gems||0)+r.g;return '+'+r.g+' GEMS';}
+  const ev=EVENTS.find(e=>e.id===save.ev.id),pz=EVENT_DEFS[ev?ev.kind:'blizzard'].prize;
+  if(pz.trail&&!save.trails[pz.trail]){save.trails[pz.trail]=true;track('event_prize',{event:save.ev.id,prize:pz.trail});return 'PRIZE: '+TRAILS.find(t=>t.id===pz.trail).name+' TRAIL!';}
+  save.gems=(save.gems||0)+pz.gems;track('event_prize',{event:save.ev.id,prize:'gems'});return 'PRIZE: +'+pz.gems+' GEMS';}
+function evRun(pct,stars,allClear){const ev=EVENTS.find(e=>e.id===run.event);if(!ev)return null;const e=evSave(ev),f=Math.round(pct)+stars*10+(allClear?20:0);
+  if(!e.runs)track('event_join',{event:ev.id,kind:ev.kind});e.runs++;e.flakes+=f;const msgs=[];
+  while(e.got<EV_STEPS.length&&e.flakes>=EV_STEPS[e.got]){msgs.push(evReward(e.got));e.got++;track('event_milestone',{event:ev.id,step:e.got,flakes:e.flakes});}
+  if(msgs.length)showToast(msgs[msgs.length-1],'#ffd23f');return {f,total:e.flakes,msgs};}
+function drawEvBanner(){const ev=evNow();if(!ev||!dailyOn())return;const d=EVENT_DEFS[ev.kind],e=save.ev&&save.ev.id===ev.id?save.ev:{flakes:0,got:0},y=22,left=(ev.end-Date.now())/1000;
+  btn('evbanner',4,y,172,14,()=>{evOpen=true;sfx('click');});R(b,4,y,172,14,K);R(b,5,y+1,170,12,'#13306b');R(b,5,y+1,Math.round(170*Math.min(1,e.flakes/EV_STEPS[9])),12,'#1d4f9a');
+  b.drawImage(SPR.star,8,y+3);text(b,d.name,19,y+4,d.col,{outline:null});text(b,fmtDur(left)+' LEFT',172,y+4,'#ffffff',{align:'right',outline:null});
+  if(e.got<10&&!e.runs){R(b,169,y-2,6,6,K);R(b,170,y-1,4,4,'#e8283f');}}
+function drawEvent(){const ev=evNow();if(!ev){evOpen=false;return;}const d=EVENT_DEFS[ev.kind],e=evSave(ev),x=8,y=24,w=164,h=262;
+  b.fillStyle='rgba(11,24,56,0.82)';b.fillRect(0,0,W,H);panel(x,y,w,h,'#13306b',d.col);
+  text(b,d.name,W/2,y+7,d.col,{align:'center',scale:2});text(b,d.sub,W/2,y+23,'#ffffff',{align:'center',outline:null});text(b,'ENDS IN '+fmtDur((ev.end-Date.now())/1000),W/2,y+32,'#9fc0e8',{align:'center',outline:null});
+  // the track: 10 steps
+  const ty=y+46;R(b,x+8,ty,w-16,8,K);R(b,x+9,ty+1,w-18,6,'#0b1838');R(b,x+9,ty+1,Math.round((w-18)*Math.min(1,e.flakes/EV_STEPS[9])),6,d.col);
+  for(let k=0;k<10;k++){const px=x+9+Math.round((w-18)*EV_STEPS[k]/EV_STEPS[9])-3;R(b,px,ty+10,6,6,K);R(b,px+1,ty+11,4,4,k<e.got?'#ffd23f':k===9?'#ff8fc8':'#4f6fa0');}
+  text(b,e.flakes+' / '+EV_STEPS[9]+' FLAKES',W/2,ty+20,'#ffffff',{align:'center',outline:null});
+  const nx=e.got<10?EV_REW[e.got]:null,pz=d.prize,pzName=pz.trail&&!save.trails[pz.trail]?TRAILS.find(t=>t.id===pz.trail).name+' TRAIL':pz.gems+' GEMS';
+  text(b,nx?('NEXT AT '+EV_STEPS[e.got]+': '+(nx.c?fmt(runPay()*nx.c)+' COINS':nx.g?nx.g+' GEMS':'THE PRIZE')):'ALL STEPS DONE!',W/2,ty+30,'#9fd8ff',{align:'center',outline:null});
+  text(b,'PRIZE: '+pzName,W/2,ty+40,'#ff8fc8',{align:'center',outline:null});
+  text(b,'EVENT JOBS',x+10,ty+54,'#9fc0e8',{outline:null});
+  evJobs(ev).forEach((i,k)=>{const L=LEVELS[i],ry=ty+64+k*30;card(x+8,ry,w-16,26,'#eef3fb','#9fc0e8');text(b,L.name,x+14,ry+5,'#13306b',{outline:null});
+    text(b,(save.stars[i]||0)+' OF 3 STARS',x+14,ry+15,'#4f6fa0',{outline:null});button('evp'+k,x+w-58,ry+5,44,16,'orange','PLAY',()=>{evOpen=false;startLevelUI(i,{event:ev.id});});});
+  text(b,'FLAKES: % CLEARED + 10 A STAR',W/2,y+h-38,'#9fc0e8',{align:'center',outline:null});
+  button('evdone',W/2-36,y+h-26,72,18,'blue','DONE',()=>{evOpen=false;sfx('click');});}
+function overlayOpen(){return !!(ridePeek||rideReveal||settingsOpen||trophiesOpen||dailyOpen||winterOpen||adScreen||shopOpen||jobInfo>=0||skinFor||outfitsOpen||trailsOpen||bookOpen||weeklyOpen||(storyOpen&&state==='map')||(offerOpen&&state==='map')||(evOpen&&state==='map'));}
 let privT=0;
 function drawPrivacyCard(dt){privT=Math.min(1,privT+(dt||0.016)*3.5);const e=1-Math.pow(1-privT,3),x=6,w=W-12,h=58,y=Math.round(NAV_Y-h-6+(1-e)*70);
   btn('privbg',x,y,w,h,()=>{});panel(x,y,w,h,'#13306b','#ffd23f');b.drawImage(SPR.frost,x+6,y+5);text(b,'ANONYMOUS PLAY DATA',x+18,y+6,'#ffd23f',{outline:null});
@@ -2844,7 +2889,7 @@ function endRound(allClear){
   save.fails[idx]=stars>prev?0:(save.fails[idx]||0)+1;save.winterCoins=(save.winterCoins||0)+Math.max(0,run.earned)+bonus+timeBonus;
   dailyAdd('runs',1);if(run.hits===0)dailyAdd('nohit',1,true);dailyAdd('stars',stars,true);
   award('first');if(L.id==='driveway'&&stars===3)award('drive3');if(run.hits===0&&stars>=1)award('untouch');if(allClear)award('spotless');if(L.id==='street'&&stars===3)award('night');if(L.id==='airport'&&stars===3)award('takeoff');
-  if(stars===3)earnSkinFor(L.id);persist();}
+  if(stars===3)earnSkinFor(L.id);if(run.event)run.res.ev=evRun(pct,stars,allClear);persist();}
 
 // ---------------- DRAW: UI PRIMITIVES ----------------
 const b=mk(W,H).getContext('2d');const buf=b.canvas;b.imageSmoothingEnabled=false;
@@ -2886,6 +2931,7 @@ function draw(){const dtD=Math.min(0.05,Math.max(0,tNow-(draw.t==null?tNow:draw.
   if(bookOpen)drawBook();
   if(storyOpen&&state==='map')drawStory();
   if(offerOpen&&state==='map'&&!storyOpen)drawOffer();
+  if(evOpen&&state==='map'&&!offerOpen&&!storyOpen)drawEvent();
   if(settingsOpen)drawSettings();
   if(trophiesOpen)drawTrophies();
   if(dailyOpen)drawDaily();
@@ -3994,6 +4040,7 @@ function drawMapChrome(){
   if(dailyOn()){button('daily',114,2-hop,20,17,'red',null,()=>{ensureDaily();dailyOpen=true;sfx('click');});b.drawImage(SPR.cal,119,6-hop);if(dn)badge(127,0,''+dn);else if(dNew)badge(127,0,'!');}
   button('trophies',137,2,20,17,'gold',null,()=>{checkTrophyProg();trophiesOpen=true;trophyTab=0;sfx('click');});b.drawImage(SPR.trophy,142,6);
   button('gear',W-20,2,18,17,'blue',null,()=>{settingsOpen=true;sfx('click');});b.drawImage(SPR.gear,W-15,6);
+  drawEvBanner();
   const by=NAV_Y-22;
   const tc=treasureCount(),tNew=tc>(save.bookSeen||0);
   const boy=button('book',3,by,22,18,'purple',null,()=>{bookOpen=true;bookSel=-1;if(!save.trSeen)save.trSeen=Object.assign({},save.treasures||{});save.bookSeen=treasureCount();sfx('click');persist();})||0;
@@ -4622,8 +4669,9 @@ function drawResults(){
     const boostBtn=(x,w)=>button('rboost',x,py+148,w,16,'blue','FREE BOOST',()=>{save.boostNext=true;save.fails[G.idx]=0;persist();sfx('buy');showToast('+25% SPEED ON YOUR NEXT RUN','#9fd8ff');});
     if(canAd&&canBoost){adBtn(18,70);boostBtn(92,70);}else if(canAd)adBtn(18,144);else if(canBoost)boostBtn(18,144);
     if(canBoost)text(b,'STUCK? A BOOST IS ON US',W/2,py+140,'#9fd8ff',{align:'center',outline:null});
-    if(run.dailyDone&&dailyReadyCount()>0){b.drawImage(SPR.cal,26,py+166);text(b,'DAILY DONE! CLAIM ON JOBS',38,py+168,'#7fe08a',{outline:null});}
-    button('retry',18,py+176,46,22,'orange','RETRY',()=>startLevelUI(G.idx,run.challenge?{challenge:run.challenge}:null));if(close){const a=0.45+0.55*Math.abs(Math.sin(tNow*4));b.globalAlpha=a;R(b,16,py+174,50,1,'#ffd23f');R(b,16,py+199,50,1,'#ffd23f');R(b,16,py+174,1,26,'#ffd23f');R(b,65,py+174,1,26,'#ffd23f');b.globalAlpha=1;}button('rmap',67,py+176,46,22,'blue','JOBS',goMap);button('rupg',116,py+176,46,22,'green','UPGRADE',goUpgrades);}
+    if(r.ev){b.drawImage(SPR.star,26,py+166);text(b,'+'+r.ev.f+' FLAKES  ('+Math.min(r.ev.total,EV_STEPS[9])+'/'+EV_STEPS[9]+')',38,py+168,'#9fd8ff',{outline:null});}
+    else if(run.dailyDone&&dailyReadyCount()>0){b.drawImage(SPR.cal,26,py+166);text(b,'DAILY DONE! CLAIM ON JOBS',38,py+168,'#7fe08a',{outline:null});}
+    button('retry',18,py+176,46,22,'orange','RETRY',()=>startLevelUI(G.idx,run.challenge?{challenge:run.challenge}:run.event&&evNow()&&evNow().id===run.event?{event:run.event}:null));if(close){const a=0.45+0.55*Math.abs(Math.sin(tNow*4));b.globalAlpha=a;R(b,16,py+174,50,1,'#ffd23f');R(b,16,py+199,50,1,'#ffd23f');R(b,16,py+174,1,26,'#ffd23f');R(b,65,py+174,1,26,'#ffd23f');b.globalAlpha=1;}button('rmap',67,py+176,46,22,'blue','JOBS',goMap);button('rupg',116,py+176,46,22,'green','UPGRADE',goUpgrades);}
   if(run.mission&&t>0.4){const T4=TOOLS[toolIdx(run.mission)];panel(14,18,152,24,r.missionWon?'#1f5a2a':'#3a1d6e',r.missionWon?'#7fe08a':'#c4a0f5');
     text(b,r.missionWon?'MISSION WON!':'MISSION: 2 STARS TO KEEP IT',W/2,22,'#ffd23f',{align:'center',outline:null});text(b,r.missionWon?'THE '+T4.name+' IS YOURS':'TRY AGAIN, THE '+T4.name+' WAITS',W/2,31,'#ffffff',{align:'center',outline:null});}
   if(false){const T3=TOOLS[run.drove];b.fillStyle='rgba(11,24,56,0.6)';b.fillRect(0,0,W,H);panel(16,80,148,156,'#13306b','#ffd23f');
