@@ -2531,7 +2531,7 @@ function updatePlay(dt){
   // ice: once the snow is scraped off an ice patch, you slide
   const fi=(clamp(Math.floor(P.y/2),0,G.rows-1))*G.cols+clamp(Math.floor(P.x/2),0,G.cols-1),onIce=G.type[fi]===T_ICE&&G.depth[fi]<CLEAR_T;
   if(onIce&&(tid==='snowcat'||tid==='icebreaker')&&!run.iceShown){run.iceShown=true;addFloat(P.x,P.y-22,'TRACKS: NO SLIDING','#9fd8ff',1.2);}
-  if(tid==='ufo'){const k=Math.min(1,dt*UFO_GRIP);P.vx+=(tvx-P.vx)*k;P.vy+=(tvy-P.vy)*k;if(!run.hoverShown){run.hoverShown=true;if((save.ufoTips||0)<3){save.ufoTips=(save.ufoTips||0)+1;addFloat(G.pw/2,P.y-34,'FLOATS OVER SMALL STUFF','#7fe08a',2.6);addFloat(G.pw/2,P.y-25,'BUILDINGS BLOCK IT!','#ff8fb0',2.6);}}}
+  if(tid==='ufo'){const k=Math.min(1,dt*UFO_GRIP);P.vx+=(tvx-P.vx)*k;P.vy+=(tvy-P.vy)*k;if(!run.hoverShown){run.hoverShown=true;if((save.ufoTips||0)<3){save.ufoTips=(save.ufoTips||0)+1;addFloat(G.pw/2,P.y-34,'FLOATS OVER SMALL THINGS','#7fe08a',2.6);addFloat(G.pw/2,P.y-25,'BUILDINGS BLOCK IT!','#ff8fb0',2.6);}}}
   else if(onIce&&tid!=='snowcat'&&tid!=='icebreaker'){const k=Math.min(1,dt*1.4);P.vx+=(tvx-P.vx)*k;P.vy+=(tvy-P.vy)*k;if(!run.iceShown){run.iceShown=true;addFloat(P.x,P.y-22,'ICE! SLIPPERY','#9fd8ff',1.2);}}
   else{P.vx=tvx;P.vy=tvy;}
   if(P.stun>0&&(!onIce||tid==='ufo')){P.vx=0;P.vy=0;}

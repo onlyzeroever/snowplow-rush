@@ -42,7 +42,7 @@ rep("if(Math.abs(P.vy)>full*0.5&&b==='ob'&&P.bumpCd<=0){P.bumpCd=0.8;hit('ob');}
     "if(Math.abs(P.vy)>full*0.5&&b==='ob'&&P.bumpCd<=0){P.bumpCd=0.8;hit('ob');if(tid==='ufo')addFloat(clamp(P.x,34,G.pw-34),P.y-24,'TOO BIG!','#ff8fb0',0.9);}P.vy=tid==='ufo'?-P.vy*0.35:0;}")
 # the rule, said once at the start of the first few UFO runs
 rep("if(!run.hoverShown){run.hoverShown=true;addFloat(P.x,P.y-22,'HOVERING: IT DRIFTS!','#7fe08a',1.4);}",
-    "if(!run.hoverShown){run.hoverShown=true;if((save.ufoTips||0)<3){save.ufoTips=(save.ufoTips||0)+1;addFloat(G.pw/2,P.y-34,'FLOATS OVER SMALL STUFF','#7fe08a',2.6);addFloat(G.pw/2,P.y-25,'BUILDINGS BLOCK IT!','#ff8fb0',2.6);}}")
+    "if(!run.hoverShown){run.hoverShown=true;if((save.ufoTips||0)<3){save.ufoTips=(save.ufoTips||0)+1;addFloat(G.pw/2,P.y-34,'FLOATS OVER SMALL THINGS','#7fe08a',2.6);addFloat(G.pw/2,P.y-25,'BUILDINGS BLOCK IT!','#ff8fb0',2.6);}}")
 
 # --- buildings glow as the UFO gets close
 rep("function outlineOf(sp){",
