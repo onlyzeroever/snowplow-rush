@@ -21,8 +21,8 @@ let fails = 0; const ok = (c, m) => { console.log((c ? 'ok   ' : 'FAIL ') + m); 
   ok(honk.moved === 0 && honk.beep, 'a car waits and beeps when you are in its way ' + JSON.stringify(honk));
   // grannies
   const gr = JSON.parse(await EV(`(()=>{startLevel(LEVELS.findIndex(L=>L.id==='maple'));run.time=999;const nb=G.neighbours[0];P.x=nb.x+20;P.y=nb.y+30;floats.length=0;for(let i=0;i<5;i++)update(1/30);
-    const f=floats.find(f=>f.s==='CLEAR MY PATH, DEAR!');return JSON.stringify({asked:!!nb.asked,f:!!f,inside:f?f.x-textW(f.s)/2>=0&&f.x+textW(f.s)/2<=W:false});})()`));
-  ok(gr.asked && gr.f && gr.inside, 'a granny asks you to clear her path when you come near, and the words fit on screen ' + JSON.stringify(gr));
+    const ln=nbLine(nb),r=ln?nbBubble(nb,ln):null;return JSON.stringify({asked:!!nb.asked,f:ln==='CLEAR MY PATH, DEAR!',inside:r?r.x>=0&&r.x+r.w<=W&&Math.abs(r.tx-nb.x)<=r.w/2:false,above:r?r.y+r.h<=nb.y-14:false});})()`));
+  ok(gr.asked && gr.f && gr.inside && gr.above, 'a granny asks you to clear her path in a bubble above her head, kept on screen ' + JSON.stringify(gr));
   // posts under string lights that would hang in mid-air
   const posts = JSON.parse(await EV(`(()=>{camY=0;draw();const o=G.over.filter(o=>o.k==='lights'||o.k==='banner');return JSON.stringify(o.map(o=>[o.sx,o.spr.width,(o.posts||[]).length]));})()`));
   ok(posts.length > 0 && posts.some(o => o[2] > 0), 'string lights get a post where an end would float ' + JSON.stringify(posts));
