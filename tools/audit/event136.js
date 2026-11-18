@@ -25,7 +25,12 @@ let fails = 0; const ok = (c, m) => { console.log((c ? 'ok   ' : 'FAIL ') + m); 
   const jobs = JSON.parse(await EV(`JSON.stringify(evJobs(evNow()).map(i=>({id:LEVELS[i].id,open:levelOpen(i),boss:!!LEVELS[i].boss,ride:!!LEVELS[i].tool})))`));
   ok(jobs.length === 3 && jobs.every(j => j.open && !j.boss && !j.ride), 'event jobs are open, not bosses or ride jobs ' + JSON.stringify(jobs.map(j => j.id)));
   const st = JSON.parse(await EV(`(()=>{window.__HOLD=1;const i=evJobs(evNow())[0];startLevel(i,{event:evNow().id});return JSON.stringify({ev:run.event,snow:G.def.snowfall/LEVELS[i].snowfall,val:G.def.value/LEVELS[i].value,restored:LEVELS[i]!==G.def&&LEVELS[i].id===G.def.id,idx:G.idx===i});})()`));
-  ok(st.ev && Math.abs(st.snow - 1.6) < 0.01 && st.val === 2 && st.restored && st.idx, 'blizzard job: 60% more snow, double coins, the job itself untouched ' + JSON.stringify(st));
+  ok(st.ev && Math.abs(st.snow - 1.4) < 0.01 && st.val === 2 && st.restored && st.idx, 'blizzard job: 40% more snow, double coins, the job itself untouched ' + JSON.stringify(st));
+  // Alex, Nov 19: the blizzard has to feel like one - gusts push the machine, squalls drop snow
+  const gz = JSON.parse(await EV(`(()=>{const out={gust:G.def.gust,squall:G.def.squall,phases:{}};run.contUsed=true;run.time=99;const x0=P.x;let maxDx=0;
+    for(let i=0;i<30*14;i++){update(1/30);if(run.bz)out.phases[run.bz.phase]=1;maxDx=Math.max(maxDx,Math.abs(P.x-x0));}out.maxDx=Math.round(maxDx);out.squalls=!!run.squallT;return JSON.stringify(out);})()`));
+  ok(gz.gust === 1 && gz.squall > 0 && gz.phases.calm && gz.phases.warn && gz.phases.blow, 'blizzard has calm, warning and gust phases, plus squalls ' + JSON.stringify(gz));
+  ok(gz.maxDx >= 10, 'a gust pushes the machine sideways (' + gz.maxDx + ' px)');
   const r1 = JSON.parse(await EV(`(()=>{const g0=save.gems||0;G.cleared=Math.round(G.clearable*0.7);run.contUsed=true;run.time=0.01;update(0.05);return JSON.stringify({ended:run.ended,ev:run.res&&run.res.ev,got:save.ev.got,dg:(save.gems||0)-g0});})()`));
   ok(r1.ended && r1.ev && r1.ev.f === 70 + 10 * 2, 'flakes = % cleared + 10 a star ' + JSON.stringify(r1.ev));
   ok(r1.got === 2 && r1.dg >= 10, 'first two steps paid (coins, 10 gems)');
