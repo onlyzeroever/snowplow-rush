@@ -26,7 +26,7 @@ function tiCrack(g,S,fp){const x=S.fx.getContext('2d');for(let k=0;k<4;k++){cons
   for(let j=0;j<br;j++){let a=Math.random()*Math.PI*2,qx=px,qy=py;const len=3+((Math.random()*6)|0);for(let st=0;st<len;st++){qx+=Math.cos(a);qy+=Math.sin(a)*0.8;a+=(Math.random()-0.5)*1.2;
     const ix=Math.round(qx),iy=Math.round(qy);if(ix<0||iy<0||ix>=g.pw-1||iy>=g.ph)break;const ci=(iy>>1)*g.cols+(ix>>1);if(S.st[ci]!==1)break;
     x.fillStyle=st<3?'#1f4878':'#3a6aa6';x.fillRect(ix,iy,1,1);if(st%2===0){x.fillStyle='rgba(255,255,255,0.95)';x.fillRect(ix+1,iy,1,1);}}}}}
-MODES.thinice={name:'THIN ICE',sub:"DON'T CROSS YOUR OWN TRACKS",rule:"DON'T CROSS YOUR OWN TRACKS",col:'#7ad3ff',
+MODES.thinice={name:'THIN ICE',sub:"DON'T CROSS YOUR TRACKS",rule:"DON'T CROSS YOUR OWN TRACKS",col:'#7ad3ff',
   how:['THE FROZEN HARBOUR CRACKS WHERE','YOU DRIVE. DRIVE ON CRACKED ICE','AGAIN, OR STOP ON IT, AND IT','BREAKS. FALL IN: YOU GET TOWED.','PLAN YOUR LANES. HOLES REFREEZE.','BREAKING ICE CAN FLIP UP A FISH!'],
   post(g){const n=g.cols*g.rows,S=g.lab;S.st=new Uint8Array(n);S.t=new Float32Array(n);S.fx=mk(g.pw,g.ph);S.cq=[];S.ci=0;S.hq=[];S.hi=0;S.nh=0;
     S.keep=g.def.teach?2.0:1.4;S.thr=g.def.teach?0.75:0.62;S.thaw=g.def.teach?8:13;S.heal=g.def.teach?16:26;let ice=0;for(let i=0;i<n;i++)if(g.type[i]===T_ICE)ice++;S.ice=ice;},
@@ -98,7 +98,7 @@ MODES.digout={name:'DIG-OUT',sub:'FREE THE SNOWED-IN CARS',rule:'PLOW ROUND THE 
     else if(hz.freed&&hz.flash>0&&Math.floor(tNow*8)%2===0&&hz.state==='park')ents.push({base:hz.y+hz.h+1,draw:()=>{R(b,hz.x+1,hz.y+23,5,3,'#fff6b0');R(b,hz.x+16,hz.y+23,5,3,'#fff6b0');}});}}};
 
 // ---------- ROUND-UP (farm): stray sheep; push them into the pens ----------
-MODES.roundup={name:'ROUND-UP',sub:'PUSH THE SHEEP INTO THE PENS',rule:'PUSH THE SHEEP INTO THE PENS',col:'#c98d4a',
+MODES.roundup={name:'ROUND-UP',sub:'HERD SHEEP INTO PENS',rule:'PUSH THE SHEEP INTO THE PENS',col:'#c98d4a',
   how:['SHEEP HAVE GOT OUT. THEY RUN','FROM YOUR PLOW, SO DRIVE ROUND','BEHIND ONE AND PUSH IT TOWARD A','PEN GATE. EACH SHEEP HOME PAYS','AND ADDS TIME. ALL HOME: BONUS!'],
   post(g){const S=g.lab,rn=srng(hashS(g.def.id)+17),np=g.def.teach?1:Math.max(1,Math.min(3,Math.round(g.ph/600))),per=g.def.teach?3:2,bands=labBands(g,np);S.pens=[];S.sheep=[];S.lure=g.def.teach?34:26;
     const av=[{x:g.start.x,y:g.start.y,r:60}];
@@ -130,7 +130,7 @@ MODES.roundup={name:'ROUND-UP',sub:'PUSH THE SHEEP INTO THE PENS',rule:'PUSH THE
     for(const hz of S.sheep)if(hz.heart>0&&hz.y>top&&hz.y<bot)ents.push({base:hz.y+20,draw:()=>{const y=Math.round(hz.y-10-(1.5-hz.heart)*6);R(b,hz.x+2,y,2,1,'#ff4f7a');R(b,hz.x+5,y,2,1,'#ff4f7a');R(b,hz.x+2,y+1,5,1,'#ff4f7a');R(b,hz.x+3,y+2,3,1,'#ff4f7a');R(b,hz.x+4,y+3,1,1,'#ff4f7a');}});}};
 
 // ---------- POWER CUT (theme park): dark park; find the power boxes to light each part back up ----------
-MODES.powercut={name:'POWER CUT',sub:'TURN THE PARK LIGHTS BACK ON',rule:'FIND THE POWER BOXES',col:'#ffd23f',
+MODES.powercut={name:'POWER CUT',sub:'TURN THE LIGHTS BACK ON',rule:'FIND THE POWER BOXES',col:'#ffd23f',
   how:['THE PARK HAS LOST POWER AND IT','IS PITCH DARK. FOLLOW THE ARROW','TO EACH GLOWING POWER BOX AND','DRIVE ONTO IT: THAT PART OF THE','PARK LIGHTS UP. ALL ON: BONUS!'],
   post(g){const S=g.lab,rn=srng(hashS(g.def.id)+23),n=g.def.teach?2:3,bands=labBands(g,n);S.boxes=[];
     for(let k=0;k<n;k++){const [y0,y1]=bands[k];const av2=[{x:g.start.x,y:g.start.y,r:k===0?50:90}],p=labSpot(g,16,16,y0,y1,rn,{margin:18,xin:26,avoid:av2})||labSpot(g,16,16,y0,y1,rn,{margin:12,xin:20,avoid:av2});if(p)S.boxes.push({x:p.x+8,y:p.y+8,on:0,litT:0,y0,y1});}
@@ -182,7 +182,7 @@ MODES.slalom={name:'SLALOM',sub:'CHAIN THE FLAG GATES',rule:'DRIVE BETWEEN THE F
 // ---------- AVALANCHE (pass): siren, get into the safe zone before the wave ----------
 function avZone(){for(let k=0;k<60;k++){const p=labSpot(G,40,40,Math.max(0,camY+10),Math.min(G.ph,camY+VIEW_H-10),Math.random,{near:{x:P.x,y:P.y,r0:45,r1:105}});if(p)return {x:p.x+20,y:p.y+20,r:19};}
   for(let k=0;k<60;k++){const p=labSpot(G,40,40,0,G.ph,Math.random,{near:{x:P.x,y:P.y,r0:40,r1:160}});if(p)return {x:p.x+20,y:p.y+20,r:19};}return {x:P.x,y:P.y,r:19};}
-MODES.avalanche={name:'AVALANCHE',sub:'BEAT THE AVALANCHES TO SAFETY',rule:'GET TO THE SAFE ZONE IN TIME',col:'#ff6a5a',
+MODES.avalanche={name:'AVALANCHE',sub:'BEAT THE WAVE TO SAFETY',rule:'GET TO THE SAFE ZONE IN TIME',col:'#ff6a5a',
   how:['NOW AND THEN THE MOUNTAIN LETS','GO. WHEN THE SIREN SOUNDS, DRIVE','INTO THE SAFE ZONE BEFORE THE','WAVE HITS, OR GET BURIED. THE','WAVE DUMPS FRESH SNOW: MORE COINS!'],
   post(g){g.lab.first=g.def.teach?13:9;g.lab.every=g.def.teach?999:20;},
   tick(dt,tid,L){const S=G.lab;let A=L.av;if(!A)A=L.av={ph:'calm',t:S.first,n:0,safe:0,buried:0};
@@ -206,7 +206,7 @@ MODES.avalanche={name:'AVALANCHE',sub:'BEAT THE AVALANCHES TO SAFETY',rule:'GET 
   screen(){const A=run.lab&&run.lab.av;if(!A||A.ph!=='warn')return;if(Math.floor(tNow*6)%2){panel(16,VIEW_Y+20,148,15,'#5c0e1e','#ff6a5a');text(b,'AVALANCHE! GET TO SAFETY',W/2,VIEW_Y+24,'#ffffff',{align:'center',outline:null});}if(A.z)labArrow(A.z.x,A.z.y,'#7fe08a');}};
 
 // ---------- LOST PENGUINS (north): fog; find chicks by their peeps, lead them home in a line ----------
-MODES.penguins={name:'LOST PENGUINS',sub:'LEAD THE CHICKS HOME IN THE FOG',rule:'FIND CHICKS, LEAD THEM HOME',col:'#9fd8ff',
+MODES.penguins={name:'LOST PENGUINS',sub:'LEAD THE CHICKS HOME',rule:'FIND CHICKS, LEAD THEM HOME',col:'#9fd8ff',
   how:['PENGUIN CHICKS ARE LOST IN THE','FOG. FOLLOW THEIR PEEPS, DRIVE','UP TO ONE AND IT FOLLOWS YOU.','LEAD THE LINE TO THE NEST: MORE','AT ONCE PAYS MORE. CRASH? THEY RUN.'],
   post(g){const S=g.lab,rn=srng(hashS(g.def.id)+41),n=g.def.teach?3:5;const ne=labSpot(g,30,22,0,g.ph,rn,{near:{x:g.start.x,y:g.start.y,r0:30,r1:80},margin:4});
     S.nest=ne?{x:ne.x+15,y:ne.y+11}:{x:g.start.x,y:clamp(g.start.y+(g.start.y<g.ph/2?50:-50),20,g.ph-20)};const bands=labBands(g,n);S.chicks=[];

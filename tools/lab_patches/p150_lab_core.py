@@ -124,14 +124,14 @@ function drawLab(){if(labReopen&&!overlayOpen()&&!pendingStart){labReopen=false;
   b.fillStyle='rgba(11,24,56,0.88)';b.fillRect(0,0,W,H);panel(6,20,168,288,'#13306b','#c4a0f5');
   if(labPick==null){text(b,'PROTOTYPE LAB',W/2,27,'#c4a0f5',{align:'center',scale:2});
     button('labt0',14,42,74,14,labTab===0?'purple':'navy','EVENTS',()=>{labTab=0;sfx('click');});button('labt1',92,42,74,14,labTab===1?'purple':'navy','AREA TWISTS',()=>{labTab=1;sfx('click');});
-    const rows=labTab===0?LAB_EV.filter(k=>EVENT_DEFS[k]).map(k=>({k,name:EVENT_DEFS[k].name,sub:EVENT_DEFS[k].sub,col:EVENT_DEFS[k].col})):Object.keys(TWISTS).map(a=>{const M=MODES[TWISTS[a]]||{};return {k:'tw:'+a,name:M.name||a,sub:(AREAS&&AREAS[a]&&AREAS[a].name||a.toUpperCase())+': '+(M.sub||''),col:M.col||'#ffffff'};});
-    rows.forEach((r,n)=>{const y=60+n*19;card(12,y,156,17,'#eef3fb',r.col);text(b,r.name,18,y+3,'#13306b',{outline:null});text(b,r.sub,18,y+10,'#5a6b8c',{outline:null});btn('labr'+n,12,y,156,17,()=>{labPick=r.k;sfx('click');});});
-    button('labsz',14,270,152,14,labSizeNew()?'green':'grey','PLOW SIZES: '+(labSizeNew()?'NEW (SMALLER)':'OLD (LIVE)'),()=>{save.labSize=labSizeNew()?'old':'new';vcache.clear();_tc.k='';persist();sfx('click');});
+    const rows=labTab===0?LAB_EV.filter(k=>EVENT_DEFS[k]).map(k=>({k,name:EVENT_DEFS[k].name,sub:EVENT_DEFS[k].sub,col:EVENT_DEFS[k].col})):Object.keys(TWISTS).map(a=>{const M=MODES[TWISTS[a]]||{};return {k:'tw:'+a,name:M.name||a,area:(AREAS&&AREAS[a]&&AREAS[a].name||a.toUpperCase()),sub:M.sub||'',col:M.col||'#ffffff'};});
+    rows.forEach((r,n)=>{const y=60+n*19;card(12,y,156,17,'#eef3fb',r.col);text(b,r.name,18,y+3,'#13306b',{outline:null});if(r.area)text(b,r.area,164,y+3,'#8a9ab8',{align:'right',outline:null});text(b,r.sub,18,y+10,'#5a6b8c',{outline:null});btn('labr'+n,12,y,156,17,()=>{labPick=r.k;sfx('click');});});
+    {const m=labSizeMode();button('labsz',14,270,152,14,m==='old'?'grey':m==='small'?'blue':'green',m==='small'?'SIZES: SMALL - NARROW BLADES':m==='old'?'SIZES: OLD - AS LIVE':'SIZES: NEW - FOLDING WINGS',()=>{save.labSize=m==='new'?'small':m==='small'?'old':'new';vcache.clear();_tc.k='';persist();sfx('click');});}
     button('labclose',62,289,56,14,'grey','CLOSE',()=>{labOpen=false;sfx('click');});return;}
   const tw=labPick.startsWith('tw:'),a=tw?labPick.slice(3):null,mk2=tw?TWISTS[a]:(EVENT_DEFS[labPick].mod.mode||null),M=mk2?MODES[mk2]:null,d=tw?M:EVENT_DEFS[labPick];
   text(b,d.name,W/2,28,d.col,{align:'center',scale:2});text(b,tw?'AREA TWIST: '+((AREAS&&AREAS[a]&&AREAS[a].name)||a.toUpperCase()):'WEEKEND EVENT',W/2,44,'#9fc0e8',{align:'center',outline:null});
   const lines=(M&&M.how)||LAB_HOW[labPick]||[d.sub];lines.forEach((l,n)=>text(b,l,W/2,55+n*8,'#ffffff',{align:'center',outline:null}));
-  const yj=58+lines.length*8+4;text(b,tw?'ITS JOBS (THE FIRST TEACHES IT), THEN 2 ELSEWHERE':'PICK A JOB',W/2,yj,'#ffd23f',{align:'center',outline:null});
+  const yj=58+lines.length*8+4;text(b,tw?'ITS 4 JOBS + 2 ELSEWHERE':'PICK A JOB',W/2,yj,'#ffd23f',{align:'center',outline:null});
   const jobs=(tw?twistJobs(a).concat((TW_ALSO[mk2]||[]).map(id=>LEVELS.findIndex(L=>L.id===id))):(LAB_JOBS[labPick]||[]).map(id=>LEVELS.findIndex(L=>L.id===id))).filter(i=>i>=0).slice(0,6);
   jobs.forEach((i,n)=>{const L=LEVELS[i],y=yj+10+n*22;card(14,y,152,20,'#eef3fb',n>=4&&tw?'#c4a0f5':'#9fc0e8');text(b,L.name,20,y+4,'#13306b',{outline:null});text(b,(AREAS&&AREAS[L.area]&&AREAS[L.area].name)||L.area.toUpperCase(),20,y+11,'#5a6b8c',{outline:null});
     button('labj'+n,124,y+3,38,14,'green','PLAY',()=>labStart(i,tw?{twist:a}:{event:'lab-'+labPick},tw?null:labPick));});
