@@ -1,6 +1,6 @@
 // Bot playtest on every build: plays jobs for real inside the game (real hazards, real timer, real machine physics),
 // stepped faster than real time with a fixed random seed, so two builds can be compared run for run.
-//   node tools/audit/botplay.js [jobs=all|id,id] [workers=3] [lv=3] [out=/tmp/botplay.json] [baseline=tools/audit/bot_baseline.json] [machines=all|entry] [seeds=1]
+//   node tools/audit/botplay.js [jobs=all|id,id] [workers=3] [lv=3] [out=/tmp/botplay.json] [baseline=tools/audit/bot_baseline.json] [machines=all|entry|id,id (the same machines on every non-ride job)] [seeds=1]
 // Busy later jobs swing a lot from one set of random numbers to the next, so compare builds on the median of 3 seeds (seeds=3).
 // Every build: machines=entry (~125 runs, ~4 min). Before a release or after big changes: all (~560 runs, ~20 min on 2 CPUs).
 // For each job: the area's entry machine, the next two, the Icebreaker and the UFO (Wild Ride jobs: their own ride).
@@ -9,7 +9,7 @@ const { chromium } = require('/opt/npm-tools/node_modules/playwright');
 const fs = require('fs');
 const arg = (i, d) => (process.argv[i] === undefined || process.argv[i] === '' ? d : process.argv[i]);
 const JOBS = arg(2, 'all'), WORKERS = +arg(3, 3), MACH = arg(7, 'all'), SEEDS = +arg(8, 1), LV = arg(4, 'arrive'), OUT = arg(5, '/tmp/botplay.json'), BASE = arg(6, __dirname + '/bot_baseline.json');
-const URL = 'http://127.0.0.1:8765/index6.html?test=1';
+const URL = 'http://127.0.0.1:8765/' + (process.env.PAGE || 'index6.html') + '?test=1' + (process.env.QS ? '&' + process.env.QS : '');
 // the same job and machine always get the same random numbers, whatever else is in the run
 // upgrade levels a typical player has on arrival (matches the skip-ahead test saves: themepark 4, ski 6, pass 4, north 6)
 const ARRIVE_LV = { suburbs: 1, farm: 2, city: 3, themepark: 4, harbour: 4, ski: 6, pass: 4, north: 6 };
@@ -126,7 +126,7 @@ const PLAY = ([jobId, toolId, lv, seed, AVOID]) => {
     areas.forEach((a, k) => { if (ARRIVE[a] && T.includes(ARRIVE[a])) entry[a] = T.indexOf(ARRIVE[a]); else if (k && entry[a] <= 0) entry[a] = Math.max(0, entry[areas[k - 1]]); });
     R.LEVELS.forEach(L => { if (L.id === 'farm_old') return; if (JOBS !== 'all' && !JOBS.split(',').includes(L.id)) return;
       let ms; if (L.tool) ms = [L.tool]; else { const e = Math.max(0, entry[L.area]); ms = [...new Set([e, e + 1, e + 2, T.indexOf('icebreaker'), T.indexOf('ufo')].filter(x => x >= 0 && x < T.length))].map(x => T[x]); }
-      (MACH === 'entry' ? ms.slice(0, 1) : ms).forEach(m => out.push([L.id, m, L.area])); });
+      (MACH === 'entry' ? ms.slice(0, 1) : MACH === 'all' ? ms : (L.tool ? [] : MACH.split(',').filter(m => T.includes(m)))).forEach(m => out.push([L.id, m, L.area])); });
     return { runs: out, entry }; }, [JOBS, MACH]);
   await p0.context().close();
   console.log('runs', plan.runs.length, 'entry machine per area', JSON.stringify(plan.entry));
