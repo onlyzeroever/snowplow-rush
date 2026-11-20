@@ -236,11 +236,11 @@ MODES.snowroll={name:'SNOWBALL ROLL',sub:'GROW A GIANT SNOWBALL',rule:'PUSH IT, 
 // ---------- TIME ATTACK: checkpoint run ----------
 MODES.timeattack={name:'TIME ATTACK',sub:'CHECKPOINT TO CHECKPOINT',rule:'REACH EACH CHECKPOINT IN TIME',bonus:'REACH THE FINISH: GOLD GIFT',arrows:1,col:'#7fe08a',
   how:['THE CLOCK IS SHORT. EVERY','CHECKPOINT YOU CROSS ADDS TIME','AND SHOWS YOUR SPLIT AGAINST','YOUR BEST RUN. REACH THE FINISH','FOR A BONUS. PLOW ON THE WAY!'],
-  post(g){const S=g.lab,st=g.start.y,yT=50,yB=g.ph-50,down=st<g.ph/2,v=Math.max(30,moveSpeed()*0.6),legs=[];let y=st,dir=down?1:-1,tot=0;
+  post(g){const S=g.lab,st=g.start.y,yT=50,yB=g.ph-50,down=st<g.ph/2,v=Math.max(30,moveSpeed()*0.75),legs=[];let y=st,dir=down?1:-1,tot=0;
     while(tot<900||!legs.length){const end=dir>0?yB:yT,len=Math.abs(end-y);if(len<40&&legs.length)break;legs.push({y0:y,y1:end,dir,len});tot+=len;y=end;dir=-dir;if(legs.length>6)break;}
     const n=Math.max(3,Math.min(10,Math.round((tot-80)/280))),at=d=>{let a=d;for(const L2 of legs){if(a<=L2.len)return {y:Math.round(L2.y0+L2.dir*a),dir:L2.dir};a-=L2.len;}const L3=legs[legs.length-1];return {y:L3.y1,dir:L3.dir};};
     S.cps=[];for(let k=1;k<=n;k++){const q=at(80+(tot-80)*k/n-(k===n?6:0));S.cps.push({y:q.y,dir:q.dir,st:0,rd:80+(tot-80)*k/n});}
-    S.seg=S.cps.map((c,k)=>{const prev=k?S.cps[k-1]:{rd:0,dir:down?1:-1};return (c.rd-prev.rd)/v+2+(c.dir!==prev.dir?1.5:0);});g.def.time=Math.round(S.seg[0]+5);S.down=down;},
+    S.seg=S.cps.map((c,k)=>{const prev=k?S.cps[k-1]:{rd:0,dir:down?1:-1};return (c.rd-prev.rd)/v+1.5+(c.dir!==prev.dir?1.5:0);});g.def.time=Math.round(S.seg[0]+5);S.down=down;},
   tick(dt,tid,L){const S=G.lab;if(!S.cps)return;if(L.k==null){L.k=0;L.py=P.y;L.e=0;L.lastTick=99;}L.e+=dt;
     const c=S.cps[L.k];if(c&&L.py!==P.y&&(L.py-c.y)*(P.y-c.y)<=0&&Math.sign(P.y-L.py)===c.dir){c.st=1;c.e=L.e;const best=((save.labTA||{})[G.def.id]||[]),last=L.k===S.cps.length-1,diff=best[L.k]!=null?L.e-best[L.k]:null;c.diff=diff;
       if(!last){const add=Math.round(S.seg[L.k+1]*10)/10;run.time+=add;addFloat(P.x,P.y-30,'CHECKPOINT! +'+add.toFixed(1)+'S','#7fe08a',1.3);sfx('time');sfx('combo',0,{rate:1+L.k*0.06});labRing(P.x,P.y,18);}
