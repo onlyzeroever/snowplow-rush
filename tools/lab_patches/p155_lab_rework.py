@@ -201,8 +201,8 @@ MODES.avalanche={name:'AVALANCHE',sub:'OUTRUN THE AVALANCHE',rule:'SIREN? DRIVE 
     if(A.buried>0){A.buried-=dt;P.vx=P.vy=0;if(A.buried<=0)addFloat(P.x,P.y-28,'DUG OUT!','#ffffff',0.9);}
     if(A.ph==='calm'){A.t-=dt;if(A.t<=0&&run.time>8){A.ph='warn';A.t=A.tt=G.def.teach?4.5:3.5;A.sir=0;addFloat(P.x,P.y-32,'AVALANCHE!','#ff6a5a',1.4);}}
     else if(A.ph==='warn'){A.t-=dt;A.sir-=dt;if(A.sir<=0){A.sir=0.6;sfx('warn',0,{rate:0.75,vol:0.6});}shake=Math.max(shake,0.03+0.08*(1-A.t/A.tt));
-      if(A.t<=0){A.ph='wave';A.fy=Math.max(4,camY-20);A.y0=A.fy;A.res=0;sfx('squall');sfx('stomp');}}
-    else if(A.ph==='wave'){A.fy+=S.spd*dt;shake=Math.max(shake,0.1+0.1*Math.max(0,1-Math.abs(A.fy-P.y)/160));
+      if(A.t<=0){A.ph='wave';A.fy=Math.max(4,camY-20);A.y0=A.fy;A.res=0;A.spd=clamp(moveSpeed()*(G.def.teach?0.72:0.85),36,96);sfx('squall');sfx('stomp');}}
+    else if(A.ph==='wave'){A.fy+=(A.spd||S.spd)*dt;shake=Math.max(shake,0.1+0.1*Math.max(0,1-Math.abs(A.fy-P.y)/160));
       for(let q=0;q<7;q++){const x=rnd(4,G.pw-4),y=A.fy-rnd(0,24);if(y>2&&y<G.ph-2&&!avShelter(x,y))addSnowCircle(G,x,y,rnd(5,10),rnd(0.4,0.7));}
       const safe=avShelter(P.x,P.y);
       if(!A.res&&A.fy>=P.y-8&&!safe){A.res=1;A.n++;A.row=0;A.buried=2;P.stun=Math.max(P.stun,2);P.inv=Math.max(P.inv,2.6);P.vx=P.vy=0;shake=0.45;buzz(80);sfx('stomp');addFloat(P.x,P.y-32,'BURIED!','#ff6a5a',1.5);if(run.combo>=2){run.combo=0;run.comboProg=0;sfx('cend');}addSnowCircle(G,P.x,P.y,22,0.7);}

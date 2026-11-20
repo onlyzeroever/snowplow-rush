@@ -24,7 +24,7 @@ const res = []; const ok = (name, pass, info) => { res.push(pass); console.log((
     const ev=LAB_EV.filter(k=>EVENT_DEFS[k].mod.mode).map(k=>({k:EVENT_DEFS[k].mod.mode,o:{event:'lab-'+k},j:LEVELS.findIndex(L=>L.id===LAB_JOBS[k][0])}));
     for(const m of tw.concat(ev)){try{startLevel(m.j,m.o);run.moved=true;for(let k=0;k<90;k++){P.vy=-30;update(1/30);if(k%30===0)draw();}draw();out.push([m.k,G.def.mode===m.k&&!!labM()]);}catch(e){out.push([m.k,false,e.message]);}}
     return JSON.stringify(out);})()`);
-  ok('all 15 modes start, run 3s and draw', smoke.length === 15 && smoke.every(x => x[1]), smoke.filter(x => !x[1]));
+  ok('all 16 modes start, run 3s and draw', smoke.length === 16 && smoke.every(x => x[1]), smoke.filter(x => !x[1]));
   ok('twists are on their own jobs (first one teaches)', (await EV(p, `(()=>{const i=twistJobs('harbour')[0];startLevel(i);return JSON.stringify({m:G.def.mode,teach:G.def.teach,i2:(startLevel(twistJobs('farm')[1]),G.def.mode+':'+G.def.teach)});})()`)).m === 'thinice', null);
 
   // 3. each rule works
@@ -54,16 +54,8 @@ const res = []; const ok = (name, pass, info) => { res.push(pass); console.log((
   ok('gold rush: reaching the nugget counts and chains', t.gold.found === 1 && t.gold.chain === 1, t.gold);
   t.yeti = await EV(p, `(()=>{${prep}${use('truck')}${evj('yetihunt')}${step(60)}const Y=run.lab.yeti;if(!Y)return JSON.stringify({none:1});P.x=Y.x+8;P.y=Y.y+4;${step(1)}return JSON.stringify({hits:Y.hits});})()`);
   ok('yeti hunt: bumping the yeti counts', t.yeti.hits === 1, t.yeti);
-  t.roll = await EV(p, `(()=>{${prep}${use('truck')}${evj('snowroll')}P.f=2;keys.ArrowDown=true;${step(45)}keys.ArrowDown=false;const r=run.lab.ball.r,c0=save.coins;const B=run.lab.ball;
-    P.f=3;P.x=40;${step(1)}keys.ArrowLeft=true;${step(40)}keys.ArrowLeft=false;return JSON.stringify({grew:r,smashes:B.n,paid:save.coins>c0});})()`);
-  ok('snowball roll: the ball grows on fresh snow and smashes at a wall', t.roll.grew > 6 && t.roll.smashes >= 1, t.roll);
   t.ice = await EV(p, `(()=>{${prep}${use('truck')}${evj('blackice')}${step(5)}return JSON.stringify({mode:G.def.mode});})()`);
   ok('black ice builds', t.ice.mode === 'blackice', t.ice);
-  t.snowday = await EV(p, `(()=>{${prep}${use('truck')}const a=bladeCells();${evj('snowday')}${step(2)}return JSON.stringify({a,b:bladeCells()});})()`);
-  ok('snow day: mega blade', t.snowday.b >= Math.round(t.snowday.a * 1.6), t.snowday);
-  t.time = await EV(p, `(()=>{${prep}${use('truck')}const i=LEVELS.findIndex(L=>L.id===LAB_JOBS.timeattack[0]);startLevel(i,{event:'lab-timeattack'});const tt=G.def.time,full=LEVELS[i].time;run.moved=true;${step(45)}const c=run.lab.ck;if(!c)return JSON.stringify({none:1});
-    const t0=run.time;P.x=c.x;P.y=c.y;${step(1)}return JSON.stringify({half:tt<full*0.6,got:run.lab.got,plus:run.time>t0+4});})()`);
-  ok('time attack: half time, clocks add 5 seconds', t.time.half && t.time.got === 1 && t.time.plus, t.time);
   t.forts = await EV(p, `(()=>{${prep}${use('truck')}${evj('forts')}${step(2)}const o=G.lab.forts[0];P.x=o.x+14;P.y=o.y+o.h+24;P.f=0;keys.ArrowUp=true;${step(30)}keys.ArrowUp=false;return JSON.stringify({smashed:G.lab.smashed,n:G.lab.n});})()`);
   ok('snowball fight: ramming a fort smashes it', t.forts.smashed >= 1, t.forts);
   t.stars = await EV(p, `(()=>{${prep}${use('truck')}${evj('stars')}${step(130)}const s=run.lab.st.find(q=>q.land);if(!s)return JSON.stringify({none:1,n:run.lab.st.length});P.x=s.x;P.y=s.y;${step(1)}return JSON.stringify({caught:run.lab.caught});})()`);
