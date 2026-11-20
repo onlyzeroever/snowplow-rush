@@ -12,7 +12,7 @@ def rep(a,b_,cnt=1):
 #  4. Collision boxes 1-4px tighter than the art for the long machines (bumps feel fair; the art may kiss a wall).
 rep("function bladeCells(t){t=t||tool();return Math.min(80,Math.round(t.width*(1+mspec(t.id).sizePer*(chal()||t.ride?0:mLv(t.id).size))));}",
 """function bladeRaw(t){t=t||tool();return Math.min(80,Math.round(t.width*(1+mspec(t.id).sizePer*(chal()||t.ride?0:mLv(t.id).size))));}
-const LABQS=(()=>{try{return new URLSearchParams(location.search);}catch(e){return new Map();}})(),LABCURVE=parseFloat(LABQS.get('labcurve'))||0.45,LABTRIM=LABQS.get('labtrim')!=='0',LABFOLD=LABQS.get('labfold')!=='0';
+const LABQS=(()=>{try{return new URLSearchParams(location.search);}catch(e){return new Map();}})(),LABCURVE=parseFloat(LABQS.get('labcurve'))||0.45,LABTRIM=LABQS.get('labtrim')!=='0',LABFOLD=LABQS.get('labfold')==='1';
 function sizeCurve(px){return px<=64?px:64+(px-64)*LABCURVE;}
 function bladeCells(t){t=t||tool();let c=bladeRaw(t);if(labSizeSmall()&&!isKidTool(t.id))c=Math.round(sizeCurve(c*2)/2);
   if(state==='play'&&G&&G.def&&G.def.mode==='snowday')c=Math.round(c*1.7);return c;}

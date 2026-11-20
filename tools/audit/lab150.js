@@ -79,8 +79,8 @@ const res = []; const ok = (name, pass, info) => { res.push(pass); console.log((
   const sz = await EV(p, `(()=>{${prep}${use('icebreaker')}const out={};for(const m of ['old','new','small']){save.labSize=m;startLevel(LEVELS.findIndex(L=>L.id==='shops'));run.moved=true;out[m]={blade:bladeCells()*2,fp:footprint('icebreaker',0,0,0).w+'x'+footprint('icebreaker',0,0,0).h,comp:+sizeComp().toFixed(2)};}
     save.labSize='new';startLevel(LEVELS.findIndex(L=>L.id==='shops'));run.moved=true;P.f=0;let fold=null;for(let y=60;y<G.ph-60&&!fold;y+=8)for(let x=30;x<G.pw-30;x+=6){P.x=x;P.y=y;if(blockedBy(footprint('icebreaker',x,y,0)))continue;wingUpdate('icebreaker',1);if(P.wing&&(P.wing.n<P.wing.half||P.wing.p<P.wing.half)){fold={x,y,n:P.wing.n,p:P.wing.p,half:P.wing.half};break;}}
     out.fold=fold;return JSON.stringify(out);})()`);
-  ok('plow sizes: NEW keeps the blade, tightens the body box, folds the wings at walls; SMALL narrows the blade and pays more per snow',
-    sz.new.blade === sz.old.blade && sz.new.comp === 1 && sz.new.fp !== sz.old.fp && !!sz.fold && sz.small.blade < sz.old.blade && sz.small.comp > 1 && sz.old.comp === 1, sz);
+  ok('plow sizes: NEW keeps the blade (no folding: Alex, Nov 20), tightens the body box; SMALL narrows the blade and pays more per snow',
+    sz.new.blade === sz.old.blade && sz.new.comp === 1 && sz.new.fp !== sz.old.fp && !sz.fold && sz.small.blade < sz.old.blade && sz.small.comp > 1 && sz.old.comp === 1, sz);
 
   // 5. the lab screen
   const ui = await EV(p, `(()=>{state='map';labOpen=true;labPick=null;labTab=0;ui.length=0;draw();const a=ui.filter(u=>/^labr/.test(u.id)).length;labTab=1;ui.length=0;draw();const c=ui.filter(u=>/^labr/.test(u.id)).length;
