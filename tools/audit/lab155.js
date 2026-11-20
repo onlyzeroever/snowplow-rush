@@ -41,12 +41,12 @@ const res = []; const ok = (name, pass, info) => { res.push(pass); console.log((
   const herd = await EV(`(()=>{${go('tractor', 'farm')}const S=G.lab,out=[];for(const s of S.sheep){const pn=S.pens[0];
       // open ground for the test: put the sheep 120px straight below/above the pen gate, plow behind it, drive at the pen
       const dir=pn.cy<G.ph/2?1:-1;s.x=pn.cx-4;s.y=(dir>0?pn.y+pn.h:pn.y)+dir*120;s.vx=s.vy=0;P.x=pn.cx;P.y=s.y+3+dir*34;P.f=dir>0?0:2;const d0=Math.hypot(s.x+4-pn.cx,s.y+3-pn.cy);
-      for(let k=0;k<240&&!s.penned;k++){P.vx=0;P.vy=-dir*38;P.y-=dir*38/30;update(1/30);if(Math.abs(P.y-(pn.cy))<pn.h/2+10)break;}out.push({d0:Math.round(d0),d1:Math.round(Math.hypot(s.x+4-pn.cx,s.y+3-pn.cy)),penned:!!s.penned});break;}
+      ${step(1)}{const br=bladeRect(TOOLS[useIdx()].id,P.x,P.y,P.f,bladeCells()*2);s.y=dir>0?br.y-14:br.y+br.h+6;}if(dir>0)keys.ArrowUp=true;else keys.ArrowDown=true;for(let k=0;k<240&&!s.penned;k++){update(1/30);}keys.ArrowUp=keys.ArrowDown=false;out.push({d0:Math.round(d0),d1:Math.round(Math.hypot(s.x+4-pn.cx,s.y+3-pn.cy)),penned:!!s.penned});break;}
     // no wander: plow far away, sheep stays put
     const s=S.sheep[1];P.x=G.start.x;P.y=G.start.y;const x0=s.x,y0=s.y;${step(150)}const still=Math.hypot(s.x-x0,s.y-y0);
     // edge: a sheep at the map edge steps back in
     const e=S.sheep[2];let ey=e.y;for(let yy=30;yy<G.ph-40;yy+=6)if(chaserFree(e,6,yy)&&mClear('sheep',e,6,yy)&&mClear('sheep',e,12,yy)){ey=yy;break;}e.x=6;e.y=ey;e.vx=e.vy=0;${step(90)}return JSON.stringify({push:out[0],still:Math.round(still*10)/10,edgeX:Math.round(e.x),home:run.lab.home,obj:run.lobj});})()`);
-  ok('round-up: driving up behind a sheep herds it into the pen', herd.push.penned || herd.push.d1 < herd.push.d0 - 60, herd.push);
+  ok('round-up: driving at a sheep with the blade pushes it into the pen (rev 3d)', herd.push.penned || herd.push.d1 < herd.push.d0 - 60, herd.push);
   ok('round-up: sheep stand still when you are far away; a sheep at the edge steps back in', herd.still < 4 && herd.edgeX >= 9, herd);
   await shot('roundup', `${go('tractor', 'farm')}const S=G.lab,s=S.sheep[0];P.x=s.x+4;P.y=s.y+40;P.f=0;camY=clamp(P.y-VIEW_H*0.55,0,G.ph-VIEW_H);${step(8)}`);
 
