@@ -537,14 +537,14 @@ function labTime(x,y,s){run.time+=s;addFloat(x,y,'+'+s+' SECONDS','#9fd8ff',1.2)
 function labBurst(x,y,n,kind,sp){for(let k=0;k<n;k++)particles.push({x:x+rnd(-3,3),y:y+rnd(-3,3),vx:rnd(-1,1)*(sp||50),vy:rnd(-1,0.4)*(sp||50),z:2,vz:rnd(15,45),life:rnd(0.4,0.8),t:0,kind:kind||'snow'});}
 function labRing(x,y,r){particles.push({x,y,vx:0,vy:0,z:0,vz:0,life:0.4,t:0,kind:'ring',r:r||10});}
 function labObj(label,n,of,extra){if(run.lab&&(!run.lobj||run.lobj.n!==n))run.lab.idle=0;run.lobj={label,n,of,extra:extra||''};labRes(label,n,of);}
-function labRes(label,n,of){const M=labM();run.labRes={name:M?M.name:'',label,n,of,gift:!!(run.lab&&run.lab.gift)};}
+function labRes(label,n,of){const M=labM();run.labRes={name:M?M.name:'',label:(G.def.bonus?'BONUS ':'')+label,n,of,gift:!!(run.lab&&run.lab.gift)};}
 // touching something counts with the plow body or the blade (the blade reaches corners the body can't)
 function labTouch(tid,r){if(overlap(footprint(tid,P.x,P.y,P.f),r))return true;if(tid==='ufo')return Math.hypot(P.x-(r.x+r.w/2),P.y-(r.y+r.h/2))<24;return overlap(bladeRect(tid,P.x,P.y,P.f,bladeCells()*2),r);}
 // can this machine's blade reach that spot? (markReach marks what it can't)
 function labReach(x,y){const i=(clamp(y,0,G.ph-1)>>1)*G.cols+(clamp(x,0,G.pw-1)>>1);return G.type[i]!==T_BLOCK&&!(G.nc&&G.nc[i]);}
 function labMove(o,dx,dy){for(let r=6;r<=90;r+=6)for(let a=0;a<12;a++){const x=Math.round(o.x+Math.cos(a/12*Math.PI*2)*r),y=Math.round(o.y+Math.sin(a/12*Math.PI*2)*r);
   if(x<14||x>G.pw-14||y<14||y>G.ph-14)continue;if(labReach(x,y)&&labReach(x-dx,y-dy)&&labReach(x+dx,y+dy)&&labRect(G,x-dx,y-dy,dx*2,dy*2)){o.x=x;o.y=y;return true;}}return false;}
-function labPost(g){const M=MODES[g.def.mode];g.lab={};if(M&&M.post)M.post(g);}
+function labPost(g){const M=MODES[g.def.mode];g.lab={rs:TEST_MODE?(window.__LABSEED|0):((Math.random()*1e9)|0)};if(M&&M.post)M.post(g);}
 function labTick(dt,tid){const M=labM();if(!M||run.ended)return;run.lab=run.lab||{t:0};const L=run.lab;L.t+=dt;L.idle=(L.idle||0)+dt;if(L.hintT>0)L.hintT-=dt;if(L.idle>=15){L.hintT=4;L.idle=0;}if(M.tick)M.tick(dt,tid,L);if(M.goal&&!L.gift&&M.goal(L))labGoldGift(P.x,P.y-38,M.goalText||'DONE!');}
 function labEnts(ents,top,bot){const M=labM();if(M&&M.ents)M.ents(ents,top,bot);}
 // arrow at the screen edge pointing at something off screen
@@ -557,7 +557,7 @@ function labScreen(){const M=labM();if(!M)return;if(M.screen)M.screen();
   const o=run.lobj;if(o){const done=o.of!=null&&o.n>=o.of,l2=o.of==null?''+o.n:o.n+'/'+o.of,w=Math.max(textW(o.label),textW(l2),textW(o.extra||''))+8,h=o.extra?27:20,cx=2+Math.round(w/2);
     panel(2,VIEW_Y+2,w+(M.bonus?10:0),h,done?'#3a5a12':'#13306b',done?'#ffd23f':M.col);if(M.bonus)b.drawImage(SPR.present,2+w,VIEW_Y+6+(h>20?3:0));text(b,o.label,cx,VIEW_Y+5,'#9fc0e8',{align:'center',outline:null});text(b,l2,cx,VIEW_Y+12,done?'#ffd23f':'#ffffff',{align:'center',outline:null});if(o.extra)text(b,o.extra,cx,VIEW_Y+19,'#ffd23f',{align:'center',outline:null});}
   const t=run.lab?run.lab.t:0;if(t<(G.def.teach?5:4)&&!run.ended){const cd=G.def.teach?5:4,a=t<0.25?t/0.25:t>cd-0.5?(cd-t)/0.5:1,y=VIEW_Y+46-Math.round((1-Math.min(1,t/0.25))*16);b.globalAlpha=Math.max(0,Math.min(1,a));
-    panel(8,y,164,M.bonus?46:36,'#13306b',M.col);text(b,(G.def.teach?'NEW! ':'')+M.name,W/2,y+5,M.col,{align:'center',scale:2});text(b,M.rule,W/2,y+23,'#ffffff',{align:'center',outline:null});if(M.bonus){const bw2=textW(M.bonus);b.drawImage(SPR.present,Math.round(W/2-bw2/2-6),y+31);text(b,M.bonus,W/2+5,y+33,'#ffd23f',{align:'center',outline:null});}b.globalAlpha=1;}}
+    panel(8,y,164,M.bonus?46:36,'#13306b',M.col);if(G.def.bonus){panel(44,y-14,92,13,'#5c3a00','#ffd23f');text(b,'BONUS TWIST!',W/2,y-11,'#ffd23f',{align:'center',outline:null});}text(b,(G.def.teach?'NEW! ':'')+M.name,W/2,y+5,M.col,{align:'center',scale:2});text(b,M.rule,W/2,y+23,'#ffffff',{align:'center',outline:null});if(M.bonus){const bw2=textW(M.bonus);b.drawImage(SPR.present,Math.round(W/2-bw2/2-6),y+31);text(b,M.bonus,W/2+5,y+33,'#ffd23f',{align:'center',outline:null});}b.globalAlpha=1;}}
 // ---------------- the lab screen ----------------
 const LAB_EV=['blizzard','presents','goldrush','yetihunt','snowroll','blackice','snowday','timeattack','forts','stars'];
 const LAB_JOBS={blizzard:['maple','lot','lane','switchbacks'],presents:['maple','village','parade','northpole'],goldrush:['gardens','village','street','mainst'],yetihunt:['park','farmyard','mansion','chalets'],
@@ -3032,8 +3032,8 @@ function evJobs(ev){const open=[];LEVELS.forEach((L,i)=>{if(!L.tool&&!L.boss&&L.
   let h=0;for(const ch of ev.id+ev.kind)h=(h*31+ch.charCodeAt(0))>>>0;const out=[];for(let k=0;k<pool.length&&out.length<3;k++){const i=pool[(h+k*7)%pool.length];if(!out.includes(i))out.push(i);}
   for(const i of pool)if(out.length<3&&!out.includes(i))out.push(i);return out;}
 function evBuild(idx,opts){const ev=opts&&opts.event?EVENTS.find(e=>e.id===opts.event):null;
-  if(!ev){const ta=(opts&&opts.twist)||twistOf(idx),mk2=ta&&TWISTS[ta];if(!mk2)return buildLevel(idx);const L=LEVELS[idx],c=Object.assign({},L);
-    c.mode=mk2;c.twist=ta;c.teach=twistJobs(ta)[0]===idx;LEVELS[idx]=c;try{const g=buildLevel(idx);labPost(g);return g;}finally{LEVELS[idx]=L;}}
+  if(!ev){let ta=(opts&&opts.twist)||twistOf(idx),bon=false;if(!ta&&labBonusDue(idx,opts)){ta=LEVELS[idx].area;bon=true;}const mk2=ta&&TWISTS[ta];if(!mk2)return buildLevel(idx);const L=LEVELS[idx],c=Object.assign({},L);
+    c.mode=mk2;c.twist=ta;c.teach=!bon&&twistJobs(ta)[0]===idx;c.bonus=bon?1:0;if(bon){save.labCruise=0;track('lab_bonus_twist',{job:L.id,twist:mk2});}LEVELS[idx]=c;try{const g=buildLevel(idx);labPost(g);return g;}finally{LEVELS[idx]=L;}}
   const L=LEVELS[idx],m=EVENT_DEFS[ev.kind].mod,c=Object.assign({},L);if(m.snow)c.snowfall=L.snowfall*m.snow;if(m.squall)c.squall=L.squall?Math.min(L.squall,m.squall):m.squall;if(m.gust)c.gust=1;if(m.deep){c.deep=1;c.time=Math.round(L.time*(1+DEEP_TIME*deepDrag(TOOLS[useIdx()].id)));}if(m.presents)c.presents=Math.round(L.presents*m.presents);if(m.value)c.value=L.value*m.value;
   if(m.mode)c.mode=m.mode;if(m.half)c.time=Math.round(L.time*0.55);
   LEVELS[idx]=c;try{const g=buildLevel(idx);labPost(g);return g;}finally{LEVELS[idx]=L;}}
@@ -3573,7 +3573,7 @@ function endRound(allClear){
   const stars=L.stars.filter(s=>pct>=s).length;const prev=save.stars[idx];let bonus=0;for(let s=prev;s<stars;s++)bonus+=STAR_BONUS*L.value*(s+1);
   const timeBonus=allClear?Math.floor(run.time*10*L.value):0;save.coins+=bonus+timeBonus;pickups=[];
   save.stars[idx]=Math.max(prev,stars);save.best[idx]=Math.max(save.best[idx],Math.floor(pct));
-  run.res={pct,stars,bonus,timeBonus,allClear,t:0,starsPlayed:0};sfx(allClear?'win':'end');stopLoops();musicRate(1);musicDuck(0.45);
+  run.res={pct,stars,bonus,timeBonus,allClear,t:0,starsPlayed:0};if(PROTO&&!run.event&&!run.mission&&!L.mode){if(stars>=3)save.labCruise=(save.labCruise||0)+1;else if(stars<2)save.labCruise=0;}sfx(allClear?'win':'end');stopLoops();musicRate(1);musicDuck(0.45);
   save.fails[idx]=stars>prev?0:(save.fails[idx]||0)+1;save.winterCoins=(save.winterCoins||0)+Math.max(0,run.earned)+bonus+timeBonus;
   dailyAdd('runs',1);if(run.hits===0)dailyAdd('nohit',1,true);dailyAdd('stars',stars,true);
   award('first');if(L.id==='driveway'&&stars===3)award('drive3');if(run.hits===0&&stars>=1)award('untouch');if(allClear)award('spotless');if(L.id==='street'&&stars===3)award('night');if(L.id==='airport'&&stars===3)award('takeoff');
@@ -5416,7 +5416,7 @@ setInterval(persist,5000);
 
 // ================= LAB rev 3 (Nov 20) =================
 function labHintOn(){const L=run.lab;if(!L)return false;const M=labM();return !!(M&&M.arrows)||!!L.urgent||L.t<3||L.hintT>0;}
-function labGoldGift(x,y,label){const L=run.lab;if(!L||L.gift)return 0;L.gift=1;const c=Math.max(1,Math.round(labUnit()*5));earn(c);
+function labGoldGift(x,y,label){const L=run.lab;if(!L||L.gift)return 0;L.gift=1;const c=Math.max(1,Math.round(labUnit()*(G.def.bonus?7:5)));earn(c);
   addFloat(x,y-12,label||'DONE!','#7fe08a',2);addFloat(x,y-2,'GOLD GIFT'+cplus(c),'#ffd23f',2.2);sfx('fanfare');sfx('gift');buzz(40);shake=Math.max(shake,0.15);
   const CF=['#ff4fa3','#ffd23f','#7ad3ff','#9cff7a','#ff7a3a','#ffffff'];for(let k=0;k<40;k++)particles.push({x,y,vx:rnd(-70,70),vy:rnd(-40,20),z:4,vz:rnd(30,70),life:rnd(1,1.5),t:0,kind:'conf',c:CF[k%6]});
   for(let k=0;k<14;k++)particles.push({x,y,vx:rnd(-50,50),vy:rnd(-40,10),z:3,vz:rnd(30,70),life:0.8,t:0,kind:'coin'});if(run.labRes)run.labRes.gift=true;return c;}
@@ -5453,8 +5453,8 @@ MODES.roundup={name:'ROUND-UP',sub:'HERD THE SHEEP INTO THE PEN',rule:'COME FROM
         const r={x:p.x+8,y:p.y+14,w:W2,h:H2};if(labNoCut(g,tid,base,r,extra))pen=r;}
       if(!pen)continue;extra.push(pen);S.pens.push(penBuild(g,pen.x,pen.y,W2,H2,rn));}
     if(!S.pens.length)return;const fin=labReachGrid(g,tid,extra);
-    for(let j=0;j<ns;j++){const pn=S.pens[j%S.pens.length];let q=null;
-      for(let tr=0;tr<40&&!q;tr++){const r1=(g.def.teach?220:300)+Math.max(0,tr-20)*8,c=labSpot(g,10,8,0,g.ph,rn,{near:{x:pn.cx,y:pn.cy,r0:110,r1},margin:6,avoid:S.pens.map(p2=>({x:p2.cx,y:p2.cy,r:95})).concat([{x:g.start.x,y:g.start.y,r:60}],S.sheep.map(h=>({x:h.x,y:h.y,r:70})))});
+    const rq=srng(hashS(g.def.id)+(g.lab.rs||0)+19);for(let j=0;j<ns;j++){const pn=S.pens[j%S.pens.length];let q=null;
+      for(let tr=0;tr<40&&!q;tr++){const r1=(g.def.teach?220:300)+Math.max(0,tr-20)*8,c=labSpot(g,10,8,0,g.ph,rq,{near:{x:pn.cx,y:pn.cy,r0:110,r1},margin:6,avoid:S.pens.map(p2=>({x:p2.cx,y:p2.cy,r:95})).concat([{x:g.start.x,y:g.start.y,r:60}],S.sheep.map(h=>({x:h.x,y:h.y,r:70})))});
         if(c&&c.x>=14&&c.x<=g.pw-24&&c.y>=24&&c.y<=g.ph-30&&labCanReach(fin,c.x+5,c.y+4,34))q=c;}
       if(!q)continue;const hz={kind:'sheep',stray:1,horse:false,col:0,x:q.x,y:q.y,w:9,h:6,hx:q.x,hy:q.y,vx:0,vy:0,t:99,anim:rn()*2};g.hazards.push(hz);S.sheep.push(hz);}},
   tick(dt,tid,L){const S=G.lab;if(!S.pens||!S.pens.length||!S.sheep.length)return;if(L.home==null)L.home=0;
@@ -5523,16 +5523,17 @@ MODES.powercut={name:'POWER CUT',sub:'TURN THE LIGHTS BACK ON',rule:'LIGHT EVERY
 // ---------- AVALANCHE: outrun the wave (or hide in a shelter) ----------
 function avShelter(x,y){const S=G.lab;return !!(S.sh&&S.sh.some(s=>x>s.x-2&&x<s.x+s.w+2&&y>s.y-2&&y<s.y+s.h+8));}
 MODES.avalanche={name:'AVALANCHE',sub:'OUTRUN THE AVALANCHE',rule:'SIREN? DRIVE DOWNHILL OR HIDE!',col:'#ff6a5a',
-  how:['NOW AND THEN THE MOUNTAIN LETS','GO. AT THE SIREN A WALL OF SNOW','RUSHES DOWN THE MAP: DRIVE AWAY','FROM IT OR DUCK INTO A ROCK','SHELTER. CAUGHT? YOU GET BURIED.'],
+  how:['AT THE SIREN A WALL OF SNOW','RUSHES DOWN THE MAP: DRIVE AWAY','FROM IT OR DUCK INTO A ROCK','SHELTER. DODGE THE TUMBLING','BOULDERS. CAUGHT? YOU GET BURIED.'],
   post(g){const S=g.lab,rn=srng(hashS(g.def.id)+53);S.first=g.def.teach?12:10;S.every=g.def.teach?999:24;S.spd=g.def.teach?50:62;S.len=g.def.teach?320:420;S.need=g.def.teach?1:3;
     S.sh=[];for(let y=100;y<g.ph-90;y+=360){const p=labSpot(g,30,22,y,Math.min(g.ph-50,y+300),rn,{edge:true,margin:3});if(p){S.sh.push({x:p.x,y:p.y,w:30,h:22});labBlock(g,p.x,p.y,30,5);labPaint(g,p.x-2,p.y-2,34,28);}}
     MODES.avalanche.bonus=g.def.teach?'ESCAPE IT: GOLD GIFT':'ESCAPE 3 IN A ROW: GOLD GIFT';},
   tick(dt,tid,L){const S=G.lab;let A=L.av;if(!A)A=L.av={ph:'calm',t:S.first,n:0,esc:0,row:0,buried:0};L.urgent=A.ph==='warn'||A.ph==='wave';
     if(A.buried>0){A.buried-=dt;P.vx=P.vy=0;if(A.buried<=0)addFloat(P.x,P.y-28,'DUG OUT!','#ffffff',0.9);}
+    avRocks(dt,tid,A);
     if(A.ph==='calm'){A.t-=dt;if(A.t<=0&&run.time>8){A.ph='warn';A.t=A.tt=G.def.teach?4.5:3.5;A.sir=0;addFloat(P.x,P.y-32,'AVALANCHE!','#ff6a5a',1.4);}}
     else if(A.ph==='warn'){A.t-=dt;A.sir-=dt;if(A.sir<=0){A.sir=0.6;sfx('warn',0,{rate:0.75,vol:0.6});}shake=Math.max(shake,0.03+0.08*(1-A.t/A.tt));
       if(A.t<=0){A.ph='wave';A.fy=Math.max(4,camY-20);A.y0=A.fy;A.res=0;A.spd=clamp(moveSpeed()*(G.def.teach?0.72:0.85),36,96);sfx('squall');sfx('stomp');}}
-    else if(A.ph==='wave'){A.fy+=(A.spd||S.spd)*dt;shake=Math.max(shake,0.1+0.1*Math.max(0,1-Math.abs(A.fy-P.y)/160));
+    else if(A.ph==='wave'){A.fy+=(A.spd||S.spd)*dt;A.rt=(A.rt||0)-dt;if(A.rt<=0&&(A.rk||[]).length<6){A.rt=rnd(0.35,0.7);(A.rk=A.rk||[]).push({x:rnd(12,G.pw-12),y:A.fy+rnd(4,14),vx:rnd(-14,14),vy:(A.spd||S.spd)*rnd(1.4,1.75),r:Math.round(rnd(4,7)),h:4,vh:rnd(20,50),an:Math.random()*6,d:0});}shake=Math.max(shake,0.1+0.1*Math.max(0,1-Math.abs(A.fy-P.y)/160));
       if(Math.random()<0.5){const x=rnd(4,G.pw-4),y=A.fy-rnd(0,24);if(y>2&&y<G.ph-2&&!avShelter(x,y))addSnowCircle(G,x,y,rnd(5,9),rnd(0.35,0.55));}
       const safe=avShelter(P.x,P.y);
       if(!A.res&&A.fy>=P.y-8&&!safe){A.res=1;A.n++;A.row=0;A.buried=2;P.stun=Math.max(P.stun,2);P.inv=Math.max(P.inv,2.6);P.vx=P.vy=0;shake=0.45;buzz(80);sfx('stomp');addFloat(P.x,P.y-32,'BURIED!','#ff6a5a',1.5);if(run.combo>=2){run.combo=0;run.comboProg=0;sfx('cend');}addSnowCircle(G,P.x,P.y,22,0.7);}
@@ -5547,6 +5548,8 @@ MODES.avalanche={name:'AVALANCHE',sub:'OUTRUN THE AVALANCHE',rule:'SIREN? DRIVE 
       for(let x=0;x<W;x+=6){const h=5+((x*13+Math.floor(tNow*24))%8);R(b,x,y-3,6,h+1,K);R(b,x,y-3,6,h,'#eef4fc');R(b,x,y-4+h,6,1,'#9fb4d8');}
       for(let k=0;k<11;k++){const bx=(k*23+Math.floor(tNow*(70+k*9)))%(W+20)-10,by=y-6-((k*17)%40),r=3+(k%4);b.fillStyle=K;pixCircle(b,bx,by,r+1);b.fillStyle='#ffffff';pixCircle(b,bx,by,r);b.fillStyle='#c6d9f3';b.fillRect(bx-r+1,by+r-2,r*2-1,1);}
       for(let k=0;k<6;k++)particles.push({x:rnd(0,W),y:y+rnd(-4,6),vx:rnd(-30,30),vy:rnd(40,90),z:3,vz:rnd(10,40),life:0.5,t:0,kind:'snow'});R(b,0,y-90,W,2,'#9fb4d8');}
+    for(const rk of A.rk||[]){if(rk.y<cy-20||rk.y>cy+VIEW_H+20)continue;const x=Math.round(rk.x),y=Math.round(rk.y),hy=Math.round(rk.y-rk.h),r=rk.r;R(b,x-r,y+r-2,r*2+1,3,'rgba(27,31,59,0.3)');
+      b.fillStyle=K;pixCircle(b,x,hy,r+1);b.fillStyle='#7a869c';pixCircle(b,x,hy,r);b.fillStyle='#9aa6ba';pixCircle(b,x-1,hy-1,Math.max(1,r-2));b.fillStyle='#c6ccd6';pixCircle(b,x-Math.round(r*0.4),hy-Math.round(r*0.45),Math.max(1,Math.round(r*0.3)));const ca=rk.an;R(b,Math.round(x+Math.cos(ca)*r*0.55),Math.round(hy+Math.sin(ca)*r*0.55),2,1,'#4a5068');R(b,Math.round(x+Math.cos(ca+2.2)*r*0.5),Math.round(hy+Math.sin(ca+2.2)*r*0.5),1,2,'#4a5068');}
     if(A.buried>0){b.fillStyle='#e8f0fa';pixCircle(b,Math.round(P.x),Math.round(P.y+2),17);b.fillStyle='#ffffff';pixCircle(b,Math.round(P.x-4+Math.sin(tNow*30)),Math.round(P.y-3),9);if(Math.floor(tNow*4)%2)text(b,'DIG DIG!',P.x,P.y-24,'#ffffff',{align:'center'});}},
   screen(){const A=run.lab&&run.lab.av;if(!A)return;
     if(A.ph==='warn'){if(Math.floor(tNow*6)%2){panel(10,VIEW_Y+20,160,15,'#5c0e1e','#ff6a5a');text(b,'AVALANCHE! DRIVE DOWNHILL OR HIDE',W/2,VIEW_Y+24,'#ffffff',{align:'center',outline:null});}text(b,''+Math.ceil(A.t),W/2,VIEW_Y+40,'#ff6a5a',{align:'center',scale:2});}
@@ -5568,7 +5571,7 @@ MODES.penguins={name:'LOST PENGUINS',sub:'REUNITE THE CHICKS',rule:'TAKE EACH CH
       const p=labSpot(g,26,14,y0,y1,rn,{margin:8,xin:16,avoid:S.fam.map(f=>({x:f.x,y:f.y,r:220})).concat([{x:g.start.x,y:g.start.y,r:90}])});if(!p||!labCanReach(base,p.x+13,p.y+7,44))continue;
       const ad=[0,1].map(j=>{const hz={kind:'sheep',peng:true,horse:false,col:0,x:p.x+j*13,y:p.y+(j?2:0),w:8,h:6,hx:p.x+j*13,hy:p.y+(j?2:0),vx:0,vy:0,t:rn()*3,anim:rn()*2};g.hazards.push(hz);return hz;});S.fam.push({x:p.x+13,y:p.y+7,ad});}
     S.fam.forEach((f,k)=>{f.col=PCOL[k%PCOL.length];f.k=k;fixAd(f);});
-    for(const f of S.fam){let q=null;const far=Math.max(170,Math.min(320,g.ph*0.12));for(let tr=0;tr<80&&!q;tr++){const c=labSpot(g,10,10,0,g.ph,rn,{near:{x:f.x,y:f.y,r0:far,r1:far+260+Math.max(0,tr-40)*10},margin:6,avoid:S.fam.map(o=>({x:o.x,y:o.y,r:o===f?far:120})).concat([{x:g.start.x,y:g.start.y,r:70}],S.chicks.map(o=>({x:o.x,y:o.y,r:100})))});if(c&&c.x>=16&&c.x<=g.pw-26&&labCanReach(base,c.x+5,c.y+5,30))q=c;}
+    const rc=srng(hashS(g.def.id)+(g.lab.rs||0)+43);for(const f of S.fam){let q=null;const far=Math.max(170,Math.min(320,g.ph*0.12));for(let tr=0;tr<80&&!q;tr++){const c=labSpot(g,10,10,0,g.ph,rc,{near:{x:f.x,y:f.y,r0:far,r1:far+260+Math.max(0,tr-40)*10},margin:6,avoid:S.fam.map(o=>({x:o.x,y:o.y,r:o===f?far:120})).concat([{x:g.start.x,y:g.start.y,r:70}],S.chicks.map(o=>({x:o.x,y:o.y,r:100})))});if(c&&c.x>=16&&c.x<=g.pw-26&&labCanReach(base,c.x+5,c.y+5,30))q=c;}
       if(q)S.chicks.push({x:q.x+5,y:q.y+5,st:'lost',fam:f,ping:rn()*2.4,pt:9,hop:0,t:0});}
     S.n=S.chicks.length;},
   tick(dt,tid,L){const S=G.lab;if(!S.chicks||!S.chicks.length)return;if(!L.tr){L.tr=[];L.home=0;L.inv0=P.inv;}
@@ -5618,7 +5621,7 @@ function shootStar(L){const p=nugSpot(70,120);if(!p)return;L.ss={x:p.x,y:p.y,t:0
 const GOLDP=spr(["..K..K..",".KRKKRK.","KKKKKKKK","KYYRYYYK","KRRRRRRK","KYYRYYYK","KYYRYYYK","KKKKKKKK"],{Y:'#ffd23f',R:'#ff4f7a'});
 MODES.presenthunt={name:'PRESENT HUNT',sub:'DIG UP THE GOLDEN PRESENTS',rule:'FOLLOW THE JINGLE, DIG THEM UP',bonus:'FIND ALL 5: GOLD GIFT',col:'#ff8fc8',
   how:['5 GOLDEN PRESENTS ARE BURIED','UNDER THE SNOW. LISTEN: THE','JINGLE GETS FASTER AS YOU GET','CLOSE, AND THE SNOW TWINKLES.','PLOW THE SPOT TO DIG ONE UP!'],
-  post(g){const S=g.lab,rn=srng(hashS(g.def.id)+61),n=5,bands=labBands(g,n);S.gp=[];
+  post(g){const S=g.lab,rn=srng(hashS(g.def.id)+(g.lab.rs||0)+61),n=5,bands=labBands(g,n);S.gp=[];
     for(let k=0;k<n;k++){const [y0,y1]=bands[k];let p=null;for(let tr=0;tr<40&&!p;tr++){const q=labSpot(g,12,12,y0,y1,rn,{margin:6,xin:12,avoid:[{x:g.start.x,y:g.start.y,r:90}].concat(S.gp.map(o=>({x:o.x,y:o.y,r:120})))});if(!q)continue;const i=((q.y+6)>>1)*g.cols+((q.x+6)>>1);if(g.type[i]===T_BLOCK||(g.nc&&g.nc[i]))continue;p=q;}
       if(!p)continue;const gp={x:p.x+6,y:p.y+6,found:0,tw:rn()*2,cells:[]};for(let cy=(gp.y-5)>>1;cy<=(gp.y+5)>>1;cy++)for(let cx=(gp.x-5)>>1;cx<=(gp.x+5)>>1;cx++){const i=cy*g.cols+cx;if(cy<0||cx<0||cy>=g.rows||cx>=g.cols||g.type[i]===T_BLOCK||(g.nc&&g.nc[i]))continue;setDepth(g,i,1);gp.cells.push(i);}S.gp.push(gp);}
     S.n=S.gp.length;},
@@ -5731,6 +5734,17 @@ MODES.timeattack={name:'TIME ATTACK',sub:'CHECKPOINT TO CHECKPOINT',rule:'REACH 
   ents(ents,top,bot){const S=G.lab,L=run.lab;if(!S.cps)return;S.cps.forEach((c,k)=>{if(c.y<top-20||c.y>bot+20)return;const kk=L&&L.k!=null?L.k:0;if(k>kk+1||k<kk-1)return;const last=k===S.cps.length-1,nxt=kk===k;ents.push({base:c.y+1,draw:()=>{
       const a=c.st?0.35:1;b.globalAlpha=a;for(let x=0;x<G.pw;x+=4){const ch=last?(((x>>2)+Math.floor(c.y/2))%2):0;R(b,x,c.y-1,2,2,last?(ch?K:'#ffffff'):(nxt&&Math.floor(tNow*4)%2?'#ffffff':'#7fe08a'));}
       for(const sx of [3,G.pw-5]){R(b,sx,c.y-14,2,15,K);R(b,sx+(sx<9?2:-5),c.y-14,5,4,last?'#ffffff':'#7fe08a');}text(b,last?'FINISH':'CHECKPOINT '+(k+1),G.pw/2,c.y-10,last?'#ffd23f':'#7fe08a',{align:'center'});if(nxt)for(const ax of [24,G.pw-28])for(let i=0;i<4;i++){const yy=c.dir>0?c.y-12+i:c.y-3-i;R(b,ax-3+i,yy,7-i*2,1,K);R(b,ax-2+i,yy,Math.max(1,5-i*2),1,'#7fe08a');}b.globalAlpha=1;}});});}};
+// ================= LAB rev 3b (Nov 20) =================
+function labBonusDue(idx,opts){if(!PROTO)return false;const L=LEVELS[idx];if(!L||L.boss||L.tool||!TWISTS[L.area])return false;if(opts&&(opts.event||opts.challenge||opts.mission))return false;
+  if(new URLSearchParams(location.search).has('notwist')||twistOf(idx))return false;if(window.__BONUS)return true;if(TEST_MODE&&!window.__CRUISE)return false;return (save.labCruise||0)>=2;}
+function avRocks(dt,tid,A){if(!A.rk||!A.rk.length)return;const fp=footprint(tid,P.x,P.y,P.f);
+  for(const rk of A.rk){rk.x=clamp(rk.x+rk.vx*dt,6,G.pw-6);rk.y+=rk.vy*dt;rk.d+=rk.vy*dt;rk.an+=rk.vy*dt/Math.max(3,rk.r);rk.vh-=210*dt;rk.h+=rk.vh*dt;
+    if(rk.h<=0){rk.h=0;rk.vh=Math.abs(rk.vh)*0.55+rnd(12,28);if(rk.y>camY-10&&rk.y<camY+VIEW_H+10){labBurst(rk.x,rk.y,3,'snow',30);if(Math.random()<0.4)sfx('bump',0,{vol:0.18,rate:0.55+Math.random()*0.2});}}
+    const box={x:rk.x-rk.r,y:rk.y-rk.r,w:rk.r*2,h:rk.r*2};let o=null;for(const ob of G.obstacles)if(overlap(box,ob)){o=ob;break;}
+    if(rk.h<7&&tid!=='ufo'&&overlap(fp,box)){if(!(P.inv>0)){hit('hz',SPILL_HAZARD);addFloat(P.x,P.y-26,'ROCK!','#ff9aa8',0.9);}rk.dead=1;}
+    else if(o||rk.d>240||rk.y>G.ph-4)rk.dead=1;
+    if(rk.dead){for(let k=0;k<8;k++)particles.push({x:rk.x,y:rk.y,vx:rnd(-40,40),vy:rnd(-30,20),z:2,vz:rnd(15,40),life:0.45,t:0,kind:'clump'});}}
+  A.rk=A.rk.filter(rk=>!rk.dead);}
 loadSave();save.sess=(save.sess||0)+1;
 if(PROTO){delete save.labSize;if(SAVE_KEY==='snowplowRush.reviewAll'&&!save.labAll){save.tool=Math.max(save.tool|0,BASE_TOOLS-1);save.rides=Object.assign({},save.rides||{});for(let i=BASE_TOOLS;i<TOOLS.length;i++)save.rides[TOOLS[i].id]=true;save.labAll=1;persist();}}
 let offlineAway=0;{const away=(Date.now()-(save.last||Date.now()))/1000;if(save.lv.helpers>0&&away>30){offlineAway=away;offlineGain=helperIncome()*Math.min(offCap(),away)*OFFLINE_RATE*(save.pro?2:1);save.coins+=offlineGain;}}
