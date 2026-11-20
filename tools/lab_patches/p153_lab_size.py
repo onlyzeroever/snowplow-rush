@@ -43,5 +43,15 @@ rep("g.save();g.translate(x,y);g.rotate(f*Math.PI/2);if(flash)g.globalAlpha=0.5;
     "if(wg&&wg.f===f&&(wg.n<wg.half-0.5||wg.p<wg.half-0.5)){const bh=Math.max(rigBodyHalf(v,vs.hh),vs.hw+1);g.save();g.beginPath();g.rect(-bh,-300,bh*2,600);g.rect(-wg.n,-300,wg.n+wg.p,300-vs.hh+3);g.clip();g.drawImage(v.c,-v.ox,-v.oy);g.restore();"
     "for(const [sg,len] of [[-1,wg.n],[1,wg.p]])if(len<wg.half-0.5){const ex=Math.round(sg*len),y0=-vs.hh-vs.bt;R(g,sg<0?ex-1:ex-2,y0-1,3,vs.bt+2,K);R(g,sg<0?ex:ex-1,y0,1,vs.bt,'#9aa4b8');}}"
     "else g.drawImage(v.c,-v.ox,-v.oy);")
+
+# turn assist (NEW sizes): a big machine whose turn is blocked eases up to 10 px forward/back (or across) to where the turn fits
+rep("if(nf!==P.f&&!blockedBy(footprint(tid,P.x,P.y,nf)))P.f=nf;",
+    "if(nf!==P.f){if(!blockedBy(footprint(tid,P.x,P.y,nf)))P.f=nf;else if(labSizeNew()&&!isKidTool(tid)&&!window.__noTA)turnAssist(tid,nf,dt);}")
+rep("function updatePlay(dt){",r"""function turnAssist(tid,nf,dt){const vert=P.f===0||P.f===2,st=Math.max(1,moveSpeed()*dt),sgF=(P.f===0||P.f===3)?-1:1,sgT=(nf===1||nf===2)?1:-1;
+  for(let d=1;d<=10;d++)for(const ax of vert?['y','x']:['x','y'])for(const sg of (ax===(vert?'y':'x')?[sgF,-sgF]:[sgT,-sgT])){const ox=ax==='x'?sg*d:0,oy=ax==='y'?sg*d:0;
+    if(blockedBy(footprint(tid,P.x+ox,P.y+oy,nf))||blockedBy(footprint(tid,P.x+ox,P.y+oy,P.f)))continue;
+    const m=Math.min(d,st)*sg,mx=ax==='x'?m:0,my=ax==='y'?m:0;if(blockedBy(footprint(tid,P.x+mx,P.y+my,P.f)))return;P.x+=mx;P.y+=my;run.taN=(run.taN||0)+1;
+    if(!blockedBy(footprint(tid,P.x,P.y,nf)))P.f=nf;return;}}
+function updatePlay(dt){""")
 open(f,'w',encoding='utf-8').write(s)
-print('p153 lab plow sizes: wing plows, blade curve, coin compensation, fairer collision boxes (NEW/OLD switch)')
+print('p153 lab plow sizes: wing plows, blade curve, coin compensation, fairer collision boxes (NEW only on the lab screen), turn assist')

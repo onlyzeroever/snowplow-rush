@@ -5,8 +5,8 @@ def rep(a,b_,cnt=1):
 # Weekend events rebuilt around one clear verb each: race (Gold Rush, Time Attack), chase (Yeti Hunt), grow and cash in
 # (Snowball Roll), drift (Black Ice), power fantasy (Snow Day), smash (Snowball Fight), catch (Star Shower).
 rep("onIce=G.type[fi]===T_ICE&&G.depth[fi]<CLEAR_T;","onIce=(G.type[fi]===T_ICE||G.def.mode==='blackice')&&G.depth[fi]<CLEAR_T;")
-rep("const gust=!!(run.bz&&run.bz.phase==='blow'),full=moveSpeed()*(run.boost?BOOST_SPEED:1)*(gust?0.8:1);",
-    "const gust=!!(run.bz&&run.bz.phase==='blow'),full=moveSpeed()*(run.boost?BOOST_SPEED:1)*(gust?0.8:1)*(G.def.mode==='snowday'?1.2:1);")
+rep("full=moveSpeed()*(run.boost?BOOST_SPEED:1)*(gust?0.8:1)*(G.def.deep?deepSlow(tid,dt):1);",
+    "full=moveSpeed()*(run.boost?BOOST_SPEED:1)*(gust?0.8:1)*(G.def.deep?deepSlow(tid,dt):1)*(G.def.mode==='snowday'?1.2:1);")
 rep("if(tid==='monster'&&o.crush){crushOb(o);continue;}","if((tid==='monster'||o.fort)&&o.crush){if(o.fort)fortSmash(o);crushOb(o);continue;}")
 
 rep("function sprAlpha(c){",r"""// ================= LAB rev 2: WEEKEND EVENTS =================

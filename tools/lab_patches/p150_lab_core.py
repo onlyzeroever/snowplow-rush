@@ -126,7 +126,8 @@ function drawLab(){if(labReopen&&!overlayOpen()&&!pendingStart){labReopen=false;
     button('labt0',14,42,74,14,labTab===0?'purple':'navy','EVENTS',()=>{labTab=0;sfx('click');});button('labt1',92,42,74,14,labTab===1?'purple':'navy','AREA TWISTS',()=>{labTab=1;sfx('click');});
     const rows=labTab===0?LAB_EV.filter(k=>EVENT_DEFS[k]).map(k=>({k,name:EVENT_DEFS[k].name,sub:EVENT_DEFS[k].sub,col:EVENT_DEFS[k].col})):Object.keys(TWISTS).map(a=>{const M=MODES[TWISTS[a]]||{};return {k:'tw:'+a,name:M.name||a,area:(AREAS&&AREAS[a]&&AREAS[a].name||a.toUpperCase()),sub:M.sub||'',col:M.col||'#ffffff'};});
     rows.forEach((r,n)=>{const y=60+n*19;card(12,y,156,17,'#eef3fb',r.col);text(b,r.name,18,y+3,'#13306b',{outline:null});if(r.area)text(b,r.area,164,y+3,'#8a9ab8',{align:'right',outline:null});text(b,r.sub,18,y+10,'#5a6b8c',{outline:null});btn('labr'+n,12,y,156,17,()=>{labPick=r.k;sfx('click');});});
-    {const m=labSizeMode();button('labsz',14,270,152,14,m==='old'?'grey':m==='small'?'blue':'green',m==='small'?'SIZES: SMALL - NARROW BLADES':m==='old'?'SIZES: OLD - AS LIVE':'SIZES: NEW - FOLDING WINGS',()=>{save.labSize=m==='new'?'small':m==='small'?'old':'new';vcache.clear();_tc.k='';persist();sfx('click');});}
+    {const own=[];for(let i=0;i<TOOLS.length;i++)if(owns(i))own.push(i);const u=useIdx(),k=Math.max(0,own.indexOf(u));
+      button('labmc',14,270,152,14,'green','MACHINE: '+TOOLS[u].name+' >',()=>{equip(own[(k+1)%own.length]);});}
     button('labclose',62,289,56,14,'grey','CLOSE',()=>{labOpen=false;sfx('click');});return;}
   const tw=labPick.startsWith('tw:'),a=tw?labPick.slice(3):null,mk2=tw?TWISTS[a]:(EVENT_DEFS[labPick].mod.mode||null),M=mk2?MODES[mk2]:null,d=tw?M:EVENT_DEFS[labPick];
   text(b,d.name,W/2,28,d.col,{align:'center',scale:2});text(b,tw?'AREA TWIST: '+((AREAS&&AREAS[a]&&AREAS[a].name)||a.toUpperCase()):'WEEKEND EVENT',W/2,44,'#9fc0e8',{align:'center',outline:null});
