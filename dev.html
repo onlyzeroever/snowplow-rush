@@ -5533,7 +5533,7 @@ MODES.avalanche={name:'AVALANCHE',sub:'OUTRUN THE AVALANCHE',rule:'SIREN? DRIVE 
     else if(A.ph==='warn'){A.t-=dt;A.sir-=dt;if(A.sir<=0){A.sir=0.6;sfx('warn',0,{rate:0.75,vol:0.6});}shake=Math.max(shake,0.03+0.08*(1-A.t/A.tt));
       if(A.t<=0){A.ph='wave';A.fy=Math.max(4,camY-20);A.y0=A.fy;A.res=0;A.spd=clamp(moveSpeed()*(G.def.teach?0.72:0.85),36,96);sfx('squall');sfx('stomp');}}
     else if(A.ph==='wave'){A.fy+=(A.spd||S.spd)*dt;shake=Math.max(shake,0.1+0.1*Math.max(0,1-Math.abs(A.fy-P.y)/160));
-      for(let q=0;q<7;q++){const x=rnd(4,G.pw-4),y=A.fy-rnd(0,24);if(y>2&&y<G.ph-2&&!avShelter(x,y))addSnowCircle(G,x,y,rnd(5,10),rnd(0.4,0.7));}
+      if(Math.random()<0.5){const x=rnd(4,G.pw-4),y=A.fy-rnd(0,24);if(y>2&&y<G.ph-2&&!avShelter(x,y))addSnowCircle(G,x,y,rnd(5,9),rnd(0.35,0.55));}
       const safe=avShelter(P.x,P.y);
       if(!A.res&&A.fy>=P.y-8&&!safe){A.res=1;A.n++;A.row=0;A.buried=2;P.stun=Math.max(P.stun,2);P.inv=Math.max(P.inv,2.6);P.vx=P.vy=0;shake=0.45;buzz(80);sfx('stomp');addFloat(P.x,P.y-32,'BURIED!','#ff6a5a',1.5);if(run.combo>=2){run.combo=0;run.comboProg=0;sfx('cend');}addSnowCircle(G,P.x,P.y,22,0.7);}
       if(A.fy-A.y0>=S.len||A.fy>G.ph-4){A.ph='calm';A.t=S.every+rnd(-2,3);if(!A.res){A.n++;A.esc++;A.row++;labPay(P.x,P.y-32,1.5,avShelter(P.x,P.y)?'SHELTERED!':'ESCAPED!','#7fe08a');labTime(P.x,P.y-22,3);sfx('win');if(A.row>=S.need)labGoldGift(P.x,P.y-44,A.row>1?A.row+' IN A ROW!':'YOU MADE IT!');}}}
