@@ -48,13 +48,7 @@ const res = []; const ok = (name, pass, info) => { res.push(pass); console.log((
   t.slalom = await EV(p, `(()=>{${prep}${use('snowcat')}startLevel(LEVELS.findIndex(L=>L.id==='redrun'),{twist:'ski'});run.moved=true;${step(2)}const g0=G.lab.gates[0],g1=G.lab.gates[1];
     P.x=g0.cx;P.y=g0.y-3;${step(1)}P.y=g0.y+3;${step(1)}const pass=run.lab.pass;P.x=g1.cx+G.lab.gap;P.y=g1.y-3;${step(1)}P.y=g1.y+3;${step(1)}return JSON.stringify({pass,miss:run.lab.miss,chain:run.lab.chain});})()`);
   ok('slalom: between the flags counts, beside them is a miss', t.slalom.pass === 1 && t.slalom.miss === 1 && t.slalom.chain === 0, t.slalom);
-  t.avalanche = await EV(p, `(()=>{${prep}${use('rotary')}startLevel(LEVELS.findIndex(L=>L.id==='avalanche'),{twist:'pass'});run.moved=true;run.time=60;${step(2)}
-    run.lab.av={ph:'warn',t:0.05,tt:5,z:{x:P.x,y:P.y,r:19},sir:1,n:0,safe:0,buried:0};${step(60)}const safe=run.lab.av.safe;
-    run.lab.av.ph='warn';run.lab.av.t=0.05;run.lab.av.z={x:P.x+120,y:P.y,r:19};${step(60)}return JSON.stringify({safe,n:run.lab.av.n,buriedT:P.stun>0||run.lab.av.buried>0});})()`);
-  ok('avalanche: in the safe zone = SAFE, outside = buried', t.avalanche.safe === 1 && t.avalanche.n === 2, t.avalanche);
-  t.penguins = await EV(p, `(()=>{${prep}${use('rotary')}startLevel(LEVELS.findIndex(L=>L.id==='frozenlake'),{twist:'north'});run.moved=true;${step(2)}const c=G.lab.chicks[0];P.x=c.x;P.y=c.y;${step(2)}
-    const fol=G.lab.chicks.filter(q=>q.st==='follow').length;P.x=G.lab.nest.x;P.y=G.lab.nest.y;${step(2)}return JSON.stringify({fol,home:run.lab.home});})()`);
-  ok('lost penguins: a chick follows you and counts at the nest', t.penguins.fol === 1 && t.penguins.home === 1, t.penguins);
+  // avalanche + lost penguins rules changed in lab rev 3: checked by tools/audit/lab155.js
   const evj = k => `startLevel(LEVELS.findIndex(L=>L.id===LAB_JOBS['${k}'][0]),{event:'lab-${k}'});run.moved=true;run.time=60;`;
   t.gold = await EV(p, `(()=>{${prep}${use('truck')}${evj('goldrush')}${step(60)}const n=run.lab.nug;if(!n)return JSON.stringify({none:1});P.x=n.x;P.y=n.y;${step(2)}return JSON.stringify({found:run.lab.found,chain:run.lab.chain});})()`);
   ok('gold rush: reaching the nugget counts and chains', t.gold.found === 1 && t.gold.chain === 1, t.gold);
