@@ -50,7 +50,7 @@ rep("how:['NOW AND THEN THE MOUNTAIN LETS','GO. AT THE SIREN A WALL OF SNOW','RU
 
 rep("loadSave();save.sess=(save.sess||0)+1;",r"""// ================= LAB rev 3b (Nov 20) =================
 function labBonusDue(idx,opts){if(!PROTO)return false;const L=LEVELS[idx];if(!L||L.boss||L.tool||!TWISTS[L.area])return false;if(opts&&(opts.event||opts.challenge||opts.mission))return false;
-  if(new URLSearchParams(location.search).has('notwist')||twistOf(idx))return false;if(window.__BONUS)return true;if(TEST_MODE&&!window.__CRUISE)return false;return (save.labCruise||0)>=2;}
+  if(new URLSearchParams(location.search).has('notwist')||twistOf(idx))return false;if(window.__BONUS||new URLSearchParams(location.search).has('labbonus'))return true;if(TEST_MODE&&!window.__CRUISE)return false;return (save.labCruise||0)>=2;}
 function avRocks(dt,tid,A){if(!A.rk||!A.rk.length)return;const fp=footprint(tid,P.x,P.y,P.f);
   for(const rk of A.rk){rk.x=clamp(rk.x+rk.vx*dt,6,G.pw-6);rk.y+=rk.vy*dt;rk.d+=rk.vy*dt;rk.an+=rk.vy*dt/Math.max(3,rk.r);rk.vh-=210*dt;rk.h+=rk.vh*dt;
     if(rk.h<=0){rk.h=0;rk.vh=Math.abs(rk.vh)*0.55+rnd(12,28);if(rk.y>camY-10&&rk.y<camY+VIEW_H+10){labBurst(rk.x,rk.y,3,'snow',30);if(Math.random()<0.4)sfx('bump',0,{vol:0.18,rate:0.55+Math.random()*0.2});}}
