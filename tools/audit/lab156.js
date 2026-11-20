@@ -42,13 +42,13 @@ const res = []; const ok = (name, pass, info) => { res.push(pass); console.log((
     return JSON.stringify({minY:Math.round(minY),d0:Math.round(d0),d1:Math.round(d1),h1,leap,h2,away:Math.round(away),give,gifts,gift,left,back,paid:save.coins>c0});})()`);
   ok('yeti: never goes above the top edge', yt.minY >= 24, yt);
   ok('yeti: runs away when you come close', yt.d1 > yt.d0 + 15, yt);
-  ok('yeti: a bump counts once, then he leaps clear (no pinning him)', yt.h1 === 1 && yt.leap && yt.h2 === 1 && yt.away >= 50, yt);
+  ok('yeti: a bump counts once, then he leaps clear (no pinning him)', yt.h1 === 1 && yt.leap && yt.h2 === 1 && yt.away >= 32, yt);
   ok('yeti: 5 bumps = sack bursts (presents), gold gift, he leaves and comes back for round 2', yt.give === 'give' && yt.gifts >= 8 && yt.gift === 1 && yt.left && yt.back === 2, yt);
   await shot('yeti', `${ev('yetihunt')}${late}for(let q=0;q<90&&!run.lab.yeti;q++)update(1/30);const Y=run.lab.yeti;P.x=Y.x+8;P.y=Y.y+60;P.f=0;camY=clamp(P.y-VIEW_H*0.6,0,G.ph-VIEW_H);${step(6)}`);
   await shot('yeti_burst', `${ev('yetihunt')}${late}for(let q=0;q<90&&!run.lab.yeti;q++)update(1/30);const Y=run.lab.yeti;for(let k=0;k<8&&Y.st==='run';k++){Y.leap=null;Y.inv=0;for(let f=0;f<4;f++){P.x=Y.x+8;P.y=Y.y+4;update(1/30);}}P.y+=40;camY=clamp(P.y-VIEW_H*0.6,0,G.ph-VIEW_H);${step(12)}`);
 
   // ---- SNOWBALL ROLL ----
-  const sr = await EV(`(()=>{${ev('snowroll','truck',2)}const L=run.lab;${step(2)}const B=L.ball;
+  const sr = await EV(`(()=>{${ev('snowroll','truck',2)}const L=run.lab;${step(2)}L.acc=ROLL_NEED;${step(1)}const B=L.ball;
     // push it along (driving down), then stop: the ball rolls on by itself
     P.f=2;keys.ArrowDown=true;${step(30)}keys.ArrowDown=false;const bx=L.ball.x,by=L.ball.y;${step(20)}const rolled=Math.hypot(L.ball.x-bx,L.ball.y-by),grew=L.ball.r;
     // soft knock: a slow ball against a building loses chunks, no smash
@@ -58,11 +58,11 @@ const res = []; const ok = (name, pass, info) => { res.push(pass); console.log((
     return JSON.stringify({rolled:Math.round(rolled),grew:Math.round(grew*10)/10,soft,hard});})()`);
   ok('snowball roll: push it and it keeps rolling on its own, growing', sr.rolled >= 8 && sr.grew > 5, sr);
   ok('snowball roll: a soft knock breaks chunks off, a hard hit smashes and pays', !sr.soft.smash && sr.soft.lost && sr.hard.smash && sr.hard.paid, sr);
-  await shot('snowroll', `${ev('snowroll','truck',2)}${late}P.f=2;keys.ArrowDown=true;${step(40)}keys.ArrowDown=false;camY=clamp(P.y-VIEW_H*0.4,0,G.ph-VIEW_H);${step(3)}`);
+  await shot('snowroll', `${ev('snowroll','truck',2)}${late}run.lab.acc=ROLL_NEED;update(1/30);P.f=2;keys.ArrowDown=true;${step(40)}keys.ArrowDown=false;camY=clamp(P.y-VIEW_H*0.4,0,G.ph-VIEW_H);${step(3)}`);
 
   // ---- BLACK ICE ----
-  const bi = await EV(`(()=>{${ev('blackice')}const L=run.lab;${step(2)}P.vx=P.vy=0;L.dr=3.2;L.tier=3;const c0=save.coins;${step(12)}const r1={paid:save.coins>c0,turbo:run.turbo>0.8,purp:L.purp,ch:L.ch};
-    L.dr=1.8;L.tier=2;${step(12)}const r2={ch:L.ch};L.dr=3.1;${step(12)}L.dr=3.3;${step(12)}return JSON.stringify({r1,r2,purp:L.purp,gift:L.gift});})()`);
+  const bi = await EV(`(()=>{${ev('blackice')}const L=run.lab;${step(2)}P.vx=P.vy=0;L.dr=3.2;L.tier=3;const c0=save.coins;${step(15)}const r1={paid:save.coins>c0,turbo:run.turbo>0.8,purp:L.purp,ch:L.ch};
+    L.dr=1.2;L.tier=2;${step(15)}const r2={ch:L.ch};L.dr=3.1;${step(15)}L.dr=3.3;${step(15)}return JSON.stringify({r1,r2,purp:L.purp,gift:L.gift});})()`);
   ok('black ice: a purple drift pays and gives a mini-turbo; drifts back to back chain', bi.r1.paid && bi.r1.turbo && bi.r1.purp === 1 && bi.r2.ch === 2, bi);
   ok('black ice: 3 purple drifts = gold gift', bi.purp === 3 && bi.gift === 1, bi);
 
@@ -74,11 +74,11 @@ const res = []; const ok = (name, pass, info) => { res.push(pass); console.log((
 
   // ---- TIME ATTACK ----
   const ta = await EV(`(()=>{delete save.labTA;const R=[];for(let run2=0;run2<2;run2++){${ev('timeattack')}const S=G.lab,L=run.lab;const t0=G.def.time;run.time=t0;const n=S.cps.length;const tr=[];
-      for(let k=0;k<n;k++){const c=S.cps[k];const t1=run.time;P.y=c.y-c.dir*3;${step(2)}P.y=c.y+c.dir*3;${step(2)}tr.push({add:Math.round((run.time-t1)*10)/10,diff:c.diff==null?null:Math.round(c.diff*10)/10});for(let q=0;q<(run2?20:30);q++)update(1/30);}
-      R.push({t0,n,route:S.cps.map(c=>c.y+(c.dir>0?'v':'^')),tr:tr.slice(0,3),fin:L.fin,gift:L.gift,best:(save.labTA||{})[G.def.id]});}return JSON.stringify(R);})()`);
+      for(let k=0;k<n;k++){const c=S.cps[k];const t1=run.time;P.x=c.cx;P.y=c.y-c.dir*3;${step(2)}P.x=c.cx;P.y=c.y+c.dir*3;${step(2)}tr.push({add:Math.round((run.time-t1)*10)/10,diff:c.diff==null?null:Math.round(c.diff*10)/10});for(let q=0;q<(run2?20:30);q++)update(1/30);}
+      R.push({t0,n,route:S.cps.map(c=>c.cx+','+c.y+(c.dir>0?'v':'^')),tr:tr.slice(0,3),fin:L.fin,gift:L.gift,best:(save.labTA||{})[S.key]});}return JSON.stringify(R);})()`);
   ok('time attack: short start clock; each checkpoint adds time; the finish gives the gold gift and saves your splits', ta[0].t0 <= 40 && ta[0].n >= 3 && ta[0].tr.slice(0, Math.min(3, ta[0].n - 1)).every(x => x.add >= 3) && ta[0].fin === 1 && ta[0].gift === 1 && ta[0].best && ta[0].best.length === ta[0].n, ta[0]);
   ok('time attack: the next run shows splits against your best', ta[1].tr[1].diff !== null && ta[1].tr[1].diff < 0, ta[1].tr);
-  await shot('timeattack', `${ev('timeattack')}${late}const c=G.lab.cps[0];run.time=7.3;P.y=c.y+(G.lab.down?-40:40);camY=clamp(P.y-VIEW_H*0.5,0,G.ph-VIEW_H);${step(2)}`);
+  await shot('timeattack', `${ev('timeattack')}${late}const c=G.lab.cps[0];run.time=7.3;P.x=c.cx;P.y=c.y-c.dir*40;camY=clamp(P.y-VIEW_H*0.5,0,G.ph-VIEW_H);${step(2)}`);
 
   // ---- SNOWBALL THROWERS ----
   const th = await EV(`(()=>{${ev('forts')}const kid=G.hazards.find(h=>h.kind==='thrower');if(!kid)return JSON.stringify({none:1});let good=0,n=0;

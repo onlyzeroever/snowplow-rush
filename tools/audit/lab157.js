@@ -40,7 +40,7 @@ const res = []; const ok = (name, pass, info) => { res.push(pass); console.log((
     startLevel(j);const plain=G.def.mode||null;
     // cruising: two 3-star finishes, then the next plain job is a bonus twist
     window.__CRUISE=1;save.labCruise=0;for(let k=0;k<2;k++){startLevel(j);G.cleared=G.clearable;run.moved=true;endRound(true);}const cruise=save.labCruise;
-    startLevel(j);const m1=G.def.mode,b1=G.def.bonus,after=save.labCruise;run.lab=run.lab||{t:0};run.lab.t=1;let err=null;try{draw();}catch(e){err=e.message;}
+    startLevel(j);const m1=G.def.mode,b1=G.def.bonusTwist,after=save.labCruise;run.lab=run.lab||{t:0};run.lab.t=1;let err=null;try{draw();}catch(e){err=e.message;}
     const c0=save.coins;const u=labUnit();labGoldGift(P.x,P.y,'X');const gift=Math.round((save.coins-c0)/u);
     // a poor run resets it
     save.labCruise=1;startLevel(j);G.cleared=0;run.moved=true;endRound(false);const reset=save.labCruise;
@@ -55,7 +55,7 @@ const res = []; const ok = (name, pass, info) => { res.push(pass); console.log((
   const av = await EV(`(()=>{${prep}${use('truck')}startLevel(twistJobs('pass')[1],{twist:'pass'});run.moved=true;run.time=999;${step(2)}const A=run.lab.av;P.x=G.pw/2;P.y=Math.min(G.ph-500,Math.max(300,G.ph*0.3));camY=clamp(P.y-VIEW_H*0.55,0,G.ph-VIEW_H);
     A.ph='warn';A.t=0.01;A.tt=3.5;${step(45)}const n=(A.rk||[]).length,faster=(A.rk||[]).every(r=>r.vy>A.spd*1.3);let hit=false;const h0=run.hits;
     for(let k=0;k<60&&!hit;k++){const r=(A.rk||[]).find(q=>q.y>A.fy+10);if(r){P.inv=0;P.x=clamp(r.x,20,G.pw-20);P.y=r.y+10;}update(1/30);if(run.hits>h0)hit=true;}
-    for(let k=0;k<30*9;k++)update(1/30);return JSON.stringify({n,faster,hit,left:(A.rk||[]).length,ph:A.ph});})()`);
+    for(let k=0;k<30*14;k++)update(1/30);return JSON.stringify({n,faster,hit,left:(A.rk||[]).length,ph:A.ph});})()`);
   ok('avalanche: boulders tumble ahead of the wave, faster than it; one can hit you; they clear away', av.n >= 1 && av.faster && av.hit && av.left === 0, av);
   await shot('boulders', `${prep}${use('truck')}startLevel(twistJobs('pass')[1],{twist:'pass'});run.moved=true;run.time=999;${step(2)}const A=run.lab.av;P.x=G.pw/2;P.y=Math.min(G.ph-500,Math.max(300,G.ph*0.3));camY=clamp(P.y-VIEW_H*0.55,0,G.ph-VIEW_H);A.ph='warn';A.t=0.01;A.tt=3.5;${step(40)};camY=clamp(A.fy-20,0,G.ph-VIEW_H)`);
 

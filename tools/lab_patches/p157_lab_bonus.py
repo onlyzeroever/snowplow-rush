@@ -7,6 +7,7 @@
 #    never in Suburbs, on boss or Wild Ride jobs, events, challenges or missions.
 #  - Avalanche: boulders tumble down ahead of the wave; their shadows show where they roll; a hit stuns you and the
 #    wave gains on you.
+# (flag is c.bonusTwist: levels already use 'bonus' for side jobs)
 import sys
 f=sys.argv[1];s=open(f,encoding='utf-8').read()
 def rep(a,b_,cnt=1):
@@ -26,14 +27,14 @@ rep(",c=labSpot(g,10,8,0,g.ph,rn,{near:{x:pn.cx,y:pn.cy,r0:110,r1},",",c=labSpot
 
 # ---- bonus twists ----
 rep("if(!ev){const ta=(opts&&opts.twist)||twistOf(idx),mk2=ta&&TWISTS[ta];if(!mk2)return buildLevel(idx);const L=LEVELS[idx],c=Object.assign({},L);\n    c.mode=mk2;c.twist=ta;c.teach=twistJobs(ta)[0]===idx;",
-    "if(!ev){let ta=(opts&&opts.twist)||twistOf(idx),bon=false;if(!ta&&labBonusDue(idx,opts)){ta=LEVELS[idx].area;bon=true;}const mk2=ta&&TWISTS[ta];if(!mk2)return buildLevel(idx);const L=LEVELS[idx],c=Object.assign({},L);\n    c.mode=mk2;c.twist=ta;c.teach=!bon&&twistJobs(ta)[0]===idx;c.bonus=bon?1:0;if(bon){save.labCruise=0;track('lab_bonus_twist',{job:L.id,twist:mk2});}")
+    "if(!ev){let ta=(opts&&opts.twist)||twistOf(idx),bon=false;if(!ta&&labBonusDue(idx,opts)){ta=LEVELS[idx].area;bon=true;}const mk2=ta&&TWISTS[ta];if(!mk2)return buildLevel(idx);const L=LEVELS[idx],c=Object.assign({},L);\n    c.mode=mk2;c.twist=ta;c.teach=!bon&&twistJobs(ta)[0]===idx;c.bonusTwist=bon?1:0;if(bon){save.labCruise=0;track('lab_bonus_twist',{job:L.id,twist:mk2});}")
 rep("  run.res={pct,stars,bonus,timeBonus,allClear,t:0,starsPlayed:0};sfx(allClear?'win':'end');",
     "  run.res={pct,stars,bonus,timeBonus,allClear,t:0,starsPlayed:0};if(PROTO&&!run.event&&!run.mission&&!L.mode){if(stars>=3)save.labCruise=(save.labCruise||0)+1;else if(stars<2)save.labCruise=0;}sfx(allClear?'win':'end');")
-rep("const c=Math.max(1,Math.round(labUnit()*5));earn(c);","const c=Math.max(1,Math.round(labUnit()*(G.def.bonus?7:5)));earn(c);")
+rep("const c=Math.max(1,Math.round(labUnit()*5));earn(c);","const c=Math.max(1,Math.round(labUnit()*(G.def.bonusTwist?7:5)));earn(c);")
 rep("text(b,(G.def.teach?'NEW! ':'')+M.name,W/2,y+5,M.col,{align:'center',scale:2});",
-    "if(G.def.bonus){panel(44,y-14,92,13,'#5c3a00','#ffd23f');text(b,'BONUS TWIST!',W/2,y-11,'#ffd23f',{align:'center',outline:null});}text(b,(G.def.teach?'NEW! ':'')+M.name,W/2,y+5,M.col,{align:'center',scale:2});")
+    "if(G.def.bonusTwist){panel(44,y-14,92,13,'#5c3a00','#ffd23f');text(b,'BONUS TWIST!',W/2,y-11,'#ffd23f',{align:'center',outline:null});}text(b,(G.def.teach?'NEW! ':'')+M.name,W/2,y+5,M.col,{align:'center',scale:2});")
 rep("function labRes(label,n,of){const M=labM();run.labRes={name:M?M.name:'',label,n,of,gift:!!(run.lab&&run.lab.gift)};}",
-    "function labRes(label,n,of){const M=labM();run.labRes={name:M?M.name:'',label:(G.def.bonus?'BONUS ':'')+label,n,of,gift:!!(run.lab&&run.lab.gift)};}")
+    "function labRes(label,n,of){const M=labM();run.labRes={name:M?M.name:'',label:(G.def.bonusTwist?'BONUS ':'')+label,n,of,gift:!!(run.lab&&run.lab.gift)};}")
 
 # ---- avalanche: tumbling rocks ----
 rep("    else if(A.ph==='wave'){A.fy+=(A.spd||S.spd)*dt;",

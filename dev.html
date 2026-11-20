@@ -537,7 +537,7 @@ function labTime(x,y,s){run.time+=s;addFloat(x,y,'+'+s+' SECONDS','#9fd8ff',1.2)
 function labBurst(x,y,n,kind,sp){for(let k=0;k<n;k++)particles.push({x:x+rnd(-3,3),y:y+rnd(-3,3),vx:rnd(-1,1)*(sp||50),vy:rnd(-1,0.4)*(sp||50),z:2,vz:rnd(15,45),life:rnd(0.4,0.8),t:0,kind:kind||'snow'});}
 function labRing(x,y,r){particles.push({x,y,vx:0,vy:0,z:0,vz:0,life:0.4,t:0,kind:'ring',r:r||10});}
 function labObj(label,n,of,extra){if(run.lab&&(!run.lobj||run.lobj.n!==n))run.lab.idle=0;run.lobj={label,n,of,extra:extra||''};labRes(label,n,of);}
-function labRes(label,n,of){const M=labM();run.labRes={name:M?M.name:'',label:(G.def.bonus?'BONUS ':'')+label,n,of,gift:!!(run.lab&&run.lab.gift)};}
+function labRes(label,n,of){const M=labM();run.labRes={name:M?M.name:'',label:(G.def.bonusTwist?'BONUS ':'')+label,n,of,gift:!!(run.lab&&run.lab.gift)};}
 // touching something counts with the plow body or the blade (the blade reaches corners the body can't)
 function labTouch(tid,r){if(overlap(footprint(tid,P.x,P.y,P.f),r))return true;if(tid==='ufo')return Math.hypot(P.x-(r.x+r.w/2),P.y-(r.y+r.h/2))<24;return overlap(bladeRect(tid,P.x,P.y,P.f,bladeCells()*2),r);}
 // can this machine's blade reach that spot? (markReach marks what it can't)
@@ -555,9 +555,9 @@ function labArrow(tx,ty,col){if(!labHintOn())return;const sx=tx,sy=ty-camY+VIEW_
   b.fillStyle=col||'#ffd23f';b.beginPath();b.moveTo(tip[0],tip[1]);b.lineTo(l[0],l[1]);b.lineTo(r2[0],r2[1]);b.closePath();b.fill();}
 function labScreen(){const M=labM();if(!M)return;if(M.screen)M.screen();
   const o=run.lobj;if(o){const done=o.of!=null&&o.n>=o.of,l2=o.of==null?''+o.n:o.n+'/'+o.of,w=Math.max(textW(o.label),textW(l2),textW(o.extra||''))+8,h=o.extra?27:20,cx=2+Math.round(w/2);
-    panel(2,VIEW_Y+2,w+(M.bonus?10:0),h,done?'#3a5a12':'#13306b',done?'#ffd23f':M.col);if(M.bonus)b.drawImage(SPR.present,2+w,VIEW_Y+6+(h>20?3:0));text(b,o.label,cx,VIEW_Y+5,'#9fc0e8',{align:'center',outline:null});text(b,l2,cx,VIEW_Y+12,done?'#ffd23f':'#ffffff',{align:'center',outline:null});if(o.extra)text(b,o.extra,cx,VIEW_Y+19,'#ffd23f',{align:'center',outline:null});}
+    panel(2,VIEW_Y+2,w+(M.bonus?12:0),h,done?'#3a5a12':'#13306b',done?'#ffd23f':M.col);if(M.bonus){const L0=run.lab||{},pr=L0.prox||0,ix=2+w+1,iy=VIEW_Y+2+Math.round((h-8)/2)-(pr>0?Math.round(Math.abs(Math.sin(tNow*(3+pr*12)))*(1+pr*2)):0);b.drawImage(GOLDP,ix,iy);if(L0.gift){R(b,ix+4,iy+4,5,5,K);R(b,ix+5,iy+6,1,1,'#7fe08a');R(b,ix+6,iy+7,1,1,'#7fe08a');R(b,ix+7,iy+5,1,2,'#7fe08a');}}text(b,o.label,cx,VIEW_Y+5,'#9fc0e8',{align:'center',outline:null});text(b,l2,cx,VIEW_Y+12,done?'#ffd23f':'#ffffff',{align:'center',outline:null});if(o.extra)text(b,o.extra,cx,VIEW_Y+19,'#ffd23f',{align:'center',outline:null});}
   const t=run.lab?run.lab.t:0;if(t<(G.def.teach?5:4)&&!run.ended){const cd=G.def.teach?5:4,a=t<0.25?t/0.25:t>cd-0.5?(cd-t)/0.5:1,y=VIEW_Y+46-Math.round((1-Math.min(1,t/0.25))*16);b.globalAlpha=Math.max(0,Math.min(1,a));
-    panel(8,y,164,M.bonus?46:36,'#13306b',M.col);if(G.def.bonus){panel(44,y-14,92,13,'#5c3a00','#ffd23f');text(b,'BONUS TWIST!',W/2,y-11,'#ffd23f',{align:'center',outline:null});}text(b,(G.def.teach?'NEW! ':'')+M.name,W/2,y+5,M.col,{align:'center',scale:2});text(b,M.rule,W/2,y+23,'#ffffff',{align:'center',outline:null});if(M.bonus){const bw2=textW(M.bonus);b.drawImage(SPR.present,Math.round(W/2-bw2/2-6),y+31);text(b,M.bonus,W/2+5,y+33,'#ffd23f',{align:'center',outline:null});}b.globalAlpha=1;}}
+    panel(8,y,164,M.bonus?46:36,'#13306b',M.col);if(G.def.bonusTwist){panel(44,y-14,92,13,'#5c3a00','#ffd23f');text(b,'BONUS TWIST!',W/2,y-11,'#ffd23f',{align:'center',outline:null});}text(b,(G.def.teach?'NEW! ':'')+M.name,W/2,y+5,M.col,{align:'center',scale:2});text(b,M.rule,W/2,y+23,'#ffffff',{align:'center',outline:null});if(M.bonus){const bw2=textW(M.bonus);b.drawImage(GOLDP,Math.round(W/2-bw2/2-6),y+31);text(b,M.bonus,W/2+5,y+33,'#ffd23f',{align:'center',outline:null});}b.globalAlpha=1;}}
 // ---------------- the lab screen ----------------
 const LAB_EV=['blizzard','presents','goldrush','yetihunt','snowroll','blackice','snowday','timeattack','forts','stars'];
 const LAB_JOBS={blizzard:['maple','lot','lane','switchbacks'],presents:['maple','village','parade','northpole'],goldrush:['gardens','village','street','mainst'],yetihunt:['park','farmyard','mansion','chalets'],
@@ -874,21 +874,22 @@ MODES.blackice={name:'BLACK ICE',sub:'SLIDE, DRIFT, SCORE',rule:'LONGER DRIFT = 
   how:['WHAT YOU CLEAR IS BLACK ICE.','TURN WHILE YOU SLIDE TO DRIFT:','SPARKS GO BLUE, ORANGE, PURPLE.','LET GO FOR COINS AND A TURBO.','DRIFT AGAIN FAST TO CHAIN. CRASH: LOST.'],
   post(g){for(let k=0;k<g.ground.length;k+=3){g.ground[k]=g.ground[k]*0.45+190*0.55;g.ground[k+1]=g.ground[k+1]*0.45+224*0.55;g.ground[k+2]=g.ground[k+2]*0.45+252*0.55;}labPaint(g,0,0,g.pw,g.ph);},
   tick(dt,tid,L){if(L.dr==null){L.dr=0;L.best=0;L.off=0;L.inv0=P.inv;L.sc=0;}const sp=Math.hypot(P.vx,P.vy),fv=[[0,-1],[1,0],[0,1],[-1,0]][P.f],cos=sp>1?(P.vx*fv[0]+P.vy*fv[1])/sp:1;
-    const fi=(clamp(Math.floor(P.y/2),0,G.rows-1))*G.cols+clamp(Math.floor(P.x/2),0,G.cols-1),ice=G.depth[fi]<CLEAR_T,drifting=ice&&sp>moveSpeed()*0.4&&cos<0.85&&!(P.stun>0);
+    const fi=(clamp(Math.floor(P.y/2),0,G.rows-1))*G.cols+clamp(Math.floor(P.x/2),0,G.cols-1),ice=G.depth[fi]<CLEAR_T,drifting=ice&&sp>moveSpeed()*0.35&&cos<0.92&&!(P.stun>0);
     if(P.inv>L.inv0+0.3&&L.dr>0.3){addFloat(P.x,P.y-30,'WIPEOUT!','#ff9aa8',0.9);L.dr=0;L.tier=0;L.ch=0;}L.inv0=P.inv;
-    if(drifting){const before=L.dr;L.dr+=dt*sp/40;L.off=0;const tier=L.dr>=3?3:L.dr>=1.6?2:L.dr>=0.6?1:0;if(tier>(L.tier||0)){L.tier=tier;sfx('combo',0,{rate:0.9+tier*0.25,vol:0.5});addFloat(P.x,P.y-36,['','BLUE SPARKS','ORANGE SPARKS','PURPLE SPARKS!'][tier],DRIFTC[tier],0.7);}if(tier&&Math.random()<dt*30){const rx=P.x-fv[0]*10,ry=P.y-fv[1]*10;particles.push({x:rx+rnd(-5,5),y:ry+rnd(-3,3),vx:rnd(-30,30)-fv[0]*20,vy:rnd(-30,30)-fv[1]*20,z:2,vz:rnd(10,30),life:0.3,t:0,kind:'conf',c:DRIFTC[tier]});}if(Math.random()<dt*24){const bx=P.x-fv[0]*10,by=P.y-fv[1]*10;particles.push({x:bx+rnd(-6,6),y:by+rnd(-4,4),vx:-P.vx*0.3+rnd(-20,20),vy:-P.vy*0.3+rnd(-20,20),z:1,vz:rnd(5,20),life:0.4,t:0,kind:'snow'});}
+    if(drifting){const before=L.dr;L.dr+=dt*sp/40;L.off=0;const tier=driftTier(L.dr);if(tier>(L.tier||0)){L.tier=tier;sfx('combo',0,{rate:0.9+tier*0.25,vol:0.5});addFloat(P.x,P.y-36,['','BLUE SPARKS','ORANGE SPARKS','PURPLE SPARKS!'][tier],DRIFTC[tier],0.7);}if(tier&&Math.random()<dt*30){const rx=P.x-fv[0]*10,ry=P.y-fv[1]*10;particles.push({x:rx+rnd(-5,5),y:ry+rnd(-3,3),vx:rnd(-30,30)-fv[0]*20,vy:rnd(-30,30)-fv[1]*20,z:2,vz:rnd(10,30),life:0.3,t:0,kind:'conf',c:DRIFTC[tier]});}if(Math.random()<dt*24){const bx=P.x-fv[0]*10,by=P.y-fv[1]*10;particles.push({x:bx+rnd(-6,6),y:by+rnd(-4,4),vx:-P.vx*0.3+rnd(-20,20),vy:-P.vy*0.3+rnd(-20,20),z:1,vz:rnd(5,20),life:0.4,t:0,kind:'snow'});}
       if(Math.floor(L.dr*3)!==Math.floor(before*3))sfx('scrape',0,{vol:0.22,rate:1.3+Math.min(0.6,L.dr*0.1)});}
-    else if(L.dr>0){L.off+=dt;if(L.off>0.25){if(L.dr>=0.6){const tier=L.dr>=3?3:L.dr>=1.6?2:1;L.ch=(L.t-(L.lastEnd||-9)<2.2)?Math.min(5,(L.ch||1)+1):1;L.lastEnd=L.t;const mult=1+0.25*(L.ch-1),u=Math.min(3,0.25*L.dr*L.dr+0.3*L.dr)*mult;labPay(P.x,P.y-26,u,(L.ch>1?'X'+L.ch+' ':'')+(tier===3?'MEGA DRIFT!':tier===2?'GREAT DRIFT!':'DRIFT!'),DRIFTC[tier]);run.turbo=[0,0.5,0.9,1.3][tier];addFloat(P.x,P.y-16,'MINI-TURBO!','#ffffff',0.7);sfx('whoosh',0,{rate:1.2+tier*0.1,vol:0.5});for(let k=0;k<10+tier*6;k++)particles.push({x:P.x-fv[0]*10,y:P.y-fv[1]*10,vx:-fv[0]*rnd(40,90)+rnd(-20,20),vy:-fv[1]*rnd(40,90)+rnd(-20,20),z:2,vz:rnd(10,30),life:0.35,t:0,kind:'conf',c:DRIFTC[tier]});L.best=Math.max(L.best,L.dr);L.sc++;if(tier===3){L.purp=(L.purp||0)+1;if(L.purp>=3)labGoldGift(P.x,P.y-40,'DRIFT KING!');}}L.dr=0;L.tier=0;}}
+    else if(L.dr>0){L.off+=dt;if(L.off>0.4){if(L.dr>=DRIFT_T[0]){const tier=driftTier(L.dr);L.ch=(L.t-(L.lastEnd||-9)<2.2)?Math.min(5,(L.ch||1)+1):1;L.lastEnd=L.t;const mult=1+0.25*(L.ch-1),u=driftPay(L.dr)*mult;labPay(P.x,P.y-26,u,(L.ch>1?'X'+L.ch+' ':'')+(tier===3?'MEGA DRIFT!':tier===2?'GREAT DRIFT!':'DRIFT!'),DRIFTC[tier]);run.turbo=[0,0.5,0.9,1.3][tier];addFloat(P.x,P.y-16,'MINI-TURBO!','#ffffff',0.7);sfx('whoosh',0,{rate:1.2+tier*0.1,vol:0.5});for(let k=0;k<10+tier*6;k++)particles.push({x:P.x-fv[0]*10,y:P.y-fv[1]*10,vx:-fv[0]*rnd(40,90)+rnd(-20,20),vy:-fv[1]*rnd(40,90)+rnd(-20,20),z:2,vz:rnd(10,30),life:0.35,t:0,kind:'conf',c:DRIFTC[tier]});L.best=Math.max(L.best,L.dr);L.sc++;if(tier===3){L.purp=(L.purp||0)+1;if(L.purp>=3)labGoldGift(P.x,P.y-40,'DRIFT KING!');}}L.dr=0;L.tier=0;}}
     labObj('PURPLE',L.purp||0,3,L.ch>1&&L.t-L.lastEnd<2.2?'CHAIN X'+L.ch:'');},
-  over(cy){const L=run.lab;if(L&&L.dr>0.6){const tier=L.dr>=3?3:L.dr>=1.6?2:1,mult=1+0.25*(((L.t-(L.lastEnd||-9)<2.2)?Math.min(5,(L.ch||1)+1):1)-1),c=Math.round(labUnit()*Math.min(3,0.25*L.dr*L.dr+0.3*L.dr)*mult);text(b,'+'+fmt(c),P.x,P.y-32-tier*2,DRIFTC[tier],{align:'center',scale:tier>=2?2:1});const w=24,f2=tier===3?1:tier===2?(L.dr-1.6)/1.4:(L.dr-0.6)/1;R(b,P.x-w/2-1,P.y-24,w+2,4,K);R(b,P.x-w/2,P.y-23,Math.round(w*Math.max(0,Math.min(1,f2))),2,DRIFTC[tier]);}}};
+  over(cy){const L=run.lab;if(L&&L.dr>DRIFT_T[0]){const tier=driftTier(L.dr),mult=1+0.25*(((L.t-(L.lastEnd||-9)<2.2)?Math.min(5,(L.ch||1)+1):1)-1),c=Math.round(labUnit()*driftPay(L.dr)*mult);text(b,'+'+fmt(c),P.x,P.y-32-tier*2,DRIFTC[tier],{align:'center',scale:tier>=2?2:1});const w=24,f2=tier===3?1:(L.dr-DRIFT_T[tier-1])/(DRIFT_T[tier]-DRIFT_T[tier-1]);R(b,P.x-w/2-1,P.y-24,w+2,4,K);R(b,P.x-w/2,P.y-23,Math.round(w*Math.max(0,Math.min(1,f2))),2,DRIFTC[tier]);}}};
 // ---------- SNOW DAY: mega blade, faster plow, three times the snow ----------
-MODES.snowday={name:'SNOW DAY',sub:'FILL THE METER, GO MEGA',rule:'PLOW TO FILL THE METER',bonus:'GO MEGA 3 TIMES: GOLD GIFT',col:'#e8f0ff',
-  how:['THE SNOW COMES DOWN TWICE AS','FAST. EVERY SCOOP FILLS THE SNOW','DAY METER. FULL: 8 SECONDS OF','MEGA BLADE, MORE SPEED AND','DOUBLE COINS. COINS X1.5.'],
+MODES.snowday={name:'SNOW DAY',sub:'FILL THE METER, GO MEGA',rule:'IT FILLS BACK IN: KEEP PLOWING',bonus:'GO MEGA 3 TIMES: GOLD GIFT',col:'#e8f0ff',
+  how:['IT IS SNOWING HARD: CLEARED','GROUND FILLS BACK IN. EVERY SCOOP','FILLS THE SNOW DAY METER. FULL:','8 SECONDS OF MEGA BLADE, SPEED','AND DOUBLE COINS. COINS X1.5.'],
   tick(dt,tid,L){const g2=run.lastGot||0;if(L.meter==null){L.meter=0;L.mega=0;L.n=0;}const need=Math.max(120,G.clearable*0.09);
     if(!(L.mega>0)){L.meter+=g2/need;if(L.meter>=1){L.meter=0;L.mega=8;L.n++;G.def.value*=2;shake=Math.max(shake,0.3);buzz(50);sfx('fanfare');sfx('whoosh');addFloat(P.x,P.y-34,'SNOW DAY! MEGA BLADE!','#ffffff',1.6);labRing(P.x,P.y,30);labBurst(P.x,P.y,30,'snow',110);if(L.n>=3)labGoldGift(P.x,P.y-48,'SNOW DAY CHAMP!');}}
     else{L.mega-=dt;if(g2>2&&Math.random()<0.6){const fv=[[0,-1],[1,0],[0,1],[-1,0]][P.f],bw=bladeCells();labBurst(P.x+fv[0]*20+rnd(-bw,bw)*Math.abs(fv[1]),P.y+fv[1]*20+rnd(-bw,bw)*Math.abs(fv[0]),2,'snow',70);}if(L.mega<=0){L.mega=0;G.def.value/=2;addFloat(P.x,P.y-28,'MEGA OVER: FILL IT AGAIN!','#e8f0ff',1.1);sfx('cend');}}
+    {const y0=Math.max(0,Math.floor(camY/2)-10),y1=Math.min(G.rows-1,Math.floor((camY+VIEW_H)/2)+10),K2=Math.round(150*dt*30);for(let q=0;q<K2;q++){const cy=y0+((Math.random()*(y1-y0+1))|0),cx=(Math.random()*G.cols)|0,i=cy*G.cols+cx;if(G.type[i]===T_BLOCK||(G.nc&&G.nc[i]))continue;const d=G.depth[i];if(d<0.92)setDepth(G,i,Math.min(1,d+0.12));}}
     labObj('MEGA',L.n,3,L.mega>0?Math.ceil(L.mega)+'S LEFT':Math.floor(L.meter*100)+'%');},
-  screen(){const L=run.lab;if(!L||L.meter==null)return;const x=W/2-40,y=VIEW_Y+VIEW_H-22,w=80,f2=L.mega>0?L.mega/8:L.meter;R(b,x-1,y-1,w+2,8,K);R(b,x,y,w,6,'#13306b');R(b,x,y,Math.round(w*f2),6,L.mega>0?(Math.floor(tNow*8)%2?'#ffffff':'#ffd23f'):'#9fd8ff');text(b,L.mega>0?'MEGA BLADE!':'SNOW DAY METER',W/2,y-9,L.mega>0?'#ffd23f':'#ffffff',{align:'center'});}};
+  screen(){const L=run.lab;if(!L||L.meter==null)return;sdFlakes();const x=W/2-40,y=VIEW_Y+VIEW_H-22,w=80,f2=L.mega>0?L.mega/8:L.meter;R(b,x-1,y-1,w+2,8,K);R(b,x,y,w,6,'#13306b');R(b,x,y,Math.round(w*f2),6,L.mega>0?(Math.floor(tNow*8)%2?'#ffffff':'#ffd23f'):'#9fd8ff');text(b,L.mega>0?'MEGA BLADE!':'SNOW DAY METER',W/2,y-9,L.mega>0?'#ffd23f':'#ffffff',{align:'center'});}};
 // ---------- TIME ATTACK: half time, triple coins; a clock always waits ahead ----------
 MODES.timeattack={name:'TIME ATTACK',sub:'HALF TIME, CHASE THE CLOCKS',rule:'GRAB CLOCKS FOR MORE TIME',col:'#7fe08a',
   how:['HALF THE TIME, TRIPLE THE COINS.','A CLOCK ALWAYS WAITS SOMEWHERE','NEAR YOU: GRAB IT FOR +5 SECONDS','AND THE NEXT ONE APPEARS.'],
@@ -1091,7 +1092,7 @@ const SFX_VOL={cfade:0.42,cend:0.5,click:0.5,deny:0.55,buy:0.7,coin:0.32,grab:0.
   fanfare:0.8,trophy:0.75,end:0.6,win:0.8,go:0.6,neighbour:0.7,daily:0.7,warn:0.5,squall:0.55,flump:0.6,throw:0.5,splat:0.55,whoosh:0.5,horn:0.45,moo:0.7,crunch:0.8,stomp:0.6};
 let AC=null,master=null,musicBus=null,sfxBus=null,noiseBuf=null;const BUF={};let audioLoading=false,curMusic=null,musicNode=null,musicGainNode=null,musicWant=null;
 const loopNodes={};
-function audioInit(){if(AC){if(AC.state==='suspended')Promise.resolve(AC.resume()).catch(()=>{});return;}
+function audioInit(){if(AC){if(AC.state!=='running')Promise.resolve(AC.resume()).catch(()=>{});return;}
   try{AC=new (window.AudioContext||window.webkitAudioContext)();master=AC.createGain();master.gain.value=0.9;master.connect(AC.destination);
     musicBus=AC.createGain();musicBus.gain.value=save.musicOff?0:1;musicBus.connect(master);sfxBus=AC.createGain();sfxBus.gain.value=save.muted?0:1;sfxBus.connect(master);
     noiseBuf=AC.createBuffer(1,AC.sampleRate*0.5,AC.sampleRate);const d=noiseBuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;}catch(e){AC=null;return;}
@@ -2963,7 +2964,7 @@ function drawLoading(){if(!pendingStart)return;pendingStart.f++;const L=LEVELS[p
   text(b,'GETTING THE PLOW READY',W/2,156,'#9fd8ff',{align:'center',outline:null});for(let k=0;k<3;k++)R(b,W/2-6+k*5,165,3,3,k===Math.floor(tNow*6)%3?'#ffd23f':'#4f6fa0');}
 const OVC=new Map();
 function startLevel(idx,opts){offerOpen=null;evOpen=false;if(!(opts&&opts.challenge))save.lastJob=LEVELS[idx].id;weeklyOpen=false;storyOpen=null;jobInfo=-1;skinFor=null;ridePeek=null;rideReveal=null;outfitsOpen=false;trailsOpen=false;bookOpen=false;dailyOpen=false;winterOpen=false;shopOpen=false;trophiesOpen=false;
-  G=evBuild(idx,opts);settleMovers();P={x:G.start.x,y:G.start.y,f:2,stun:0,inv:0,bob:0,walkT:0,load:0,bumpCd:0,fr:0,frT:0};
+  G=evBuild(idx,opts);settleMovers();P={x:G.start.x,y:G.start.y,f:G.start.y>G.ph*0.5?0:2,stun:0,inv:0,bob:0,walkT:0,load:0,bumpCd:0,fr:0,frT:0};
   run={time:G.def.time,earned:0,combo:0,comboProg:0,comboT:0,pending:0,pendT:0,ended:false,moved:false,snowAcc:0,res:null,sprayAcc:0,
     squallT:G.def.squall?G.def.squall*0.6:0,squall:null,gold:0,hits:0,gifts:0,boost:save.boostNext,adUsed:false,iceShown:false,nbT:0,challenge:opts&&opts.challenge||null,event:opts&&opts.event||null};
   save.boostNext=false;P.vx=0;P.vy=0;if(run.challenge&&G.driveKey)G.driveKey=null;if(run.challenge)G.part=null;if(!run.challenge&&missionOn(idx)){run.mission=LEVELS[idx].tool;run.rideT=null;G.driveKey=null;G.part=null;_tc.k='';addFloat(P.x,P.y-30,'MISSION: 2 STARS KEEPS IT','#ffd23f',2.2);}
@@ -3033,7 +3034,7 @@ function evJobs(ev){const open=[];LEVELS.forEach((L,i)=>{if(!L.tool&&!L.boss&&L.
   for(const i of pool)if(out.length<3&&!out.includes(i))out.push(i);return out;}
 function evBuild(idx,opts){const ev=opts&&opts.event?EVENTS.find(e=>e.id===opts.event):null;
   if(!ev){let ta=(opts&&opts.twist)||twistOf(idx),bon=false;if(!ta&&labBonusDue(idx,opts)){ta=LEVELS[idx].area;bon=true;}const mk2=ta&&TWISTS[ta];if(!mk2)return buildLevel(idx);const L=LEVELS[idx],c=Object.assign({},L);
-    c.mode=mk2;c.twist=ta;c.teach=!bon&&twistJobs(ta)[0]===idx;c.bonus=bon?1:0;if(bon){save.labCruise=0;track('lab_bonus_twist',{job:L.id,twist:mk2});}LEVELS[idx]=c;try{const g=buildLevel(idx);labPost(g);return g;}finally{LEVELS[idx]=L;}}
+    c.mode=mk2;c.twist=ta;c.teach=!bon&&twistJobs(ta)[0]===idx;c.bonusTwist=bon?1:0;if(bon){save.labCruise=0;track('lab_bonus_twist',{job:L.id,twist:mk2});}LEVELS[idx]=c;try{const g=buildLevel(idx);labPost(g);return g;}finally{LEVELS[idx]=L;}}
   const L=LEVELS[idx],m=EVENT_DEFS[ev.kind].mod,c=Object.assign({},L);if(m.snow)c.snowfall=L.snowfall*m.snow;if(m.squall)c.squall=L.squall?Math.min(L.squall,m.squall):m.squall;if(m.gust)c.gust=1;if(m.deep){c.deep=1;c.time=Math.round(L.time*(1+DEEP_TIME*deepDrag(TOOLS[useIdx()].id)));}if(m.presents)c.presents=Math.round(L.presents*m.presents);if(m.value)c.value=L.value*m.value;
   if(m.mode)c.mode=m.mode;if(m.half)c.time=Math.round(L.time*0.55);
   LEVELS[idx]=c;try{const g=buildLevel(idx);labPost(g);return g;}finally{LEVELS[idx]=L;}}
@@ -4618,7 +4619,8 @@ function drawUfoFly(dt){if(overlayOpen())return;if(!ufoFly){ufoNext-=dt;if(ufoNe
     if((save.ufoN||0)<3){save.ufoN=(save.ufoN||0)+1;save.gems=(save.gems||0)+1;showToast('+1 GEM! IT WILL BE BACK...','#8fe8a8');}else showToast('IT ZOOMED OFF...','#8fe8a8');persist();});}
 // ---- map screen ----
 let mapDrawT=null,weeklyTab=0,ridePeek=null,rideReveal=null;
-function drawMap(){const dt=mapDrawT==null?0:Math.min(0.05,Math.max(0,tNow-mapDrawT));mapDrawT=tNow;ensureMapArt();
+const LIST_TOGGLE=false; // Nov 21: map only (Alex); true brings back the map/list switcher
+function drawMap(){const dt=mapDrawT==null?0:Math.min(0.05,Math.max(0,tNow-mapDrawT));mapDrawT=tNow;ensureMapArt();if(!LIST_TOGGLE&&save.mapView==='list')save.mapView='map';
   if(save.mapView==='list')drawJobList(dt);else drawWorld(dt);drawMapChrome();}
 // ---------------- FOG OF WAR ----------------
 const AREA_SEQ=['suburbs','farm','city','themepark','harbour','ski','pass','north'];
@@ -4737,14 +4739,15 @@ function drawMapChrome(){
   if(tNew){badge(19,by-3,''+(tc-(save.bookSeen||0)));const bob=Math.round(Math.abs(Math.sin(tNow*4))*3);R(b,11,by-8-bob,7,2,K);R(b,12,by-6-bob,5,2,K);R(b,13,by-4-bob,3,2,K);R(b,12,by-8-bob,5,1,'#ffd23f');R(b,13,by-6-bob,3,1,'#ffd23f');R(b,14,by-5-bob,1,1,'#ffd23f');
     const t='NEW TREASURE!',tw=textW(t)+6;R(b,3,by-20-bob,tw,9,K);R(b,4,by-19-bob,tw-2,7,'#e0397a');text(b,t,6,by-18-bob,'#ffffff',{outline:null});}
   else if(tc)text(b,''+tc,24,by+10,'#ffd23f');
-  if(dailyOn()){button('weekly',29,by,44,18,'gold','WEEKLY',()=>{weeklyOpen=true;weeklyTab=0;save.weeklySeen=weekNo();sfx('click');persist();});if(!weeklyState().claimed&&save.weeklySeen!==weekNo()){R(b,68,by-2,6,6,K);R(b,69,by-1,4,4,'#e8283f');}}
-  button('shopb',121,by,40,18,'green','SHOP',()=>{shopTab=0;save.offers=save.offers||{};save.offers.seenShop=true;openShop();});
+  const ww=LIST_TOGGLE?44:62,sx=LIST_TOGGLE?121:95,sw=LIST_TOGGLE?40:66;
+  if(dailyOn()){button('weekly',29,by,ww,18,'gold','WEEKLY',()=>{weeklyOpen=true;weeklyTab=0;save.weeklySeen=weekNo();sfx('click');persist();});if(!weeklyState().claimed&&save.weeklySeen!==weekNo()){R(b,29+ww-5,by-2,6,6,K);R(b,29+ww-4,by-1,4,4,'#e8283f');}}
+  button('shopb',sx,by,sw,18,'green','SHOP',()=>{shopTab=0;save.offers=save.offers||{};save.offers.seenShop=true;openShop();});
   if(dailyOn()&&!save.starter&&!(save.offers&&save.offers.seenShop)){R(b,156,by-2,6,6,K);R(b,157,by-1,4,4,'#e8283f');}
-  // map / list toggle
-  const tx=77,lv=save.mapView==='list';R(b,tx,by,40,18,K);R(b,tx+1,by+1,19,16,lv?'#1d4f9a':'#ffd23f');R(b,tx+20,by+1,19,16,lv?'#ffd23f':'#1d4f9a');R(b,tx+1,by+1,19,1,lv?'#3f6fb8':'#fff1a0');R(b,tx+20,by+1,19,1,lv?'#fff1a0':'#3f6fb8');
+  // map / list toggle (hidden while LIST_TOGGLE is false)
+  if(LIST_TOGGLE){const tx=77,lv=save.mapView==='list';R(b,tx,by,40,18,K);R(b,tx+1,by+1,19,16,lv?'#1d4f9a':'#ffd23f');R(b,tx+20,by+1,19,16,lv?'#ffd23f':'#1d4f9a');R(b,tx+1,by+1,19,1,lv?'#3f6fb8':'#fff1a0');R(b,tx+20,by+1,19,1,lv?'#fff1a0':'#3f6fb8');
   {const x=tx+5,y=by+5,c1=lv?'#9fc0e8':'#13306b';R(b,x,y,10,8,c1);R(b,x+3,y,1,8,lv?'#1d4f9a':'#ffd23f');R(b,x+6,y,1,8,lv?'#1d4f9a':'#ffd23f');R(b,x+1,y+2,1,1,'#e03a4e');R(b,x+7,y+5,2,1,'#e03a4e');}
   {const x=tx+24,y=by+5,c1=lv?'#13306b':'#9fc0e8';for(let k=0;k<3;k++){R(b,x,y+k*3,2,2,c1);R(b,x+3,y+k*3,8,2,c1);}}
-  btn('vmap',tx,by,20,18,()=>{if(save.mapView!=='map'){save.mapView='map';sfx('click');persist();}});btn('vlist',tx+20,by,20,18,()=>{if(save.mapView!=='list'){save.mapView='list';sfx('click');persist();}});
+  btn('vmap',tx,by,20,18,()=>{if(save.mapView!=='map'){save.mapView='map';sfx('click');persist();}});btn('vlist',tx+20,by,20,18,()=>{if(save.mapView!=='list'){save.mapView='list';sfx('click');persist();}});}
   if(save.lv.helpers>0){const ft='+'+fmtR(helperIncome())+'/S',fw=textW(ft)+17,bx=W-fw-6;panel(bx,by-17,fw,13,'#13306b','#4f8fdc');const hx=bx+4,hy=by-14;R(b,hx+2,hy,3,1,'#ffffff');R(b,hx+1,hy+1,5,1,'#ffffff');R(b,hx,hy+2,7,1,'#ffffff');R(b,hx+1,hy+3,5,4,'#3f86d6');R(b,hx+3,hy+5,1,2,'#ffd23f');text(b,ft,bx+11+(fw-11)/2,by-13,'#9fd8ff',{align:'center',outline:null});btn('gohome',bx,by-19,fw,17,()=>{sfx('click');goHome();});}}
 // ---- job card ----
 function drawJobInfo(){const i=jobInfo,L=LEVELS[i],st=nodeState(i),open=st==='open'||st==='fresh',avail=st!=='mystery',wild=L.area==='secret';
@@ -5416,7 +5419,7 @@ setInterval(persist,5000);
 
 // ================= LAB rev 3 (Nov 20) =================
 function labHintOn(){const L=run.lab;if(!L)return false;const M=labM();return !!(M&&M.arrows)||!!L.urgent||L.t<3||L.hintT>0;}
-function labGoldGift(x,y,label){const L=run.lab;if(!L||L.gift)return 0;L.gift=1;const c=Math.max(1,Math.round(labUnit()*(G.def.bonus?7:5)));earn(c);
+function labGoldGift(x,y,label){const L=run.lab;if(!L||L.gift)return 0;L.gift=1;const c=Math.max(1,Math.round(labUnit()*(G.def.bonusTwist?7:5)));earn(c);
   addFloat(x,y-12,label||'DONE!','#7fe08a',2);addFloat(x,y-2,'GOLD GIFT'+cplus(c),'#ffd23f',2.2);sfx('fanfare');sfx('gift');buzz(40);shake=Math.max(shake,0.15);
   const CF=['#ff4fa3','#ffd23f','#7ad3ff','#9cff7a','#ff7a3a','#ffffff'];for(let k=0;k<40;k++)particles.push({x,y,vx:rnd(-70,70),vy:rnd(-40,20),z:4,vz:rnd(30,70),life:rnd(1,1.5),t:0,kind:'conf',c:CF[k%6]});
   for(let k=0;k<14;k++)particles.push({x,y,vx:rnd(-50,50),vy:rnd(-40,10),z:3,vz:rnd(30,70),life:0.8,t:0,kind:'coin'});if(run.labRes)run.labRes.gift=true;return c;}
@@ -5630,9 +5633,9 @@ MODES.presenthunt={name:'PRESENT HUNT',sub:'DIG UP THE GOLDEN PRESENTS',rule:'FO
       if((gp.cells.length&&clr/gp.cells.length>=0.5)||labTouch(tid,{x:gp.x-4,y:gp.y-4,w:8,h:8})){gp.found=1;gp.pop=0;L.found++;labPay(gp.x,gp.y-16,1.5,'GOLDEN PRESENT!','#ffd23f');labRing(gp.x,gp.y,14);labBurst(gp.x,gp.y,18,'coin',70);sfx('gift');sfx('gold',0,{rate:1.3});buzz(25);
         if(L.found>=S.n)labGoldGift(P.x,P.y-44,'ALL 5 FOUND!');continue;}
       if(d<nd){nd=d;near=gp;}}
-    L.nd=nd;if(near&&nd<180){L.jt-=dt;if(L.jt<=0){const k=nd/180;L.jt=0.18+k*1.1;sfx('tick',0,{rate:1.7+(1-k)*0.6,vol:0.12+0.4*(1-k)});near.ping=0.25;}}
+    L.nd=nd;L.prox=near&&nd<180?1-nd/180:0;if(near&&nd<180){L.jt-=dt;if(L.jt<=0){const k=nd/180;L.jt=0.22+k*1.0;sfx('star1',0,{rate:0.95+(1-k)*0.45,vol:0.35+0.6*(1-k)});near.ping=0.25;}}
     for(const gp of S.gp)if(gp.ping>0)gp.ping-=dt;
-    labObj('GOLD PRESENTS',L.found,S.n,near&&nd<180?(nd<45?'HOT!':nd<100?'WARM':'COLD'):'');L.tgt=near?{x:near.x,y:near.y}:null;},
+    labObj('GOLD PRESENTS',L.found,S.n);L.tgt=near?{x:near.x,y:near.y}:null;},
   screen(){const L=run.lab;if(L&&L.tgt)labArrow(L.tgt.x,L.tgt.y,'#ff8fc8');},
   ents(ents,top,bot){const S=G.lab,L=run.lab;if(!S.gp)return;for(const gp of S.gp){if(gp.y<top-20||gp.y>bot+20)continue;
     if(gp.found){if(gp.pop<1)ents.push({base:gp.y+20,draw:()=>{const k=gp.pop,y=Math.round(gp.y-6-k*18);b.globalAlpha=Math.max(0,1-k*0.8);b.drawImage(GOLDP,gp.x-4,y);b.globalAlpha=1;}});continue;}
@@ -5645,7 +5648,10 @@ function yetiMap(Y){const fp0=footprint(TOOLS[useIdx()].id,0,0,0),sz=Math.max(Y.
   const pc=clamp(Math.floor(P.x/cs),0,cols-1),pr=clamp(Math.floor((P.y-y0)/cs),0,rows-1),q=[pr*cols+pc],d=new Float32Array(n).fill(1e9);d[q[0]]=Math.max(0,(P.y<y0?y0-P.y:P.y>y1?P.y-y1:0)/cs);
   for(let i=0;i<q.length;i++){const k=q[i],x=k%cols,y=(k/cols)|0;for(const [ax,ay] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+ax,ny=y+ay;if(nx<0||ny<0||nx>=cols||ny>=rows)continue;const nk=ny*cols+nx;if(!pass[nk]||d[nk]<1e9)continue;d[nk]=d[k]+1;q.push(nk);}}
   for(let k=0;k<n;k++){if(pass[k]&&d[k]>=1e9)pass[k]=0;if(pass[k])F[k]=-1.3*d[k];}
+  const cl=new Uint8Array(n).fill(9),cq=[];for(let k=0;k<n;k++){const x=k%cols,y=(k/cols)|0;if(!pass[k]){cl[k]=0;cq.push(k);}else if(x===0||x===cols-1){cl[k]=1;cq.push(k);}}
+  for(let i=0;i<cq.length;i++){const k=cq[i],x=k%cols,y=(k/cols)|0;if(cl[k]>=4)continue;for(const [ax,ay] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+ax,ny=y+ay;if(nx<0||ny<0||nx>=cols||ny>=rows)continue;const nk=ny*cols+nx;if(cl[nk]>cl[k]+1){cl[nk]=cl[k]+1;cq.push(nk);}}}
   for(let sw=0;sw<4;sw++){const fw=sw%2===0;for(let t=0;t<n;t++){const k=fw?t:n-1-t;if(!pass[k])continue;const x=k%cols,y=(k/cols)|0;let m=F[k];if(x>0&&pass[k-1])m=Math.min(m,F[k-1]+1);if(x<cols-1&&pass[k+1])m=Math.min(m,F[k+1]+1);if(y>0&&pass[k-cols])m=Math.min(m,F[k-cols]+1);if(y<rows-1&&pass[k+cols])m=Math.min(m,F[k+cols]+1);F[k]=m;}}
+  for(let k=0;k<n;k++)if(pass[k])F[k]+=Math.max(0,4-cl[k])*1.8;
   return {cs,cols,rows,y0,F,pass};}
 function yetiSpawn(L,round){const p=nugSpot(110,170)||nugSpot(70,230);if(!p)return null;const Y={x:p.x-8,y:Math.max(30,p.y-4),w:16,h:8,vx:0,vy:0,inv:0,hits:0,st:'run',an:0,map:null,mt:0,round:round||1,leap:null};addFloat(p.x,Y.y-26,round>1?'THE YETI IS BACK!':'THERE IT IS!','#9fd8ff',1.3);sfx('warn',0,{rate:0.7,vol:0.4});return Y;}
 function yetiGift(L,x,y,n){for(let k=0;k<n;k++){const a=k/n*Math.PI*2+Math.random()*0.5,sp=rnd(30,60);L.gifts.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp*0.8,z:4,vz:rnd(30,55),t:0});}}
@@ -5672,8 +5678,8 @@ MODES.yetihunt={name:'YETI HUNT',sub:'CATCH THE PRESENT THIEF',rule:'CORNER HIM 
     if(Y.inv<=0&&labTouch(tid,{x:Y.x-2,y:Y.y-8,w:Y.w+4,h:Y.h+10})){Y.hits++;Y.inv=1.1;sfx('stomp');shake=Math.max(shake,0.18);buzz(30);HITSTOP=0.07;labBurst(cx,cy,12,'snow',70);
       if(Y.hits>=5){Y.st='give';Y.t=1.6;L.caught++;yetiGift(L,cx,cy-4,8);labPay(cx,cy-36,2,'YETI CAUGHT!','#7fe08a');addFloat(cx,cy-24,'OK OK! YOU WIN!','#ffffff',1.5);if(L.caught===1)labGoldGift(P.x,P.y-48,'SACK BURST!');else sfx('fanfare');}
       else{yetiGift(L,cx,cy-4,1);addFloat(cx,cy-34,['OOF!','HEY!','NOT FAIR!','GRRR!'][Y.hits%4],'#ffffff',0.9);
-        const M3=yetiMap(Y);let bk=-1,bv=1e9;for(let k=0;k<M3.F.length;k++){if(!M3.pass[k])continue;const x=(k%M3.cols)*M3.cs+M3.cs/2,y=M3.y0+((k/M3.cols)|0)*M3.cs+M3.cs/2,dd=Math.hypot(x-cx,y-cy);if(dd<60||dd>125)continue;if(M3.F[k]<bv){bv=M3.F[k];bk=k;}}
-        if(bk>=0){const x1=(bk%M3.cols)*M3.cs+M3.cs/2-8,y1=M3.y0+((bk/M3.cols)|0)*M3.cs+M3.cs/2-4;Y.leap={x0:Y.x,y0:Y.y,x1,y1,t:0,dur:0.6};Y.inv=1.0;sfx('whoosh',0,{rate:0.8,vol:0.5});}Y.map=null;}}
+        const M3=yetiMap(Y);let bk=-1,bv=1e9;for(let k=0;k<M3.F.length;k++){if(!M3.pass[k])continue;const x=(k%M3.cols)*M3.cs+M3.cs/2,y=M3.y0+((k/M3.cols)|0)*M3.cs+M3.cs/2,dd=Math.hypot(x-cx,y-cy);if(dd<40||dd>75)continue;if(M3.F[k]<bv){bv=M3.F[k];bk=k;}}
+        if(bk>=0){const x1=(bk%M3.cols)*M3.cs+M3.cs/2-8,y1=M3.y0+((bk/M3.cols)|0)*M3.cs+M3.cs/2-4;Y.leap={x0:Y.x,y0:Y.y,x1,y1,t:0,dur:0.45};Y.inv=1.0;sfx('whoosh',0,{rate:0.8,vol:0.5});}Y.map=null;}}
     labObj('YETI',Y.hits,5,L.caught?'CAUGHT '+L.caught:'');L.tgt={x:cx,y:cy};},
   ents(ents,top,bot){const L=run.lab;if(!L)return;for(const gq of L.gifts||[]){if(gq.y<top-10||gq.y>bot+10)continue;ents.push({base:gq.y+4,draw:()=>{if(gq.t>11&&Math.floor(tNow*8)%2)return;R(b,Math.round(gq.x)-3,Math.round(gq.y)+3,7,2,'rgba(27,31,59,0.22)');b.drawImage(SPR.present,Math.round(gq.x)-4,Math.round(gq.y-4-gq.z));}});}
     const Y=L.yeti;if(!Y||Y.st==='gone'||Y.y<top-40||Y.y>bot+30)return;const C=CHASERS.yeti;ents.push({base:Y.y+Y.h,draw:()=>{const hz2=Math.round(Y.hz||0);R(b,Math.round(Y.x)-1,Math.round(Y.y)+Y.h-2,Y.w+2,2,'rgba(27,31,59,0.25)');if(Y.inv>0&&!Y.leap&&Math.floor(tNow*12)%2)return;
@@ -5688,19 +5694,23 @@ function rollHit(B,x,y){const r=B.r*0.82,bx={x:x-r,y:y-r,w:r*2,h:r*2};if(x-B.r<1
 function rollSpawn(L,tid){const fv=[[0,-1],[1,0],[0,1],[-1,0]][P.f],sp=VSPEC[tid],front=(sp?sp.hh+sp.bt:6)+8;for(const dd of [front,front+8,front+16]){const x=P.x+fv[0]*dd,y=P.y+fv[1]*dd,B={x,y,vx:0,vy:0,r:5,snow:0,roll:0,n:(L.ball&&L.ball.n)||0,best:(L.ball&&L.ball.best)||5};if(!rollHit(B,x,y))return B;}return null;}
 function rollSmash(B,L,impact){const m=Math.max(0.7,Math.min(1.4,impact/60)),u=Math.pow(B.r/5,2)*0.22*m;B.n++;labPay(B.x,B.y-B.r-8,u,B.r>=22?'MEGA SMASH!':B.r>=14?'BIG SMASH!':'SMASH!');labBurst(B.x,B.y,Math.round(10+B.r*1.5),'snow',40+B.r*3);labRing(B.x,B.y,B.r+6);
   shake=Math.max(shake,0.1+B.r/80);sfx('crunch');if(B.r>=14){sfx('stomp');buzz(30);HITSTOP=0.06;}addSnowCircle(G,B.x,B.y,B.r*0.8,0.4);if(B.r>=22){L.megas=(L.megas||0)+1;if(L.megas>=1)labGoldGift(P.x,P.y-44,'MEGA SMASH!');}L.gone=0.7;}
-MODES.snowroll={name:'SNOWBALL ROLL',sub:'GROW A GIANT SNOWBALL',rule:'PUSH IT, GROW IT, SMASH IT',bonus:'A MEGA SMASH: GOLD GIFT',col:'#ffffff',
-  how:['PUSH THE SNOWBALL WITH YOUR PLOW:','IT ROLLS ON BY ITSELF AND GROWS','ON FRESH SNOW. SEND IT HARD INTO','A WALL TO SMASH IT AND CASH IN.','A SOFT KNOCK JUST BREAKS BITS OFF.'],
-  tick(dt,tid,L){if(L.gone>0){L.gone-=dt;if(L.gone<=0){const nb=rollSpawn(L,tid);if(nb)L.ball=nb;else L.gone=0.3;}return;}
-    let B=L.ball;if(!B){B=L.ball=rollSpawn(L,tid);if(!B)return;}
+MODES.snowroll={name:'SNOWBALL ROLL',sub:'GROW A GIANT SNOWBALL',rule:'PLOW A BALL, ROLL IT, SMASH IT',bonus:'A MEGA SMASH: GOLD GIFT',col:'#ffffff',
+  how:['PLOW SNOW AND A SNOWBALL ROLLS UP','IN FRONT OF YOU. PUSH IT: IT ROLLS','ON AND GROWS ON FRESH SNOW. SEND','IT HARD INTO A WALL TO CASH IN.','THEN PLOW UP A NEW ONE!'],
+  tick(dt,tid,L){if(L.need==null){L.need=1;L.acc=0;}if(L.gone>0){L.gone-=dt;if(L.gone<=0){L.need=1;L.acc=0;}return;}
+    if(L.need){L.acc+=run.lastGot||0;const need=ROLL_NEED;labObj('NEW BALL',Math.min(100,Math.floor(L.acc/need*100))+'%',null,'PLOW SNOW');if(L.acc>=need){const nb=rollSpawn(L,tid);if(nb){nb.snow=need*0.6;nb.r=Math.min(26,5+Math.sqrt(nb.snow)*0.3);L.ball=nb;L.need=0;addFloat(nb.x,nb.y-14,'NEW SNOWBALL!','#ffffff',1);sfx('flump',0,{rate:1.2,vol:0.6});labBurst(nb.x,nb.y,8,'snow',40);}}return;}
+    let B=L.ball;if(!B){L.need=1;L.acc=0;return;}
     // the plow pushes the ball out of its body and blade
     const boxes=[footprint(tid,P.x,P.y,P.f)];if(tid!=='ufo')boxes.push(bladeRect(tid,P.x,P.y,P.f,bladeCells()*2));let pushed=false;
     for(const q of boxes){const px=clamp(B.x,q.x,q.x+q.w),py=clamp(B.y,q.y,q.y+q.h),ex=B.x-px,ey=B.y-py,dd=Math.hypot(ex,ey);if(dd>=B.r)continue;let nx2,ny2;if(dd>0.01){nx2=ex/dd;ny2=ey/dd;}else{const fv=[[0,-1],[1,0],[0,1],[-1,0]][P.f];nx2=fv[0];ny2=fv[1];}
       B.x+=nx2*(B.r-dd);B.y+=ny2*(B.r-dd);const pv=(P.vx||0)*nx2+(P.vy||0)*ny2,bv=B.vx*nx2+B.vy*ny2,want=Math.max(0,pv)*1.12+6;if(bv<want){B.vx+=nx2*(want-bv);B.vy+=ny2*(want-bv);}pushed=true;}
-    if(pushed){const o=rollHit(B,B.x,B.y);if(o){if(B.r>=8&&o!=='edge')rollSmash(B,L,Math.hypot(P.vx||0,P.vy||0));else{B.x=clamp(B.x,B.r+1,G.pw-B.r-1);B.y=clamp(B.y,B.r+1,G.ph-B.r-1);}if(L.gone>0)return;}}
+    if(pushed){const o=rollHit(B,B.x,B.y);if(o){if(o==='edge'){B.x=clamp(B.x,B.r+1,G.pw-B.r-1);B.y=clamp(B.y,B.r+1,G.ph-B.r-1);}else if(B.r>=8)rollSmash(B,L,Math.hypot(P.vx||0,P.vy||0));else rollCrumble(B,L);if(L.gone>0)return;}}
+    {const r3=B.r*0.82;for(const ob of G.obstacles){const bx3={x:B.x-r3,y:B.y-r3,w:r3*2,h:r3*2};if(!overlap(bx3,ob))continue;const ox=Math.min(bx3.x+bx3.w,ob.x+ob.w)-Math.max(bx3.x,ob.x),oy=Math.min(bx3.y+bx3.h,ob.y+ob.h)-Math.max(bx3.y,ob.y);
+      if(Math.min(ox,oy)>4){rollCrumble(B,L);return;}if(ox<oy){const sgn=B.x<ob.x+ob.w/2?-1:1;B.x+=sgn*(ox+0.1);if(B.vx*sgn<0)B.vx=0;}else{const sgn=B.y<ob.y+ob.h/2?-1:1;B.y+=sgn*(oy+0.1);if(B.vy*sgn<0)B.vy=0;}}}
+    {const m=B.r+24;if(B.x<m)B.vx+=70*dt;if(B.x>G.pw-m)B.vx-=70*dt;if(B.y<m)B.vy+=70*dt;if(B.y>G.ph-m)B.vy-=70*dt;}
     // roll: momentum, rolling friction (big balls roll further)
     const sp=Math.hypot(B.vx,B.vy);if(sp>0){const dec=Math.max(22,55-B.r*1.3)*dt,ns=Math.max(0,sp-dec);B.vx*=ns/sp;B.vy*=ns/sp;}
     for(const ax of [0,1]){const nx=ax?B.x:B.x+B.vx*dt,ny=ax?B.y+B.vy*dt:B.y,o=rollHit(B,nx,ny);if(!o){B.x=nx;B.y=ny;continue;}const imp=Math.abs(ax?B.vy:B.vx);
-      if(o!=='edge'&&imp>34&&B.r>=8){rollSmash(B,L,imp);return;}if(ax)B.vy*=-0.35;else B.vx*=-0.35;if(imp>12&&B.snow>0){const lose=B.snow*0.14;B.snow-=lose;labBurst(B.x,B.y,6,'clump',40);sfx('flump',0,{vol:0.35,rate:1.3});addFloat(B.x,B.y-B.r-6,'CHUNKS OFF!','#c6d9f3',0.6);}}
+      if(o!=='edge'&&imp>34&&B.r>=8){rollSmash(B,L,imp);return;}if(o!=='edge'&&imp>34){rollCrumble(B,L);return;}if(ax)B.vy*=-0.35;else B.vx*=-0.35;if(imp>12&&B.snow>0){const lose=B.snow*0.14;B.snow-=lose;labBurst(B.x,B.y,6,'clump',40);sfx('flump',0,{vol:0.35,rate:1.3});addFloat(B.x,B.y-B.r-6,'CHUNKS OFF!','#c6d9f3',0.6);}}
     B.roll+=Math.hypot(B.vx,B.vy)*dt;
     const acc={got:0,cnt:0,fresh:0},r2=B.r*B.r;for(let cy=Math.max(0,Math.floor((B.y-B.r)/2));cy<=Math.min(G.rows-1,Math.floor((B.y+B.r)/2));cy++)for(let cx=Math.max(0,Math.floor((B.x-B.r)/2));cx<=Math.min(G.cols-1,Math.floor((B.x+B.r)/2));cx++){const ddx=cx*2+1-B.x,ddy=cy*2+1-B.y;if(ddx*ddx+ddy*ddy<=r2)clearCell(cy*G.cols+cx,acc);}
     if(acc.got>0){B.snow+=acc.got;earn(acc.got*BASE_CELL_VALUE*G.def.value*valueMult());}
@@ -5745,6 +5755,50 @@ function avRocks(dt,tid,A){if(!A.rk||!A.rk.length)return;const fp=footprint(tid,
     else if(o||rk.d>240||rk.y>G.ph-4)rk.dead=1;
     if(rk.dead){for(let k=0;k<8;k++)particles.push({x:rk.x,y:rk.y,vx:rnd(-40,40),vy:rnd(-30,20),z:2,vz:rnd(15,40),life:0.45,t:0,kind:'clump'});}}
   A.rk=A.rk.filter(rk=>!rk.dead);}
+// ================= LAB rev 3c (Nov 21) =================
+const ROLL_NEED=40,DRIFT_T=[0.5,1.1,1.8];
+function driftTier(d){return d>=DRIFT_T[2]?3:d>=DRIFT_T[1]?2:d>=DRIFT_T[0]?1:0;}
+function driftPay(d){return Math.min(3,0.7*d*d+0.4*d);}
+const SDF=[];function sdFlakes(){if(!SDF.length)for(let k=0;k<70;k++)SDF.push({x:Math.random()*W,y:VIEW_Y+Math.random()*VIEW_H,v:rnd(24,60),s:Math.random()<0.25?2:1});
+  b.fillStyle='rgba(255,255,255,0.85)';for(const q of SDF){q.y+=q.v/60;q.x-=q.v/240;if(q.y>VIEW_Y+VIEW_H){q.y=VIEW_Y-2;q.x=Math.random()*W;}if(q.x<-2)q.x+=W+4;b.fillRect(Math.round(q.x),Math.round(q.y),q.s,q.s);}}
+function rollCrumble(B,L){labBurst(B.x,B.y,Math.round(8+B.r),'snow',50);for(let k=0;k<6;k++)particles.push({x:B.x,y:B.y,vx:rnd(-40,40),vy:rnd(-30,20),z:2,vz:rnd(15,40),life:0.45,t:0,kind:'clump'});
+  addFloat(B.x,B.y-B.r-8,'CRUMBLED! PLOW A NEW ONE','#c6d9f3',1.1);sfx('flump',0,{vol:0.5,rate:0.9});addSnowCircle(G,B.x,B.y,Math.max(4,B.r*0.7),0.4);L.gone=0.5;}
+// ---------- TIME ATTACK rev 3c (Alex 00:40: "checkpoint zones should be smaller, something you drive through"; "hard to
+// race and collect snow"): gates you steer through instead of lines across the map; each segment's time comes from the
+// real drivable path between gates (machine-sized BFS) at 0.65x your speed; every gate pays a little ----
+function taGate(g,y,k,rn){const gw=44,xs=[g.pw*0.28,g.pw*0.5,g.pw*0.72];for(const dy of [0,-18,18,-36,36,-60,60])for(let q=0;q<3;q++){const cx=Math.round(xs[(k+q)%3]+(rn()-0.5)*16),yy=Math.round(y+dy);
+    if(yy<40||yy>g.ph-30||cx-gw/2<8||cx+gw/2>g.pw-8)continue;if(labRect(g,cx-gw/2-3,yy-18,gw+6,26))return {cx,y:yy,gw};}return null;}
+function taPath(R,ax,ay,bx,by){const st=R.st,gw=R.gw,gh=R.gh,cell=(x,y)=>{let best=-1,bd=1e9;const gx=Math.round(x/st),gy=Math.round(y/st);for(let dy=-3;dy<=3;dy++)for(let dx=-3;dx<=3;dx++){const X=gx+dx,Y=gy+dy;if(X<0||Y<0||X>=gw||Y>=gh)continue;const k=Y*gw+X;if(R.seen[k]&&dx*dx+dy*dy<bd){bd=dx*dx+dy*dy;best=k;}}return best;};
+  const a=cell(ax,ay),t=cell(bx,by);if(a<0||t<0)return -1;const d=new Int32Array(gw*gh).fill(-1),q=[a];d[a]=0;for(let i=0;i<q.length;i++){const k=q[i];if(k===t)return d[k]*st;const x=k%gw,y=(k/gw)|0;
+    for(const [ax2,ay2] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+ax2,ny=y+ay2;if(nx<0||ny<0||nx>=gw||ny>=gh)continue;const nk=ny*gw+nx;if(!R.seen[nk]||d[nk]>=0)continue;d[nk]=d[k]+1;q.push(nk);}}return -1;}
+MODES.timeattack={name:'TIME ATTACK',sub:'GATE TO GATE',rule:'DRIVE THROUGH EACH GATE IN TIME',bonus:'REACH THE FINISH: GOLD GIFT',arrows:1,col:'#7fe08a',
+  how:['THE CLOCK IS SHORT. DRIVE','THROUGH EACH CHECKPOINT GATE:','IT ADDS TIME, PAYS, AND SHOWS','YOUR SPLIT AGAINST YOUR BEST.','REACH THE FINISH FOR A BONUS!'],
+  post(g){const S=g.lab,st=g.start.y,yT=60,yB=g.ph-60,down=st<g.ph/2,tid=labTid(),v=Math.max(30,moveSpeed()*0.65),rn=srng(hashS(g.def.id)+71),R=labReachGrid(g,tid),legs=[];let y=st,dir=down?1:-1,tot=0;
+    while(tot<900||!legs.length){const end=dir>0?yB:yT,len=Math.abs(end-y);if(len<40&&legs.length)break;legs.push({y0:y,y1:end,dir,len});tot+=len;y=end;dir=-dir;if(legs.length>6)break;}
+    const n=Math.max(3,Math.min(9,Math.round((tot-80)/300))),at=d=>{let a=d;for(const L2 of legs){if(a<=L2.len)return {y:Math.round(L2.y0+L2.dir*a),dir:L2.dir};a-=L2.len;}const L3=legs[legs.length-1];return {y:L3.y1,dir:L3.dir};};
+    S.cps=[];let px=g.start.x,py=g.start.y,pd=down?1:-1;
+    for(let k=1;k<=n;k++){const q=at(80+(tot-80)*k/n-(k===n?8:0)),gt=taGate(g,q.y,k,rn);if(!gt||!labCanReach(R,gt.cx,gt.y,14))continue;const pth=taPath(R,px,py,gt.cx,gt.y),dist=pth>0?pth:Math.hypot(gt.cx-px,gt.y-py)*1.4;
+      S.cps.push({cx:gt.cx,y:gt.y,gw:gt.gw,dir:q.dir,st:0,seg:dist/v+2+(q.dir!==pd?1.5:0)});px=gt.cx;py=gt.y;pd=q.dir;}
+    S.seg=S.cps.map(c=>c.seg);g.def.time=Math.round((S.seg[0]||10)+5);S.down=down;S.key=g.def.id+':g';},
+  tick(dt,tid,L){const S=G.lab;if(!S.cps||!S.cps.length)return;if(L.k==null){L.k=0;L.py=P.y;L.e=0;L.lastTick=99;L.miss=0;}L.e+=dt;if(L.miss>0)L.miss-=dt;
+    const c=S.cps[L.k];if(c&&L.py!==P.y&&(L.py-c.y)*(P.y-c.y)<=0&&Math.sign(P.y-L.py)===c.dir){
+      if(Math.abs(P.x-c.cx)<=c.gw/2-1){c.st=1;c.e=L.e;const best=((save.labTA||{})[S.key]||[]),last=L.k===S.cps.length-1,diff=best[L.k]!=null?L.e-best[L.k]:null;c.diff=diff;
+        if(!last){const add=Math.round(S.seg[L.k+1]*10)/10;run.time+=add;addFloat(P.x,P.y-30,'CHECKPOINT! +'+add.toFixed(1)+'S','#7fe08a',1.3);labPay(c.cx,c.y-20,0.3,'');sfx('time');sfx('combo',0,{rate:1+L.k*0.06});labRing(c.cx,c.y,c.gw/2);}
+        else{L.fin=1;const left=Math.max(0,run.time);addFloat(P.x,P.y-40,'FINISH! '+L.e.toFixed(1)+'S','#ffd23f',2);labPay(P.x,P.y-28,Math.min(4,left*0.15),'TIME BONUS');const rec=!best.length||L.e<best[best.length-1];
+          if(rec){save.labTA=save.labTA||{};save.labTA[S.key]=S.cps.map(q=>Math.round(q.e*10)/10);persist();addFloat(P.x,P.y-52,'NEW RECORD!','#7fe08a',2);}labGoldGift(P.x,P.y-64,'FINISHED!');}
+        if(diff!=null)addFloat(P.x,P.y-42,(diff<=0?'-':'+')+Math.abs(diff).toFixed(1),diff<=0?'#7fe08a':'#ff6a5a',1.3);L.k++;}
+      else if(!(L.miss>0)){L.miss=1.2;addFloat(P.x,P.y-24,'MISSED THE GATE!','#ff9aa8',0.9);sfx('deny');}}
+    L.py=P.y;if(!L.fin&&run.time<10&&run.time>0){const s2=Math.ceil(run.time);if(s2!==L.lastTick){L.lastTick=s2;sfx('tick',0,{rate:s2<=3?1.6:1.2,vol:0.6});}}
+    labObj('GATE',Math.min(L.k,S.cps.length),S.cps.length,L.fin?'DONE '+(S.cps[S.cps.length-1].e||0).toFixed(1)+'S':'');const nx=S.cps[L.k];L.tgt=nx&&(nx.y<camY-4||nx.y>camY+VIEW_H+4)?{x:nx.cx,y:nx.y}:null;},
+  screen(){const L=run.lab,S=G.lab;if(!L||!S.cps||L.k==null)return;if(L.tgt)labArrow(L.tgt.x,L.tgt.y,'#7fe08a');if(run.ended)return;
+    const t=Math.max(0,run.time),hot=!L.fin&&t<5,col=L.fin?'#7fe08a':hot?(Math.floor(tNow*6)%2?'#ff4a4a':'#ffffff'):t<10?'#ffd23f':'#ffffff';text(b,L.fin?'FINISHED':t.toFixed(1),W/2,VIEW_Y+26,col,{align:'center',scale:2});
+    const best=(save.labTA||{})[S.key];if(best&&best.length&&!L.fin)text(b,'BEST '+best[best.length-1].toFixed(1)+'S',W/2,VIEW_Y+44,'#9fd8ff',{align:'center'});},
+  ents(ents,top,bot){const S=G.lab,L=run.lab;if(!S.cps)return;const kk=L&&L.k!=null?L.k:0;S.cps.forEach((c,k)=>{if(c.y<top-30||c.y>bot+30||k>kk+1||(c.st&&k<kk-1))return;const last=k===S.cps.length-1,nxt=kk===k,x0=Math.round(c.cx-c.gw/2),x1=Math.round(c.cx+c.gw/2);
+      ents.push({base:c.y+1,draw:()=>{b.globalAlpha=c.st?0.35:nxt?1:0.55;const col=last?'#ffd23f':'#7fe08a',on=nxt&&Math.floor(tNow*4)%2;
+        for(let x=x0+3;x<x1-2;x+=4)R(b,x,c.y-1,2,2,last?(((x>>2)%2)?K:'#ffffff'):(on?'#ffffff':col));
+        for(const px of [x0,x1-2]){R(b,px-1,c.y-17,4,18,K);R(b,px,c.y-16,2,17,'#e8eef8');}R(b,x0-1,c.y-19,x1-x0+2,5,K);for(let x=x0;x<x1;x+=3)R(b,x,c.y-18,3,3,last?((((x-x0)/3|0)%2)?'#ffffff':K):((((x-x0)/3|0)%2)?col:'#ffffff'));
+        text(b,last?'FINISH':''+(k+1),c.cx,c.y-28,last?'#ffd23f':col,{align:'center'});
+        if(nxt)for(const ax of [x0-8,x1+5])for(let i=0;i<4;i++){const yy=c.dir>0?c.y-12+i:c.y-3-i;R(b,ax-3+i,yy,7-i*2,1,K);R(b,ax-2+i,yy,Math.max(1,5-i*2),1,col);}b.globalAlpha=1;}});});}};
 loadSave();save.sess=(save.sess||0)+1;
 if(PROTO){delete save.labSize;if(SAVE_KEY==='snowplowRush.reviewAll'&&!save.labAll){save.tool=Math.max(save.tool|0,BASE_TOOLS-1);save.rides=Object.assign({},save.rides||{});for(let i=BASE_TOOLS;i<TOOLS.length;i++)save.rides[TOOLS[i].id]=true;save.labAll=1;persist();}}
 let offlineAway=0;{const away=(Date.now()-(save.last||Date.now()))/1000;if(save.lv.helpers>0&&away>30){offlineAway=away;offlineGain=helperIncome()*Math.min(offCap(),away)*OFFLINE_RATE*(save.pro?2:1);save.coins+=offlineGain;}}
