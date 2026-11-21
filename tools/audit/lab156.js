@@ -1,6 +1,6 @@
 // Lab rev 3 events check (prototype only, lab branch).   node tools/audit/lab156.js [port=8766] [shots dir]
 const { chromium } = require('/opt/npm-tools/node_modules/playwright'); const fs = require('fs');
-const port = process.argv[2] || 8766, shots = process.argv[3] || '', base = 'http://127.0.0.1:' + port + '/lab6.html?test=1&lab&review=all';
+const port = process.argv[2] || 8766, shots = process.argv[3] || '', base = 'http://127.0.0.1:' + port + '/'+(process.env.PAGE||'lab6.html')+'?test=1&lab&review=all';
 const res = []; const ok = (name, pass, info) => { res.push(pass); console.log((pass ? 'ok   ' : 'FAIL ') + name + (info !== undefined ? ' ' + JSON.stringify(info) : '')); };
 (async () => {
   const b = await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox'] });
@@ -84,7 +84,7 @@ const res = []; const ok = (name, pass, info) => { res.push(pass); console.log((
   const th = await EV(`(()=>{${ev('forts')}const kid=G.hazards.find(h=>h.kind==='thrower');if(!kid)return JSON.stringify({none:1});let good=0,n=0;
     for(let k=0;k<60;k++){kid.state='idle';kid.cd=0;kid.ball=null;kid.revenge=false;P.x=clamp(kid.sx+40,20,G.pw-20);P.y=kid.sy+50;P.vx=-30;P.vy=20;${step(1)}if(kid.state!=='wind')continue;n++;const T=0.7+0.55,px=P.x+P.vx*T,py=P.y-2+P.vy*T;if(Math.hypot(kid.tx-px,kid.ty-py)<8)good++;}
     // stand on the landing spot: splat
-    kid.state='idle';kid.cd=0;kid.ball=null;P.vx=P.vy=0;P.inv=0;P.x=clamp(kid.sx+30,20,G.pw-20);P.y=kid.sy+40;${step(1)}const tx=kid.tx,ty=kid.ty;P.x=tx;P.y=ty+2;for(let k=0;k<45;k++){P.vx=P.vy=0;P.x=tx;P.y=ty+2;update(1/30);}const splat=run.splat>0;
+    run.moved=true;kid.state='idle';kid.cd=0;kid.ball=null;P.vx=P.vy=0;P.inv=0;P.x=clamp(kid.sx+30,20,G.pw-20);P.y=kid.sy+40;${step(1)}const tx=kid.tx,ty=kid.ty;P.x=tx;P.y=ty+2;for(let k=0;k<45;k++){P.vx=P.vy=0;P.x=tx;P.y=ty+2;update(1/30);}const splat=run.splat>0;
     // deflect: blade on the landing spot just before it lands
     kid.state='idle';kid.cd=0;kid.ball=null;kid.immune=0;P.inv=0;P.x=clamp(kid.sx+30,20,G.pw-20);P.y=kid.sy+60;P.vx=P.vy=0;${step(1)}let defl=false;for(let k=0;k<60&&kid.state!=='buried';k++){const bl=kid.ball;if(bl&&!bl.back&&bl.t/bl.dur>0.8){const br=bladeRect(TOOLS[useIdx()].id,P.x,P.y,P.f,bladeCells()*2);P.x+=bl.x1-(br.x+br.w/2);P.y+=bl.y1-(br.y+br.h/2);}update(1/30);if(kid.ball&&kid.ball.back)defl=true;}
     return JSON.stringify({n,good,share:Math.round(good/Math.max(1,n)*100),splat,defl,buried:kid.state==='buried'});})()`);

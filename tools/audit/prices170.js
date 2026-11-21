@@ -8,9 +8,10 @@ const res = []; const ok = (n, pass, info) => { res.push(pass); console.log((pas
   const EV = c => p.evaluate(x => window.__EV(x), c).then(JSON.parse);
   const t = await EV(`JSON.stringify({g:SHOP.gems.map(g=>[g.gems,g.price,g.tag||'',g.bonus||'']),pre:SHOP.premium,st:SHOP.starter,r:SHOP.rides,pass:SHOP.ridePass.price,ids:IAP.ids,con:IAP.consumable})`);
   ok('gem ladder 60/135/365/800/1,850 at $0.99/$1.99/$4.99/$9.99/$19.99', JSON.stringify(t.g.map(g => g[0] + g[1])) === JSON.stringify(['60$0.99', '135$1.99', '365$4.99', '800$9.99', '1850$19.99']), t.g);
-  ok('no POPULAR tag; BEST VALUE only on the best rate', t.g.filter(g => g[2]).length === 1 && t.g[4][2] === 'BEST VALUE', t.g.map(g => g[2]));
+  const lb = await EV(`JSON.stringify({best:gemBest(),bonus:SHOP.gems.map((g,i)=>gemBonus(i)),fixed:SHOP.gems.some(g=>g.tag||g.bonus)})`);
+  ok('no POPULAR tag; BEST VALUE only on the best rate (worked out)', lb.best === 4 && !lb.fixed, lb);
   const rates = t.g.map(g => g[0] / parseFloat(g[1].slice(1))), base = rates[0];
-  ok('bonus labels never overstate (rounded down against the $0.99 pack)', t.g.slice(1).every((g, i) => parseInt(g[3]) <= Math.floor((rates[i + 1] / base - 1) * 100)), t.g.map((g, i) => [g[3], ((rates[i] / base - 1) * 100).toFixed(1)]));
+  ok('bonus labels +10/+20/+30/+50% and never overstate', lb.bonus.join() === ',+10%,+20%,+30%,+50%' && lb.bonus.slice(1).every((g, i) => parseInt(g) <= Math.floor((rates[i + 1] / base - 1) * 100)), lb.bonus);
   ok('Premium $6.99 with no "was" price', t.pre.price === '$6.99' && !('was' in t.pre), t.pre);
   ok('Starter $0.99: 150 gems + 10 runs', t.st.price === '$0.99' && t.st.gems === 150 && t.st.coinRuns === 10, t.st);
   const v = await EV(`JSON.stringify({gems:150*0.99/60,coins:10*0.08})`);
@@ -24,6 +25,20 @@ const res = []; const ok = (n, pass, info) => { res.push(pass); console.log((pas
   ok('coin bags show their gems in money ($0.99 pack rate, rounded up)', c.join() === '$0.50,$1.98,$4.13', c);
   const pc = await EV(`(()=>{const tot=Object.values(SHOP.rides).reduce((a,r)=>a+parseFloat(r[0].slice(1)),0);return JSON.stringify({tot,pc:Math.floor((1-7.99/tot)*100)});})()`);
   ok('Wild Ride Pass saving is 42% against $13.95', Math.abs(pc.tot - 13.95) < 0.001 && pc.pc === 42, pc);
+  // any store currency: every claim is worked out from the prices on show (the apps show the store's own prices)
+  const L = await EV(`(()=>{const keep=JSON.stringify([SHOP.gems.map(g=>g.price),SHOP.rides,SHOP.ridePass.price]);const set=(gp,rp,pp)=>{SHOP.gems.forEach((g,i)=>g.price=gp[i]);Object.keys(SHOP.rides).forEach((k,i)=>SHOP.rides[k][0]=rp[i]);SHOP.ridePass.price=pp;};
+    const pass=()=>{save.ridePass=false;shopTab=1;openShop();draw();const u=ui.find(x=>x.id==='spass');return u?u.y:null;};const out={};
+    set(['£0.99','£1.99','£4.99','£9.99','£19.99'],['£1.99','£1.99','£2.99','£2.99','£3.99'],'£7.99');out.gb={cash:[gemCash(30),gemCash(120),gemCash(250)],bonus:SHOP.gems.map((g,i)=>gemBonus(i)),best:gemBest(),passY:pass()};
+    set(['0,99 €','1,99 €','5,49 €','10,99 €','21,99 €'],['2,29 €','2,29 €','3,29 €','3,29 €','4,49 €'],'8,99 €');out.eu={cash:[gemCash(30),gemCash(120),gemCash(250)],bonus:SHOP.gems.map((g,i)=>gemBonus(i)),best:gemBest()};
+    set(['¥160','¥300','¥800','¥1,500','¥3,000'],['¥300','¥300','¥500','¥500','¥650'],'¥1,300');out.jp={cash:[gemCash(30),gemCash(120),gemCash(250)],bonus:SHOP.gems.map((g,i)=>gemBonus(i)),best:gemBest()};
+    set(['KR 12,00','KR 25,00','KR 59,00','KR 119,00','KR 229,00'],['KR 25,00','KR 25,00','KR 35,00','KR 35,00','KR 49,00'],'KR 1 234,00');out.se={cash:[gemCash(30)],big:priceFmt(priceParse('KR 1 234,00'),2000.5)};
+    set(['$0.99','$1.99','$4.99','$9.99','$19.99'],['$1.99','$1.99','$2.99','$2.99','$3.99'],'???');out.bad={passY:pass()};
+    const k=JSON.parse(keep);set(k[0],Object.values(k[1]).map(r=>r[0]),k[2]);shopOpen=false;return JSON.stringify(out);})()`);
+  ok('pounds: coin bag values £0.50/£1.98/£4.13, same bonuses, pass shows its saving', L.gb.cash.join() === '£0.50,£1.98,£4.13' && L.gb.bonus.join() === ',+10%,+20%,+30%,+50%' && L.gb.best === 4, L.gb);
+  ok('euros: "0,50 €" style, bonuses from euro prices (365 pack has none at 5,49 €)', L.eu.cash.join() === '0,50 €,1,98 €,4,13 €' && L.eu.bonus.join() === ',+10%,,+20%,+30%' && L.eu.best === 4, L.eu);
+  ok('yen: whole numbers, rounded up (¥80/¥320/¥667)', L.jp.cash.join() === '¥80,¥320,¥667' && L.jp.bonus.join() === ',+20%,+20%,+40%,+60%', L.jp);
+  ok('kronor: comma decimals and space thousands', L.se.cash[0] === 'KR 6,00' && L.se.big === 'KR 2 000,50', L.se);
+  ok('a price that cannot be read makes no saving claim (button sits lower when the SAVE tag shows)', L.bad.passY !== null && L.gb.passY !== null && L.bad.passY < L.gb.passY, L);
   ok('no page errors', errs.length === 0, errs.slice(0, 2));
   console.log(res.every(Boolean) ? 'ALL OK' : 'SOME FAILED'); await b.close();
 })();
