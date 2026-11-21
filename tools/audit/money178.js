@@ -64,7 +64,7 @@ const res = []; const ok = (n, pass, info) => { res.push(pass); console.log((pas
   const f2 = await EV(`(()=>{run=run||{};run.event='test-blizzard';const r=evRun(50,1,false);return JSON.stringify(r&&r.f);})()`);
   ok('every job after that counts x2 ((50% + 1 star x10) x 2 = 120)', f2 === 120, f2);
   const sk = await EV(`(()=>{const tid=TOOLS[save.tool].id;return JSON.stringify({own:skinOwned(tid,6),col:skinPal(tid,6).b,name:EV_PAINT[save.evPaintSel][0]});})()`);
-  ok('the blizzard paint is yours, on every machine', sk.own && sk.col === '#7fc8f8' && sk.name === 'BLIZZARD', sk);
+  ok('the blizzard paint is yours, on every machine', sk.own && sk.col === '#4fa8f0' && sk.name === 'BLIZZARD', sk);
   await EV(base(`save.fbRuns=12;save.evPaints={blizzard:true};save.evPaintSel='blizzard';state='garage';skinFor=TOOLS[save.tool].id;skinSel=6`)); await p.waitForTimeout(500);
   u = await ui(); ok('skin panel: a 7th slot for the paint', u.includes('sks6'), u.filter(x => /^sks|^ske/.test(x)));
   await shot('skin_paint');

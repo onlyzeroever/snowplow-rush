@@ -1,4 +1,4 @@
-# Event Pass (price doc rev 25, approved Nov 21; Alex 22:25 "build everything else we need"). LAB ONLY for now.
+# Event Pass (price doc rev 25, approved Nov 21; Alex 23:28: include it). HELD from the live web game; in the lab and the app build.
 #  - one pass per event weekend, $2.99 (store id event_pass) or 250 gems
 #  - double event progress: every job's flakes count x2, and the flakes already earned double the moment it is bought
 #    (any steps that reaches pay out straight away)
@@ -15,11 +15,12 @@ rep("window.srNativeReady=()=>{","IAP.ids.evpass='event_pass';IAP.consumable.evp
 rep("if(P('bank'))SHOP.bank.price=P('bank');","if(P('bank'))SHOP.bank.price=P('bank');if(P('evpass'))SHOP.evPass.price=P('evpass');")
 rep("function drawShop(){",
     "SHOP.evPass={price:'$2.99',gems:250};let passOpen=false;\n"
-    "const EV_PAINT={blizzard:['BLIZZARD','#7fc8f8'],presents:['PRESENT','#ff6fb0'],goldrush:['NUGGET','#e8962a'],yetihunt:['YETI','#c8d6f0'],snowroll:['SNOWBALL','#eef4ff'],\n"
-    "  blackice:['BLACK ICE','#3a5a8c'],snowday:['SNOW DAY','#a8e0ff'],timeattack:['TURBO','#4fd36a'],forts:['FORT','#ff6f8f'],stars:['STARLIGHT','#ffe24a']};\n"
+    "// one look per event: [name, body, trim]. Two colours each, none of them gold (Premium's paint) or red-and-green\n"
+    "const EV_PAINT={blizzard:['BLIZZARD','#4fa8f0','#f4f8ff'],presents:['PRESENT','#b35fe0','#ff8fc8'],goldrush:['NUGGET','#b8662e','#ffe2a8'],yetihunt:['YETI','#e8f0ff','#5b8fd0'],snowroll:['SNOWBALL','#2fb8b0','#e8fffb'],\n"
+    "  blackice:['BLACK ICE','#26324e','#7ad3ff'],snowday:['SNOW DAY','#ff9ec8','#ffffff'],timeattack:['TURBO','#e8283f','#f4f8ff'],forts:['FORT','#6f8a46','#d8c890'],stars:['STARLIGHT','#3a2a7a','#ffe24a']};\n"
     "function mixHex(a,c,t){const p=v=>[1,3,5].map(i=>parseInt(v.slice(i,i+2),16)),A=p(a),C=p(c);return '#'+A.map((v,i)=>Math.round(v+(C[i]-v)*t).toString(16).padStart(2,'0')).join('');}\n"
-    "function evPal(kind){const c=(EV_PAINT[kind]||EV_PAINT.blizzard)[1],l=mixHex(c,'#ffffff',0.45),d=mixHex(c,'#000000',0.35);return {b:c,l,d,a:mixHex(c,'#ffffff',0.25),x:c,xd:d,xh:l};}\n"
-    "function paintIcon(kind){const k='pi'+kind;if(paintIcon[k])return paintIcon[k];const c=mk(7,7),g=c.getContext('2d'),p=evPal(kind);R(g,0,0,7,7,K);R(g,1,1,5,5,p.b);R(g,1,1,5,2,p.l);R(g,1,5,5,1,p.d);return paintIcon[k]=c;}\n"
+    "function evPal(kind){const P=EV_PAINT[kind]||EV_PAINT.blizzard,c=P[1],t=P[2],l=mixHex(c,'#ffffff',0.4),d=mixHex(c,'#000000',0.35);return {b:c,l,d,a:t,x:t,xd:mixHex(t,'#000000',0.3),xh:mixHex(t,'#ffffff',0.4)};}\n"
+    "function paintIcon(kind){const k='pi'+kind;if(paintIcon[k])return paintIcon[k];const c=mk(7,7),g=c.getContext('2d'),p=evPal(kind);R(g,0,0,7,7,K);R(g,1,1,5,5,p.b);R(g,1,1,5,1,p.l);R(g,1,5,5,1,p.d);R(g,3,1,1,5,p.a);return paintIcon[k]=c;}\n"
     "function passOwned(ev){return !!ev&&save.evPass===ev.id;}\n"
     "function evPassBuy(gems){const ev=evNow();if(!ev||passOwned(ev))return;\n"
     "  const grant=()=>{const e=evSave(ev),before=e.flakes;save.evPass=ev.id;e.flakes*=2;const msgs=[];while(e.got<EV_STEPS.length&&e.flakes>=EV_STEPS[e.got]){msgs.push(evReward(e.got));e.got++;track('event_milestone',{event:ev.id,step:e.got,flakes:e.flakes});}\n"
@@ -47,7 +48,7 @@ rep("  text(b,'EVENT JOBS',x+10,ty+54,'#9fc0e8',{outline:null});\n"
     "  evJobs(ev).forEach((i,k)=>{const L=LEVELS[i],ry=ty+64+k*30;card(x+8,ry,w-16,26,'#eef3fb','#9fc0e8');text(b,L.name,x+14,ry+5,'#13306b',{outline:null});\n"
     "    text(b,(save.stars[i]||0)+' OF 3 STARS',x+14,ry+15,'#4f6fa0',{outline:null});button('evp'+k,x+w-58,ry+5,44,16,'orange','PLAY',()=>{evOpen=false;startLevelUI(i,{event:ev.id});});});",
     "  if(passOwned(ev)){b.drawImage(SPR.check,x+42,ty+53);text(b,'EVENT PASS: x2 FLAKES ON',x+52,ty+54,'#7fe08a',{outline:null});}\n"
-    "  else button('evpass',x+22,ty+49,w-44,16,'gold','GET THE EVENT PASS: x2',()=>{passOpen=true;sfx('click');});\n"
+    "  else button('evpass',x+22,ty+49,w-44,16,save.evPassSeen!==ev.id&&Math.floor(tNow*2)%2?'orange':'gold','GET THE EVENT PASS: x2',()=>{passOpen=true;save.evPassSeen=ev.id;persist();sfx('click');});\n"
     "  text(b,'EVENT JOBS',x+10,ty+72,'#9fc0e8',{outline:null});\n"
     "  evJobs(ev).forEach((i,k)=>{const L=LEVELS[i],ry=ty+80+k*26;card(x+8,ry,w-16,24,'#eef3fb','#9fc0e8');text(b,L.name,x+14,ry+4,'#13306b',{outline:null});\n"
     "    text(b,(save.stars[i]||0)+' OF 3 STARS',x+14,ry+13,'#4f6fa0',{outline:null});button('evp'+k,x+w-60,ry+4,46,16,'orange','PLAY',()=>{evOpen=false;startLevelUI(i,{event:ev.id});});});")
