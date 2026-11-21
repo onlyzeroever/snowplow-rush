@@ -14,7 +14,7 @@ rewarded ads, a silent cloud save and a few local reminders. No accounts, no ser
   Everything native lives in `app/` (this folder).
 - **Branches.** `main` is live (Vercel deploys it to snowplowrush.app), `next` is staging, `lab` is the
   prototype site lab.snowplowrush.app. **The app wraps `app/game/index.html`**: the live game plus the
-  app-only patches (p163, p165, p170, p171, p172), rebuilt and committed by the cloud session. Start with
+  app-only patches (p163, p165, p170, p171, p172, p174), rebuilt and committed by the cloud session. Start with
   `app/CC_START.md`.
 - **Rules from Alex that apply here:** never spend money or credits without asking; never put keys,
   passwords or tokens in chat or in the repo (Alex types them into the tools himself); prices shown must be
@@ -44,9 +44,10 @@ rewarded ads, a silent cloud save and a few local reminders. No accounts, no ser
 | p162 | Analytics that keep and retry unsent events (needed on flaky phone networks) | Live (Nov 21) |
 | p163 | `IAP`: every price and ad button goes through `window.SRNative`; Restore Purchases in Settings | Lab |
 | p165 | Save mirror to the phone, reminder plan, nudge card after the first three-star job | Lab |
-| p170 | Launch prices, five gem packs, first gem purchase doubled, honest labels | Lab, app build |
+| p170 | Launch prices, five gem packs, first gem purchase doubled, honest labels (worked out from the prices on show, so they hold in every store currency) | Lab, app build |
 | p171 | Lighter session recording in the apps (section 8) | Lab |
 | p172 | Event schedule fetched from the website in the apps | App build |
+| p174 | Store prices in the pixel font: £ € ¥ ₩ ₹ ₺ ₪ ₱ are drawn, other currencies are rebuilt from amount + currency (`SAR 18.99`); the shop's TEST MODE line is web only | App build |
 | p161 | Automatic render scale on slow phones | Live |
 
 When Alex OKs them, the cloud session moves them to `main`. The release build (`tools/release.py`, see 9)
@@ -91,7 +92,7 @@ game's script runs, then call `window.srNativeReady()` once purchases and ads ar
 | `buy(productId)` | a price button is tapped | Purchase through RevenueCat. Resolve `{ok:true}` when the store confirms; `{ok:false, reason:'cancelled'\|'pending'\|'error'}` otherwise. The game grants the item only on `ok`. |
 | `owned()` | at launch, silently | Resolve the list of non-consumable product ids the player owns (RevenueCat `getCustomerInfo`, no sign-in prompt). |
 | `restore()` | Restore Purchases in Settings | RevenueCat `restorePurchases`, then resolve the owned list. |
-| `prices()` | at launch | Resolve `{productId: localisedPriceString}` from the store. These replace the US test prices everywhere in the game. |
+| `prices()` | at launch | Resolve `{productId: {price, amount, currency}}`: RevenueCat's `priceString`, `price` and `currencyCode` (a plain localised string per product also works). These replace the US test prices everywhere in the game. The game redraws each price in its pixel font (p174) and works out every value label from these prices. |
 | `showAd(placement)` | an ad button is tapped | Show a MAX rewarded ad. Resolve `{ok:true}` only if the reward callback fired; `{ok:false, reason:'no_fill'\|'closed'\|'error'}` otherwise. The game suspends its own audio while it waits. |
 | `storeSave(key, json)` (sync) | after saves, at most every 5 s, and when the app goes to the background | Keep the latest JSON in `@capacitor/preferences` and, on iOS, in iCloud key-value storage (`NSUbiquitousKeyValueStore`, small local plugin). |
 | `window.SRNativeSave` (object, not a function) | read once at launch | `{key: json}` with the saved game, set at document start so the game finds it when the browser storage is empty (reinstall, new phone). On iOS a `WKUserScript` at document start; on Android `WebViewCompat.addDocumentStartJavaScript`. |
@@ -108,7 +109,9 @@ the game handles that.
 
 Ids are fixed in the game (`IAP.ids` in p163, the gem ladder in p170). Prices approved by Alex on
 Nov 21 (price doc: https://claude.ai/artifact/HAVajemhRomSd4CxGXcbHS). UK and euro stores: the same numbers
-in pounds and euros (£0.99, €0.99 and so on), set by hand per storefront.
+in pounds and euros (£0.99, €0.99 and so on), set by hand per storefront. Every claim in the shop (pack bonus %,
+BEST VALUE, what a coin bag's gems cost in money, the Wild Ride Pass saving) is worked out on the phone from the
+store's own prices and rounded down; a claim the prices can't support is simply not shown.
 
 | Product id | Type | Price (USD tier) | Gives | Restorable |
 | --- | --- | --- | --- | --- |
@@ -167,6 +170,7 @@ decide before launch: whether `iap_test` events become `purchase` events with th
 - [ ] MAX rewarded units created; AdMob linked inside MAX; consent flow on
 - [ ] `www/` built with `tools/release.py`; game boots offline; Restore Purchases works in Sandbox
 - [ ] A purchase, a cancelled purchase, a restore, an ad with no fill, a reinstall (save comes back)
+- [ ] The shop on a UK and a euro Sandbox account: £ and € prices drawn, no TEST MODE line, labels sensible
 - [ ] Reminders: card after the first three-star job; at most one a day; none at night
 - [ ] Privacy policy live at https://snowplowrush.app/privacy (after Alex's review)
 - [ ] Apple privacy label, Google data safety form, age rating: answers in the store doc

@@ -12,7 +12,7 @@ cloud session that builds the game.
 ## The game you wrap
 
 - **`app/game/index.html`** is the app build of the game: the live game plus the app-only patches (store and ads
-  bridge, save mirror and reminders, launch prices, lighter session recording, event schedule from the website).
+  bridge, save mirror and reminders, launch prices, lighter session recording, event schedule from the website, store prices in the pixel font).
   The cloud session rebuilds and commits it; never edit it on the Mac. Ask for a patch instead.
 - `copy-web.sh` runs `python3 tools/release.py app/game/index.html www/index.html` (test hooks off), then copies
   `ph/`, `audio/`, `events.json`, the icons and `og.png` from the repo root into `www/`.
@@ -35,7 +35,8 @@ reinstall brings the save back (iCloud key-value store on iOS); a reminder fires
 
 ## Phase 2: purchases and ads against test stores (still no accounts)
 
-1. RevenueCat Capacitor SDK wired to `buy`, `owned`, `restore`, `prices` (section 5).
+1. RevenueCat Capacitor SDK wired to `buy`, `owned`, `restore`, `prices` (section 5). `prices()` gives
+   `{productId: {price, amount, currency}}` from `priceString`, `price` and `currencyCode`.
 2. An Xcode StoreKit configuration file with every product in section 6 (ids, types, prices), so purchases,
    cancels, failures and restores work in the simulator without App Store Connect.
 3. AppLovin MAX rewarded ads behind `showAd` in test mode (section 7), including "no fill".
