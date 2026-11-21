@@ -2579,7 +2579,7 @@ let EVENTS=[],evOpen=false;
 (function evLoad(){const q=new URLSearchParams(location.search).get('event');
   if(q&&EVENT_DEFS[q]){const t=Date.now();EVENTS.push({id:'test-'+q,kind:q,start:t-1000,end:t+72*3600e3,test:true});return;}
   try{fetch((window.SRNative&&SRNative.platform&&SRNative.platform!=='web'?'https://snowplowrush.app':'')+'/events.json?d='+new Date().toDateString().replace(/ /g,''),{cache:'no-store'}).then(r=>r.ok?r.json():[]).then(a=>{if(!Array.isArray(a))return;
-    for(const e of a){if(!e||!EVENT_DEFS[e.kind])continue;const st=new Date(e.start).getTime(),en=new Date(e.end).getTime();if(isFinite(st)&&isFinite(en)&&en>st)EVENTS.push({id:String(e.id||e.start),kind:e.kind,start:st,end:en});}}).catch(()=>{});}catch(e){}})();
+    for(const e of a){if(!e||!EVENT_DEFS[e.kind])continue;const st=new Date(e.start).getTime(),en=new Date(e.end).getTime();if(isFinite(st)&&isFinite(en)&&en>st)EVENTS.push({id:String(e.id||e.start),kind:e.kind,start:st,end:en,plus:e.plus!==false});}}).catch(()=>{});}catch(e){}})();
 function evNow(){const t=Date.now();return EVENTS.find(e=>t>=e.start&&t<e.end)||null;}
 function evSave(ev){if(!save.ev||save.ev.id!==ev.id)save.ev={id:ev.id,flakes:0,got:0,runs:0};return save.ev;}
 function evJobs(ev){const open=[];LEVELS.forEach((L,i)=>{if(!L.tool&&!L.boss&&L.id!=='farm_old'&&levelOpen(i))open.push(i);});if(!open.length)return [0];
@@ -4694,7 +4694,7 @@ function drawBank(){const x=14,w=152,h=200,y=56,B=SHOP.bank,g=bankG(),ok=g>=B.op
   if(ok)button('bankbuy',x+26,y+154,w-52,20,'green',B.price,bankBuy,{scale:textW(B.price,2)<=w-60?2:1});
   else button('bankbuy',x+26,y+154,w-52,20,'grey','OPENS AT '+B.open,()=>{sfx('deny');showToast('KEEP PLAYING: '+(B.open-g)+' MORE TO GO','#9fc0e8');},{icon:SPR.lock});
   button('bankno',x+46,y+179,w-92,16,'navy','NOT NOW',()=>{bankOpen=false;sfx('click');});}
-SHOP.evPass={price:'$2.99',gems:250};let passOpen=false;
+SHOP.evPass={price:'$2.99',gems:250};SHOP.evPassPlus={price:'$4.99',flakes:300,on:true};let passOpen=false;
 // one look per event: [name, body, trim]. Two colours each, none of them gold (Premium's paint) or red-and-green
 const EV_PAINT={blizzard:['BLIZZARD','#4fa8f0','#f4f8ff'],presents:['PRESENT','#b35fe0','#ff8fc8'],goldrush:['NUGGET','#b8662e','#ffe2a8'],yetihunt:['YETI','#e8f0ff','#5b8fd0'],snowroll:['SNOWBALL','#2fb8b0','#e8fffb'],
   blackice:['BLACK ICE','#26324e','#7ad3ff'],snowday:['SNOW DAY','#ff9ec8','#ffffff'],timeattack:['TURBO','#e8283f','#f4f8ff'],forts:['FORT','#6f8a46','#d8c890'],stars:['STARLIGHT','#3a2a7a','#ffe24a']};
@@ -4702,24 +4702,25 @@ function mixHex(a,c,t){const p=v=>[1,3,5].map(i=>parseInt(v.slice(i,i+2),16)),A=
 function evPal(kind){const P=EV_PAINT[kind]||EV_PAINT.blizzard,c=P[1],t=P[2],l=mixHex(c,'#ffffff',0.4),d=mixHex(c,'#000000',0.35);return {b:c,l,d,a:t,x:t,xd:mixHex(t,'#000000',0.3),xh:mixHex(t,'#ffffff',0.4)};}
 function paintIcon(kind){const k='pi'+kind;if(paintIcon[k])return paintIcon[k];const c=mk(7,7),g=c.getContext('2d'),p=evPal(kind);R(g,0,0,7,7,K);R(g,1,1,5,5,p.b);R(g,1,1,5,1,p.l);R(g,1,5,5,1,p.d);R(g,3,1,1,5,p.a);return paintIcon[k]=c;}
 function passOwned(ev){return !!ev&&save.evPass===ev.id;}
-function evPassBuy(gems){const ev=evNow();if(!ev||passOwned(ev))return;
-  const grant=()=>{const e=evSave(ev),before=e.flakes;save.evPass=ev.id;e.flakes*=2;const msgs=[];while(e.got<EV_STEPS.length&&e.flakes>=EV_STEPS[e.got]){msgs.push(evReward(e.got));e.got++;track('event_milestone',{event:ev.id,step:e.got,flakes:e.flakes});}
+function evPassBuy(gems,plus){const ev=evNow();if(!ev||passOwned(ev))return;
+  const grant=()=>{const e=evSave(ev),before=e.flakes;save.evPass=ev.id;e.flakes*=2;if(plus){e.flakes+=SHOP.evPassPlus.flakes;save.evPassPlus=ev.id;}const msgs=[];while(e.got<EV_STEPS.length&&e.flakes>=EV_STEPS[e.got]){msgs.push(evReward(e.got));e.got++;track('event_milestone',{event:ev.id,step:e.got,flakes:e.flakes});}
     save.evPaints=save.evPaints||{};save.evPaints[ev.kind]=true;save.evPaintSel=ev.kind;vcache.clear();passOpen=false;sfx('fanfare');buzz(30);
-    youGot('EVENT PASS',[[SPR.star,'x2 FLAKES, ALL EVENT','#ffd23f'],[null,'FLAKES SO FAR: '+before+' TO '+e.flakes,'#9fc0e8'],[paintIcon(ev.kind),EV_PAINT[ev.kind][0]+' MACHINE PAINT']].concat(msgs.slice(-2).map(m=>[SPR.check,m,'#7fe08a'])));persist();};
+    youGot(plus?'EVENT PASS+':'EVENT PASS',[[SPR.star,'x2 FLAKES, ALL EVENT','#ffd23f']].concat(plus?[[SPR.star,'+'+SHOP.evPassPlus.flakes+' FLAKES HEAD START','#ffd23f']]:[],[[null,'FLAKES SO FAR: '+before+' TO '+e.flakes,'#9fc0e8'],[paintIcon(ev.kind),EV_PAINT[ev.kind][0]+' MACHINE PAINT']]).concat(msgs.slice(-2).map(m=>[SPR.check,m,'#7fe08a'])));persist();};
   if(gems){const c=SHOP.evPass.gems;if((save.gems||0)<c){passOpen=false;evOpen=false;shopTab=0;openShopFrom('event');needGems(c,'event_pass');return;}
     save.gems-=c;try{track('spend',{item:'event_pass',gems:c,event:ev.kind});}catch(e){}grant();}
-  else IAP.buy('evpass',()=>{track('iap_test',{item:'event_pass',price:SHOP.evPass.price,event:ev.kind});grant();});}
-function drawPass(){const ev=evNow();if(!ev){passOpen=false;return;}const d=EVENT_DEFS[ev.kind],pn=EV_PAINT[ev.kind]||EV_PAINT.blizzard,x=14,y=58,w=152,h=196;
+  else IAP.buy(plus?'evplus':'evpass',()=>{track('iap_test',{item:plus?'event_pass_plus':'event_pass',price:plus?SHOP.evPassPlus.price:SHOP.evPass.price,event:ev.kind});grant();});}
+function drawPass(){const ev=evNow();if(!ev){passOpen=false;return;}const d=EVENT_DEFS[ev.kind],pn=EV_PAINT[ev.kind]||EV_PAINT.blizzard,PL=!!(SHOP.evPassPlus&&SHOP.evPassPlus.on&&ev.plus!==false),x=14,w=152,h=PL?228:196,y=Math.round(156-h/2),dy=PL?32:0;
   b.fillStyle='rgba(11,24,56,0.84)';b.fillRect(0,0,W,H);btn('passbg',0,0,W,H,()=>{});panel(x,y,w,h,'#13306b',d.col);
   text(b,'EVENT PASS',W/2,y+9,'#ffd23f',{align:'center',scale:2});text(b,d.name,W/2,y+27,d.col,{align:'center',outline:null});
   const row=(ic,t,yy,c)=>{if(ic)b.drawImage(ic,x+22+Math.floor((9-ic.width)/2),yy+3-Math.floor(ic.height/2));text(b,t,x+34,yy+1,c||'#ffffff',{outline:null});};
   row(SPR.star,'x2 FLAKES FOR EVERY JOB',y+42,'#ffd23f');row(SPR.star,'EARNED FLAKES DOUBLE TOO',y+54,'#ffd23f');row(paintIcon(ev.kind),pn[0]+' PAINT',y+66);row(SPR.check,'ALL MACHINES, KEPT',y+78,'#7fe08a');
   text(b,'FOR THIS EVENT. ENDS IN '+fmtDur((ev.end-Date.now())/1000),W/2,y+93,'#9fc0e8',{align:'center',outline:null});
   button('passbuy',x+26,y+106,w-52,20,'green',SHOP.evPass.price,()=>evPassBuy(false),{scale:textW(SHOP.evPass.price,2)<=w-60?2:1});
-  text(b,'OR',W/2,y+131,'#9fc0e8',{align:'center',outline:null});
-  const okG=(save.gems||0)>=SHOP.evPass.gems;button('passgem',x+26,y+140,w-52,18,okG?'purple':'grey',null,()=>evPassBuy(true));priceRow(SPR.gemS,''+SHOP.evPass.gems+' GEMS',W/2,y+146,'#ffffff');
-  if(!okG)text(b,'YOU HAVE '+(save.gems||0)+' GEMS',W/2,y+162,'#9fc0e8',{align:'center',outline:null});
-  button('passno',x+46,y+172,w-92,16,'navy','NOT NOW',()=>{passOpen=false;sfx('click');});}
+  if(PL){button('passplus',x+26,y+130,w-52,18,'gold','PASS+  '+SHOP.evPassPlus.price,()=>evPassBuy(false,true));text(b,'ALSO +'+SHOP.evPassPlus.flakes+' FLAKES RIGHT NOW',W/2,y+151,'#ffd23f',{align:'center',outline:null});}
+  text(b,'OR',W/2,y+131+dy,'#9fc0e8',{align:'center',outline:null});
+  const okG=(save.gems||0)>=SHOP.evPass.gems;button('passgem',x+26,y+140+dy,w-52,18,okG?'purple':'grey',null,()=>evPassBuy(true));priceRow(SPR.gemS,''+SHOP.evPass.gems+' GEMS',W/2,y+146+dy,'#ffffff');
+  if(!okG)text(b,'YOU HAVE '+(save.gems||0)+' GEMS',W/2,y+162+dy,'#9fc0e8',{align:'center',outline:null});
+  button('passno',x+46,y+172+dy,w-92,16,'navy','NOT NOW',()=>{passOpen=false;sfx('click');});}
 function drawShop(){if(save.shopDay!==todayKey()){save.shopDay=todayKey();persist();}b.fillStyle='rgba(11,24,56,0.82)';b.fillRect(0,0,W,H);panel(6,6,168,306,'#13306b','#ffd23f');
   text(b,'SHOP',W/2,13,'#ffffff',{align:'center',scale:2});if(!IAP.native())text(b,'TEST MODE: NOTHING IS CHARGED',W/2,28,'#7fe08a',{align:'center',outline:null});
   R(b,12,36,156,13,'#0b1838');b.drawImage(SPR.coin,18,39);text(b,fmt(save.coins),28,40,'#ffd23f');b.drawImage(SPR.gem,100,39);text(b,fmt(save.gems||0),110,40,'#ff8fc8');
@@ -5306,14 +5307,14 @@ var IAP={busy:0,kind:null,
   syncOwned(){const N=this.native();if(!N||typeof N.owned!=='function')return;Promise.resolve().then(()=>N.owned()).then(list=>{if(list&&list.length&&this.applyOwned(list))persist();}).catch(()=>{});},
   prices(){const N=this.native();if(!N||typeof N.prices!=='function')return;Promise.resolve().then(()=>N.prices()).then(p=>{if(!p)return;const P=k=>fontPrice(p[this.ids[k]]);
     if(P('premium'))SHOP.premium.price=P('premium');if(P('starter'))SHOP.starter.price=P('starter');for(const g of SHOP.gems)if(P(g.id))g.price=P(g.id);
-    for(const k in SHOP.rides)if(P('ride_'+k))SHOP.rides[k][0]=P('ride_'+k);if(P('ride_pass'))SHOP.ridePass.price=P('ride_pass');if(P('bank'))SHOP.bank.price=P('bank');if(P('evpass'))SHOP.evPass.price=P('evpass');}).catch(()=>{});}};
+    for(const k in SHOP.rides)if(P('ride_'+k))SHOP.rides[k][0]=P('ride_'+k);if(P('ride_pass'))SHOP.ridePass.price=P('ride_pass');if(P('bank'))SHOP.bank.price=P('bank');if(P('evpass'))SHOP.evPass.price=P('evpass');if(P('evplus'))SHOP.evPassPlus.price=P('evplus');}).catch(()=>{});}};
 {const g=shopBuyPremium;shopBuyPremium=function(){if(save.pro)return;return IAP.buy('premium',()=>g());};}
 {const g=shopBuyStarter;shopBuyStarter=function(){if(save.starter)return;return IAP.buy('starter',()=>g());};}
 {const g=buyRidePass;buyRidePass=function(){if(save.ridePass)return;return IAP.buy('ride_pass',()=>g());};}
 {const g=buyRide;buyRide=function(i,gems){if(gems||!TOOLS[i]||!IAP.native())return g(i,gems);
   IAP.buy('ride_'+TOOLS[i].id,()=>{if(g(i,false)){if(shopOpen){shopOpen=false;rideReveal={tid:TOOLS[i].id,t:0};}ridePeek=null;try{if(run)run.offerShut=true;}catch(e){}}});return false;};}
 IAP.ids.bank='snow_bank';IAP.consumable.bank=1;
-IAP.ids.evpass='event_pass';IAP.consumable.evpass=1;
+IAP.ids.evpass='event_pass';IAP.consumable.evpass=1;IAP.ids.evplus='event_pass_plus';IAP.consumable.evplus=1;
 window.srNativeReady=()=>{IAP.prices();IAP.syncOwned();};if(window.SRNative)setTimeout(window.srNativeReady,0);
 {const o=startNewWinter;startNewWinter=function(){const r=o.apply(this,arguments);try{track('new_winter',{winter_now:winterNo()});}catch(e){}return r;};}
 {const o=checkPart;checkPart=function(){const b4=JSON.stringify(save.parts||{});const r=o.apply(this,arguments);try{const a=save.parts||{};if(JSON.stringify(a)!==b4)for(const k in a)track('part_found',Object.assign(phJob(),{ride:k,parts:a[k]}));}catch(e){}return r;};}

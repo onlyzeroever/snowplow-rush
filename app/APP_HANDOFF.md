@@ -14,7 +14,7 @@ rewarded ads, a silent cloud save and a few local reminders. No accounts, no ser
   Everything native lives in `app/` (this folder).
 - **Branches.** `main` is live (Vercel deploys it to snowplowrush.app), `next` is staging, `lab` is the
   prototype site lab.snowplowrush.app. **The app wraps `app/game/index.html`**: the live game plus the
-  app-only patches (p163, p165, p170, p171, p172, p173, p174, p175, p176, p179, p181, p182, p183), rebuilt and committed by the cloud session. Start with
+  app-only patches (p163, p165, p170, p171, p172, p173, p174, p175, p176, p179, p181, p182, p183, p186), rebuilt and committed by the cloud session. Start with
   `app/CC_START.md`.
 - **Rules from Alex that apply here:** never spend money or credits without asking; never put keys,
   passwords or tokens in chat or in the repo (Alex types them into the tools himself); prices shown must be
@@ -55,6 +55,7 @@ rewarded ads, a silent cloud save and a few local reminders. No accounts, no ser
 | p180 | Title screen without the small print; the anonymous play-data note shows at the top of the map after job 1 (never over a job) | Live (Nov 22) |
 | p181 | Snow Bank: a gem jar on the map from the 10th job; starts with 50 gems, +5 a job, +2 a star, up to 400 (ready around job 30); opens for `snow_bank` from 220 | App build |
 | p182 | Event Pass for the weekend event on now: flakes x2 (the ones already earned too) and that event's paint for every machine, kept; `event_pass` or 250 gems | App build |
+| p186 | EVENT PASS+: the Event Pass plus 300 flakes at once (`event_pass_plus`); an events.json entry with `"plus": false` hides it for that weekend | App build |
 | p183 | Full screen on every shape: taller game on tall phones (top bar at the top, buttons at the bottom), the safe areas filled, the world carried on either side on wide screens (iPhone Duo open, iPad), cards centred, re-fits on every resize | App build |
 | p161 | Automatic render scale on slow phones | Live |
 
@@ -152,9 +153,10 @@ In the app build since Nov 22 (p181, p182; Alex said yes on Nov 21): create thes
 | `snow_bank` | Consumable | $2.99 | The gems saved in the Snow Bank (220 to 400); the jar starts again | No |
 | `event_pass` | Consumable | $2.99 | Event Pass for the weekend event on now (one per event; 250 gems is the other way to get it) | No (the paint it gives is in the save, which the phone mirrors) |
 
-In the lab since Nov 22, waiting for Alex's OK (create them only once they move into the app build):
-`snow_bank_big` (consumable, $4.99: the big jar a player gets after opening the first one, 440 to 800 gems) and
-`event_pass_plus` (consumable, $4.99: the Event Pass plus 300 flakes at once).
+| `event_pass_plus` | Consumable | $4.99 | EVENT PASS+ for the weekend event on now: everything in the Event Pass plus 300 flakes at once (Alex said yes on Nov 22) | No |
+
+In the lab since Nov 22, waiting for Alex's OK (create it only once it moves into the app build): `snow_bank_big`
+(consumable, $4.99: the big jar a player gets after opening the first one, 440 to 800 gems).
 
 RevenueCat: one entitlement `premium` attached to `premium`; the rest are read from the customer's
 non-subscription purchases. Use StoreKit 2. Test with Sandbox testers (Apple) and license testers (Google).
