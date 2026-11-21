@@ -9,7 +9,7 @@ const res = []; const ok = (n, pass, info) => { res.push(pass); console.log((pas
     await p.goto('http://127.0.0.1:8766/lab6.html?test=1'); await p.waitForTimeout(900);
     const r = JSON.parse(await p.evaluate(() => window.__EV(`(()=>{save.pro=false;save.starter=false;save.gems=0;const c0=save.coins;shopBuyPremium();const pro=save.pro;shopBuyStarter();
       const g=save.gems;IAP.ad('double_coins',{t:2.5,reward:100});const card=!!adScreen;adScreen=null;IAP.restore();return JSON.stringify({pro,starter:save.starter,g,card,coins:save.coins>c0,busy:IAP.busy});})()`)));
-    ok('web: Premium and Starter grant at once, ads use the test card, nothing busy', r.pro && r.starter && r.g === 250 && r.card && r.coins && !r.busy, r);
+    ok('web: Premium and Starter (150 gems since p170) grant at once, ads use the test card, nothing busy', r.pro && r.starter && r.g === 150 && r.card && r.coins && !r.busy, r);
     ok('web: no page errors', errs.length === 0, errs.slice(0, 2)); await p.close(); }
   // 2) the apps: a fake native layer
   const ctx = await b.newContext({ viewport: { width: 360, height: 640 } });
@@ -36,7 +36,7 @@ const res = []; const ok = (n, pass, info) => { res.push(pass); console.log((pas
   await EV(`(()=>{window.__next.ad='ok';window.__g0=save.gems||0;IAP.ad('free_gems',{t:2.5,reward:5,gems:true});return JSON.stringify(1);})()`); await p.waitForTimeout(200);
   const a2 = await EV(`JSON.stringify({gems:(save.gems||0)-window.__g0})`);
   ok('apps: a watched ad pays its reward', a2.gems === 5, a2);
-  await EV(`(()=>{save.pro=false;save.starter=false;save.outfits={classic:true};window.__c1=save.coins;window.__g1=save.gems;IAP.restore();return JSON.stringify(1);})()`); await p.waitForTimeout(200);
+  await EV(`(()=>{window.__HOLD=1;save.pro=false;save.starter=false;save.outfits={classic:true};window.__c1=save.coins;window.__g1=save.gems;IAP.restore();return JSON.stringify(1);})()`); await p.waitForTimeout(200);
   const r1 = await EV(`JSON.stringify({pro:save.pro,starter:save.starter,explorer:!!save.outfits.explorer,sameCoins:save.coins===window.__c1,sameGems:save.gems===window.__g1,toast:toast&&toast.s})`);
   ok('apps: Restore Purchases brings back Premium and the Starter outfit without paying coins or gems again', r1.pro && r1.starter && r1.explorer && r1.sameCoins && r1.sameGems && /RESTORED 2/.test(r1.toast || ''), r1);
   const set = await EV(`(()=>{goMap();settingsOpen=true;draw();const u=ui.find(x=>x.id==='restore');settingsOpen=false;return JSON.stringify(!!u&&u.y+u.h<=290);})()`);
