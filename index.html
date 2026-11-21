@@ -728,7 +728,7 @@ function devSave(){try{localStorage.setItem('sr.dev',JSON.stringify({freeze:DEV.
 const SAVE_KEY=DEV_MODE?'snowplowRush.dev':TEST_MODE?'snowplowRush.test':REVIEW_MODE?(RV?'snowplowRush.review_'+RV:/[?&]review=all/.test(location.search)?'snowplowRush.reviewAll':'snowplowRush.review'):'snowplowRush.proto.v2';
 const NL=LEVELS.length;
 const save={coins:0,tool:0,mlv:{},lv:{speed:0,size:0,value:0,bumper:0,helpers:0},stars:Array(NL).fill(0),best:Array(NL).fill(0),muted:false,last:Date.now(),ctrl:'joy',tut:false,ach:{},stats:{cells:0,gifts:0,dodges:0,gnome:0,neighbours:0},hat:'yellow',hats:{yellow:true},daily:null,frost:0,winters:0,winterCoins:0,fails:Array(NL).fill(0),boostNext:false,gems:0,pro:false,adGems:null,dailySeen:'',winterSeen:false,musicOff:false,v:6,gold:-1,tolls:{},outfit:'classic',outfits:{classic:true},skin:{},skins:{},trail:'classic',trails:{classic:true},treasures:{}};
-function loadSave(){try{let s=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');
+function loadSave(){try{let s=null;try{s=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');}catch(e){s=null;}if((!s||typeof s!=='object')&&window.SRNativeSave&&window.SRNativeSave[SAVE_KEY]){try{s=JSON.parse(window.SRNativeSave[SAVE_KEY]);}catch(e){s=null;}}if(!s||typeof s!=='object'){try{s=JSON.parse(localStorage.getItem(SAVE_KEY+'.bak')||'null');if(s)window.__saveFromBak=1;}catch(e){s=null;}}
   if(!s&&RV){const ix=id=>TOOLS.findIndex(t=>t.id===id),AR=['suburbs','farm','city','themepark','harbour','ski','pass','north'],
     P={themepark:{m:'super',lv:[4,4,2],coins:5e5},ski:{m:'snowcat',lv:[6,6,5],coins:1e7},pass:{m:'rotary',lv:[4,3,2],coins:2.7e6},north:{m:'rotary',lv:[6,6,5],coins:2.6e7}}[RV],done=AR.slice(0,AR.indexOf(RV));
     s={v:6,tv:3,tut:true,coins:P.coins,tool:ix(P.m),use:ix(P.m),gems:40,mlv:{},lv:{speed:0,size:0,value:20,bumper:0,helpers:20},stars:[],best:[],story:{},tolls:{},areaSeen:done.length,rvStage:RV};
@@ -762,8 +762,8 @@ function sanitizeSave(){const num=(v,d)=>(typeof v==='number'&&isFinite(v))?v:d,
   if(!obj(save.lv))save.lv={};for(const k of ['speed','size','value','bumper','helpers'])save.lv[k]=Math.max(0,Math.min(k in UPG?upMax(k):99,Math.floor(num(save.lv[k],0))));
   if(save.mlv!=null){if(!obj(save.mlv))save.mlv={};for(const t in save.mlv){const m=save.mlv[t];if(!obj(m)){delete save.mlv[t];continue;}for(const k of MACHINE_UPG)m[k]=Math.max(0,Math.min(upMax(k),Math.floor(num(m[k],0))));}}
   if(save.parts)for(const t in save.parts)save.parts[t]=Math.max(0,Math.min(3,Math.floor(num(save.parts[t],0))));}
-function persist(){if(window.__noPersist)return;try{save.last=Date.now();localStorage.setItem(SAVE_KEY,JSON.stringify(save));}catch(e){}}
-function resetSave(){Object.assign(save,{coins:0,tool:0,lv:{speed:0,size:0,value:0,bumper:0,helpers:0},stars:Array(NL).fill(0),best:Array(NL).fill(0),tut:false,ach:{},stats:{cells:0,gifts:0,dodges:0,gnome:0,neighbours:0},hat:'yellow',hats:{yellow:true},daily:null,frost:0,winters:0,winterCoins:0,fails:Array(NL).fill(0),boostNext:false,gems:0,pro:false,adGems:null,dailySeen:'',winterSeen:false,gold:-1,tolls:{},outfit:'classic',outfits:{classic:true},skin:{},skins:{},trail:'classic',trails:{classic:true},treasures:{}});persist();vcache.clear();kidCacheClear();}
+function persist(){if(window.__noPersist)return;try{save.last=Date.now();const j=JSON.stringify(save);localStorage.setItem(SAVE_KEY,j);if(Date.now()-(window.__bakT||0)>60000){localStorage.setItem(SAVE_KEY+'.bak',j);window.__bakT=Date.now();}}catch(e){}}
+function resetSave(){try{localStorage.removeItem(SAVE_KEY+'.bak');}catch(e){}window.__bakT=0;Object.assign(save,{coins:0,tool:0,lv:{speed:0,size:0,value:0,bumper:0,helpers:0},stars:Array(NL).fill(0),best:Array(NL).fill(0),tut:false,ach:{},stats:{cells:0,gifts:0,dodges:0,gnome:0,neighbours:0},hat:'yellow',hats:{yellow:true},daily:null,frost:0,winters:0,winterCoins:0,fails:Array(NL).fill(0),boostNext:false,gems:0,pro:false,adGems:null,dailySeen:'',winterSeen:false,gold:-1,tolls:{},outfit:'classic',outfits:{classic:true},skin:{},skins:{},trail:'classic',trails:{classic:true},treasures:{}});persist();vcache.clear();kidCacheClear();}
 let achQueue=[];
 function checkTrophyProg(){if(!save||!save.ach)return;for(const a of ACH){if(save.ach[a.id])continue;const p=trophyProg(a.id);if(p&&p[1]>0&&p[0]>=p[1])award(a.id);}}
 function award(id){if(save.ach[id])return;const a=ACH.find(x=>x.id===id);if(!a)return;save.ach[id]=true;save.coins+=a.reward;save.gems=(save.gems||0)+SHOP.trophyGems;achQueue.push({a,t:2.6});sfx('trophy');buzz(25);persist();}
@@ -4972,20 +4972,32 @@ function openFeedback(from){if(document.getElementById('fbx'))return;const d=doc
   d.querySelector('#fbs').onclick=()=>{const t=ta.value.trim();if(!t){ta.focus();return;}const ok=phFeedback(t,from);close();sfx('buy');showToast(ok?'THANKS! SENT':'COULD NOT SEND','#ffd23f');};}
 function phOn(){return !TEST_MODE&&!PH_BOT&&!save.noTrack&&typeof fetch==='function';}
 const PH_ID=(()=>{let id=null;try{id=localStorage.getItem('sr.aid');}catch(e){}if(!id){id='p_'+Date.now().toString(36)+Math.random().toString(36).slice(2,10);try{localStorage.setItem('sr.aid',id);}catch(e){}}return id;})();
-function phSession(){try{if(PH.rec&&PH.rec.get_session_id){const s=PH.rec.get_session_id();if(s){PH.last=Date.now();return s;}}}catch(e){}const now=Date.now();if(!PH.sid||now-PH.last>30*60e3)PH.sid=now.toString(36)+Math.random().toString(36).slice(2,8);PH.last=now;return PH.sid;}
+function phSession(){try{if(PH.rec&&PH.rec.get_session_id){const s=PH.rec.get_session_id();if(s){PH.last=Date.now();return s;}}}catch(e){}const now=Date.now();if(!PH.sid||now-PH.last>30*60e3)PH.sid=uuid7();PH.last=now;return PH.sid;}
+function uuid7(){let h='';try{const r=crypto.getRandomValues(new Uint8Array(10));for(const x of r)h+=x.toString(16).padStart(2,'0');}catch(e){for(let i=0;i<20;i++)h+=Math.floor(Math.random()*16).toString(16);}
+  const t=Date.now().toString(16).padStart(12,'0');return t.slice(0,8)+'-'+t.slice(8,12)+'-7'+h.slice(0,3)+'-'+(8|(parseInt(h[3],16)&3)).toString(16)+h.slice(4,7)+'-'+h.slice(7,19);}
+function phSave(){try{if(!phOn()){localStorage.removeItem('sr.phq');return;}localStorage.setItem('sr.phq',JSON.stringify(PH.q.concat(PH.fly||[]).slice(-300)));}catch(e){}}
+try{if(phOn()){const old=JSON.parse(localStorage.getItem('sr.phq')||'[]');if(Array.isArray(old)&&old.length)PH.q.push(...old.slice(-300));}else localStorage.removeItem('sr.phq');}catch(e){}
 function track(ev,props){try{if(!phOn())return;const t=TOOLS[useIdx()];
   const p=Object.assign({distinct_id:PH_ID,$session_id:phSession(),$lib:'snowplow-rush',$geoip_disable:true,build:DEV_MODE?'dev':REVIEW_MODE?'review':'live',rv:RV,v:'0.8.0',winter:winterNo(),machine:t?t.id:null,stars_total:totalStars(),coins:Math.round(save.coins),gems:save.gems||0,premium:!!save.pro},props||{});
-  PH.q.push({event:ev,properties:p,timestamp:new Date().toISOString()});if(PH.q.length>=25)phFlush(false);}catch(e){}}
-function phForm(batch){const ev=batch.map(e=>({event:e.event,timestamp:e.timestamp,properties:Object.assign({token:PH.key},e.properties)}));let b64='';try{b64=btoa(unescape(encodeURIComponent(JSON.stringify(ev))));}catch(e){return null;}return 'data='+encodeURIComponent(b64);}
+  PH.q.push({event:ev,properties:p,timestamp:new Date().toISOString(),uuid:uuid7()});if(PH.q.length>300)PH.q.splice(0,PH.q.length-300);phSave();if(PH.q.length>=25)phFlush(false);}catch(e){}}
+function phForm(batch){const ev=batch.map(e=>({event:e.event,timestamp:e.timestamp,uuid:e.uuid,properties:Object.assign({token:PH.key},e.properties)}));let b64='';try{b64=btoa(unescape(encodeURIComponent(JSON.stringify(ev))));}catch(e){return null;}return 'data='+encodeURIComponent(b64);}
 function phSendForm(batch,final){const body=phForm(batch);if(!body)return;const url=PH.host+'/e/?compression=base64';
   try{if(final&&navigator.sendBeacon&&navigator.sendBeacon(url,new Blob([body],{type:'application/x-www-form-urlencoded'})))return;}catch(e){}
   try{fetch(url,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body,keepalive:!!final}).catch(()=>{});}catch(e){}}
-function phFlush(final){if(!PH.q.length||!phOn()){if(!phOn())PH.q.length=0;return;}const batch=PH.q.splice(0,PH.q.length);
-  // JSON to /batch/ first; if the browser blocks it (CORS) or it fails, fall back to the simple form post that never needs a preflight, and stick with it
-  if(PH.form||final){phSendForm(batch,final);return;}
-  try{fetch(PH.host+'/batch/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({api_key:PH.key,batch})}).then(r=>{if(!r.ok)throw new Error('http '+r.status);}).catch(()=>{PH.form=true;phSendForm(batch,false);});}catch(e){PH.form=true;phSendForm(batch,false);}}
+function phPostForm(batch,keep){const body=phForm(batch);if(!body)return Promise.resolve(true);
+  return fetch(PH.host+'/e/?compression=base64',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body,keepalive:!!keep}).then(r=>r.ok);}
+// a batch leaves the queue only when PostHog confirms it; failures go back in the queue. When the page hides, a keepalive
+// post (a beacon can't say whether it arrived); a batch whose answer never comes stays saved and goes again next launch
+function phFlush(final){if(!phOn()){PH.q.length=0;PH.fly=[];phSave();return;}if(!PH.q.length)return;
+  if(final&&navigator.onLine===false){phSave();return;}
+  const batch=PH.q.splice(0,final?40:50);PH.fly=(PH.fly||[]).concat(batch);phSave();
+  const done=ok=>{PH.fly=(PH.fly||[]).filter(e=>batch.indexOf(e)<0);if(ok)PH.fails=0;else{PH.q.unshift(...batch);PH.fails=(PH.fails||0)+1;PH.failT=Date.now();}phSave();};
+  if(final){phPostForm(batch,true).then(done,()=>done(false));if(PH.q.length)phFlush(true);return;}
+  // JSON to /batch/ first; if the browser blocks it (CORS) or it fails, the simple form post that needs no preflight, and stick with it
+  const form=()=>{PH.form=true;phPostForm(batch).then(done,()=>done(false));};if(PH.form){form();return;}
+  try{fetch(PH.host+'/batch/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({api_key:PH.key,batch})}).then(r=>{if(!r.ok)throw new Error('http '+r.status);done(true);}).catch(form);}catch(e){form();}}
 function trackErr(msg,where){if(PH.errs>=5)return;PH.errs++;track('error',{msg:String(msg||'').slice(0,200),where:String(where||'').slice(0,400),screen:state});}
-setInterval(()=>phFlush(false),15000);
+setInterval(()=>{if((PH.fails||0)>=5&&Date.now()-(PH.failT||0)<60000)return;phFlush(false);},15000);setTimeout(()=>phFlush(false),3000);
 document.addEventListener('visibilitychange',()=>{if(document.hidden){let hp={screen:state};try{if(state==='play'&&PH.jobT)Object.assign(hp,phJob(),{pct:G?Math.round(G.cleared/G.clearable*100):null,secs:Math.round((Date.now()-PH.jobT)/1000)});}catch(e){}track('app_hidden',hp);phFlush(true);}});
 window.addEventListener('pagehide',()=>phFlush(true));
 window.addEventListener('error',e=>trackErr(e.message,(e.filename||'')+':'+e.lineno));
@@ -4995,7 +5007,7 @@ const phJob=()=>{const L=G&&G.def;return L?{job:L.id,area:L.area}:{};};
   track('job_start',{job:L.id,area:L.area,job_no:L.area==='secret'?null:jobNo(idx),attempt:(save.fails[idx]||0)+1,stars_before:save.stars[idx]||0,weekly:!!(opts&&opts.challenge),mission:missionOn(idx),boss:!!L.boss});}catch(e){}return r;};}
 {const o=endRound;endRound=function(){const was=run&&run.ended;const r=o.apply(this,arguments);try{if(run&&!was&&run.res&&!run.mastDone){run.mastDone=true;const t=tool();if(t&&t.ride&&!run.challenge&&!run.drive&&!run.mission)mastAdd(t.id,1+(run.res.stars||0));}}catch(e){}
   try{if(run&&!was&&run.res&&!run.phDone){run.phDone=true;const R2=run.res;
-  track('job_end',Object.assign(phJob(),{combo_halved:run.cHalf||0,combo_best:+(1+0.1*(run.cBest||0)).toFixed(1),combo_avg:run.cG?+(run.cW/run.cG).toFixed(2):1,combo_bonks:run.cBonk||0,combo_fades:run.cFade||0,pct:Math.round(R2.pct),stars:R2.stars,all_clear:!!R2.allClear,earned:Math.round(run.earned||0),bonus:Math.round(R2.bonus||0),hits:run.hits||0,gifts:run.gifts||0,continue_used:!!run.contUsed,time_left:Math.round(run.time||0),secs:Math.round((Date.now()-PH.jobT)/1000),slow_frames_pct:PH.frames?Math.round(PH.slow/PH.frames*100):null,weekly:!!run.challenge,score:R2.challenge?R2.challenge.score:null,swept:!!run.swept,unreach_pct:G&&G.ncN?Math.round(G.ncN/(G.clearable+G.ncN)*1000)/10:0}));}}catch(e){}return r;};}
+  track('job_end',Object.assign(phJob(),{ks:typeof KS==='number'?KS:null,combo_halved:run.cHalf||0,combo_best:+(1+0.1*(run.cBest||0)).toFixed(1),combo_avg:run.cG?+(run.cW/run.cG).toFixed(2):1,combo_bonks:run.cBonk||0,combo_fades:run.cFade||0,pct:Math.round(R2.pct),stars:R2.stars,all_clear:!!R2.allClear,earned:Math.round(run.earned||0),bonus:Math.round(R2.bonus||0),hits:run.hits||0,gifts:run.gifts||0,continue_used:!!run.contUsed,time_left:Math.round(run.time||0),secs:Math.round((Date.now()-PH.jobT)/1000),slow_frames_pct:PH.frames?Math.round(PH.slow/PH.frames*100):null,weekly:!!run.challenge,score:R2.challenge?R2.challenge.score:null,swept:!!run.swept,unreach_pct:G&&G.ncN?Math.round(G.ncN/(G.clearable+G.ncN)*1000)/10:0}));}}catch(e){}return r;};}
 for(const [nm,get,set] of [['map',()=>goMap,f=>goMap=f],['garage',()=>goGarage,f=>goGarage=f],['upgrades',()=>goUpgrades,f=>goUpgrades=f]]){const o=get();set(function(){try{if(state==='play'&&run&&!run.ended)track('job_quit',Object.assign(phJob(),{pct:G?Math.round(G.cleared/G.clearable*100):null,secs:Math.round((Date.now()-PH.jobT)/1000)}));if(state!==nm)track('screen',{name:nm,from:state});}catch(e){}return o.apply(this,arguments);});}
 {const o=buyUpg;buyUpg=function(k){const c0=save.coins;const r=o.apply(this,arguments);try{if(save.coins<c0)track('upgrade_buy',{kind:k,machine:curMachine(),level:lvOf(k),cost:Math.round(c0-save.coins)});}catch(e){}return r;};}
 {const o=buyTool;buyTool=function(){const t0=save.tool,c0=save.coins;const r=o.apply(this,arguments);try{if(save.tool>t0)track('machine_buy',{bought:TOOLS[save.tool].id,cost:Math.round(c0-save.coins)});}catch(e){}return r;};}
@@ -5010,7 +5022,7 @@ for(const [nm,get,set] of [['premium',()=>shopBuyPremium,f=>shopBuyPremium=f],['
 function phRecStart(){try{if(!phOn()||DEV_MODE||REVIEW_MODE||PH.rec||window.posthog)return;const n=save.phRec||0;if(n>=2)return;save.phRec=n+1;persist();
   window.SR_KS=3;resize();const sc=document.createElement('script');sc.src='/ph/posthog-1.450.1.js';sc.async=true;
   sc.onload=()=>{try{window.posthog.init(PH.key,{api_host:PH.host,ui_host:'https://us.posthog.com',autocapture:false,capture_pageview:false,capture_pageleave:false,capture_dead_clicks:false,rageclick:false,
-    disable_surveys:true,enable_heatmaps:false,capture_performance:false,capture_exceptions:false,person_profiles:'identified_only',persistence:'localStorage',bootstrap:{distinctID:PH_ID},
+    disable_surveys:true,enable_heatmaps:false,capture_performance:false,capture_exceptions:false,person_profiles:'identified_only',persistence:'localStorage',bootstrap:{distinctID:PH_ID,sessionID:phSession()},
     disable_session_recording:false,session_recording:{maskAllInputs:true,captureCanvas:{recordCanvas:true,canvasFps:2,canvasQuality:'0.4'}},
     loaded:p=>{PH.rec=p;try{p.register({build:'live',v:'0.8.0',rec_n:n+1});}catch(e){}setTimeout(()=>{try{p.stopSessionRecording();}catch(e){}},20*60e3);}});}catch(e){}};
   sc.onerror=()=>{window.SR_KS=0;resize();};document.head.appendChild(sc);}catch(e){}}
