@@ -5159,7 +5159,8 @@ function drawGot(dt){const G=gotCard;G.t+=dt||0.016;const n=G.rows.length,x=14,w
   button('gotok',x+36,y+h-26,w-72,18,'orange','NICE!',()=>{gotCard=null;sfx('click');});}
 function gemMoney(price,x,y,align,col){if(!price||price.g==null)return;const t='='+gemCash(price.g);if(t.length>1)text(b,t,x,y,col||'#9fc0e8',{align:align||'left',outline:null});}
 SHOP.bank={price:'$2.99',open:220,max:400,perJob:4,perStar:1,from:10};let bankOpen=false,bankFx=null;
-function bankOn(){return (save.fbRuns||0)>=SHOP.bank.from;}
+const BANK_PREVIEW=REVIEW_MODE&&/[?&]bank\b/.test(location.search);
+function bankOn(){if(BANK_PREVIEW&&!save.bank)save.bank={g:250};return (save.fbRuns||0)>=SHOP.bank.from||BANK_PREVIEW;}
 function bankG(){return (save.bank&&save.bank.g)||0;}
 function bankValue(){const p=priceParse(SHOP.bank.price),g0=SHOP.gems[0],p0=priceParse(g0.price);return p&&p0&&p.n>0?SHOP.bank.max*p0.n/g0.gems/p.n:0;}
 function drawJar(x,y,s,f,glow){const P=(px,py,w,h,c)=>R(b,x+px*s,y+py*s,w*s,h*s,c);

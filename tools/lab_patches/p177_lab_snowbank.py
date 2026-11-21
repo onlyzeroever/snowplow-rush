@@ -8,6 +8,7 @@
 #    prices on show (so it follows each store's currency); a full jar says FULL (it stops filling)
 #  - the jar pulses when it can be broken, and shows a red dot until the first look
 #  - events: bank_open; the purchase is an iap_test like the other store items
+#  - preview: ?review=all&bank shows the jar with 250 gems in it (review saves only)
 import sys
 f=sys.argv[1];s=open(f,encoding='utf-8').read()
 def rep(a,b_,cnt=1):
@@ -16,7 +17,8 @@ rep("window.srNativeReady=()=>{","IAP.ids.bank='snow_bank';IAP.consumable.bank=1
 rep("if(P('ride_pass'))SHOP.ridePass.price=P('ride_pass');","if(P('ride_pass'))SHOP.ridePass.price=P('ride_pass');if(P('bank'))SHOP.bank.price=P('bank');")
 rep("function drawShop(){",
     "SHOP.bank={price:'$2.99',open:220,max:400,perJob:4,perStar:1,from:10};let bankOpen=false,bankFx=null;\n"
-    "function bankOn(){return (save.fbRuns||0)>=SHOP.bank.from;}\n"
+    "const BANK_PREVIEW=REVIEW_MODE&&/[?&]bank\\b/.test(location.search);\n"
+    "function bankOn(){if(BANK_PREVIEW&&!save.bank)save.bank={g:250};return (save.fbRuns||0)>=SHOP.bank.from||BANK_PREVIEW;}\n"
     "function bankG(){return (save.bank&&save.bank.g)||0;}\n"
     "function bankValue(){const p=priceParse(SHOP.bank.price),g0=SHOP.gems[0],p0=priceParse(g0.price);return p&&p0&&p.n>0?SHOP.bank.max*p0.n/g0.gems/p.n:0;}\n"
     "function drawJar(x,y,s,f,glow){const P=(px,py,w,h,c)=>R(b,x+px*s,y+py*s,w*s,h*s,c);\n"
