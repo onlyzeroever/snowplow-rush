@@ -12,7 +12,8 @@ cloud session that builds the game.
 ## The game you wrap
 
 - **`app/game/index.html`** is the app build of the game: the live game plus the app-only patches (store and ads
-  bridge, save mirror and reminders, launch prices, lighter session recording, event schedule from the website, store prices in the pixel font).
+  bridge, save mirror and reminders, launch prices, lighter session recording, event schedule from the website, store prices
+  in the pixel font, shop v2, the Snow Bank and the Event Pass).
   The cloud session rebuilds and commits it; never edit it on the Mac. Ask for a patch instead.
 - `copy-web.sh` runs `python3 tools/release.py app/game/index.html www/index.html` (test hooks off), then copies
   `ph/`, `audio/`, `events.json`, the icons and `og.png` from the repo root into `www/`.
@@ -24,7 +25,8 @@ cloud session that builds the game.
 1. Mac: the current Xcode with an iOS simulator, Android Studio with an SDK and an emulator, Node LTS. An iPhone
    and an Android phone for device tests. A free Apple ID in Xcode is enough to run on a phone for now.
 2. Capacitor 8 project in `app/` (section 4 of the hand-off): app id `app.snowplowrush`, name "Snowplow Rush",
-   portrait only, full screen, status bar hidden, dark blue splash `#13306b`.
+   portrait only, full screen, status bar hidden, dark blue splash `#13306b`. Build with Xcode 27.1 (iOS 27.1 SDK)
+   or later so the app fills the iPhone Duo's inner display (section 4 of the hand-off, "Screen shapes").
 3. `copy-web.sh` and a `native-bridge.js` that loads before the game's script and defines `window.SRNative` with
    `platform`, `storeSave`, `window.SRNativeSave`, `network`, `recordOK`, `askReminders`, `scheduleReminders`;
    `buy`, `owned`, `restore`, `prices` and `showAd` as stubs that resolve `{ok:false, reason:'error'}` for now.

@@ -2529,7 +2529,7 @@ function goMap(){checkTrophyProg();if(!TEST_MODE){const n=save.fbRuns||0,k=n>=30
     else{save.story=save.story||{};for(const ar of AREA_SEQ){if(save.story[ar]||!STORY[ar])continue;const first=LEVELS.findIndex(l=>l.area===ar);if(first>=0&&levelOpen(first)){storyOpen=ar;break;}}}}
   if(!overlayOpen())offerPick();
   persist();}
-function titleGo(){sfx('click');const fresh=!save.privSeen;if(fresh){save.privSeen=true;track('privacy_notice',{choice:'title'});persist();}
+function titleGo(){sfx('click');const fresh=!save.privSeen;
   if(fresh&&!(save.fbRuns>0)&&!save.best.some(v=>v>0)){track('ftue_direct');startLevelUI(0);return;}goMap();}
 let offerOpen=null;
 function adCount(){const k=todayKey();if(!save.adDay||save.adDay.date!==k)save.adDay={date:k,n:0};save.adDay.n++;}
@@ -2607,11 +2607,11 @@ function drawBlizzard(){const z=run.bz;if(!z||!G||!G.def.gust)return;const blow=
     text(b,'GUST!',W/2,HUD_H+46,'#ffffff',{align:'center',scale:3});}}
 function overlayOpen(){return !!(ridePeek||rideReveal||settingsOpen||trophiesOpen||dailyOpen||winterOpen||adScreen||shopOpen||jobInfo>=0||skinFor||outfitsOpen||trailsOpen||bookOpen||weeklyOpen||(storyOpen&&state==='map')||(offerOpen&&state==='map')||(evOpen&&state==='map'));}
 let privT=0;
-function drawPrivacyCard(dt){privT=Math.min(1,privT+(dt||0.016)*3.5);const e=1-Math.pow(1-privT,3),x=6,w=W-12,h=58,y=Math.round(NAV_Y-h-6+(1-e)*70);
+function drawPrivacyCard(dt){privT=Math.min(1,privT+(dt||0.016)*3.5);const e=1-Math.pow(1-privT,3),x=6,w=W-12,h=58,y=Math.round(MAP_VY+16-(1-e)*10);b.globalAlpha=Math.min(1,0.15+e);
   btn('privbg',x,y,w,h,()=>{});panel(x,y,w,h,'#13306b','#ffd23f');b.drawImage(SPR.frost,x+6,y+5);text(b,'ANONYMOUS PLAY DATA',x+18,y+6,'#ffd23f',{outline:null});
   text(b,'WE COUNT PLOWS, NOT PEOPLE.',W/2,y+17,'#ffffff',{align:'center',outline:null});text(b,'WE MAY RECORD YOUR FIRST PLAYS,',W/2,y+26,'#9fc0e8',{align:'center',outline:null});text(b,'ANONYMOUSLY. WE NEVER SELL IT.',W/2,y+34,'#9fc0e8',{align:'center',outline:null});
   button('privok',x+w/2-56,y+42,52,13,'green','GOT IT',()=>{save.privSeen=true;track('privacy_notice',{choice:'got_it'});persist();sfx('click');});
-  button('privset',x+w/2+4,y+42,52,13,'navy','SETTINGS',()=>{save.privSeen=true;track('privacy_notice',{choice:'settings'});persist();settingsOpen=true;sfx('click');});}
+  button('privset',x+w/2+4,y+42,52,13,'navy','SETTINGS',()=>{save.privSeen=true;track('privacy_notice',{choice:'settings'});persist();settingsOpen=true;sfx('click');});b.globalAlpha=1;}
 function funAskDue(){if(TEST_MODE&&!save.funTest)return false;if(!save.privSeen)return false;const today=new Date().toDateString();if(!save.day0){save.day0=today;persist();}
   if(!save.funAsk1&&(save.fbRuns||0)>=5)return 'job5';if(save.funAsk1&&!save.funAsk2&&save.day0!==today&&(save.funAsk1Day||'')!==today)return 'day2';return false;}
 let funT=0;function drawFunCard(dt,ask){funT=Math.min(1,funT+(dt||0.016)*3.5);const e=1-Math.pow(1-funT,3),x=6,w=W-12,h=60,y=Math.round(NAV_Y-h-6+(1-e)*70);
@@ -3149,8 +3149,7 @@ function drawTitle(){
   if(!logoReady){text(b,'SNOWPLOW',W/2,40,'#ffffff',{align:'center',scale:3,outline:'#1d4f9a'});text(b,'RUSH',W/2,62,'#ffc727',{align:'center',scale:4,outline:'#8e3a10'});}
   {b.globalAlpha=0.55+0.45*(0.5+0.5*Math.sin(tNow*4));text(b,'TAP TO PLAY',W/2,258+(Math.sin(tNow*4)>0.6?-1:0),'#ffffff',{align:'center',scale:2});b.globalAlpha=1;}
   text(b,'PLAYTEST V0.8.0',W/2,304,'#8fa8cc',{align:'center',outline:null});
-  if(!offlineGain){button('tgear',W-20,2,18,17,'blue',null,()=>{settingsOpen=true;sfx('click');});b.drawImage(SPR.gear,W-15,6);
-    if(!save.privSeen){const c='#5b7bab';text(b,'WE COUNT PLOWS, NOT PEOPLE.',W/2,274,c,{align:'center',outline:null});text(b,'WE MAY RECORD YOUR FIRST PLAYS,',W/2,282,c,{align:'center',outline:null});text(b,'ANONYMOUSLY. WE NEVER SELL IT.',W/2,290,c,{align:'center',outline:null});}}
+  if(!offlineGain){button('tgear',W-20,2,18,17,'blue',null,()=>{settingsOpen=true;sfx('click');});b.drawImage(SPR.gear,W-15,6);}
   if(offlineGain>0){panel(14,98,152,90,'#13306b','#ffd23f');text(b,'WELCOME BACK!',W/2,105,'#ffd23f',{align:'center'});
     text(b,'AWAY '+fmtDur(offlineAway)+' - YOUR HELPERS EARNED',W/2,116,'#ffffff',{align:'center'});
     const gw=textW('+'+fmt(offlineGain),2)+12;b.drawImage(SPR.coin,W/2-gw/2,127);text(b,'+'+fmt(offlineGain),W/2-gw/2+12,128,'#ffd23f',{scale:2});

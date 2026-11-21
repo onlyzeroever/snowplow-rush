@@ -13,7 +13,7 @@ let fails = 0; const ok = (c, m) => { console.log((c ? 'ok   ' : 'FAIL ') + m); 
   const s1 = JSON.parse(await EV(`JSON.stringify({st:state,job:G&&G.def.id,t:Math.round(run.time),priv:save.privSeen,story:!!(save.story&&save.story.suburbs)})`));
   ok(s1.st === 'play' && s1.job === 'driveway', 'first tap goes straight into the driveway ' + JSON.stringify(s1));
   ok(s1.t >= 88 && s1.t <= 90, 'driveway has 90 seconds');
-  ok(s1.priv === true, 'tapping play marks the title notice as seen');
+  ok(s1.priv !== true, 'the title has no small print; the note waits for the first map visit (p180, Nov 21)');
   ok((await EV(`JSON.stringify(LEVELS[0].stars)`)) === '[25,50,70]', 'driveway stars at 25/50/70% (p168, Nov 21)');
   // no +15 s pop-up in the first 3 jobs
   const o1 = JSON.parse(await EV(`(()=>{window.__HOLD=1;save.fbRuns=0;G.cleared=Math.round(G.clearable*0.4);run.moved=true;run.time=0.01;update(0.05);return JSON.stringify({offer:!!run.offer,ended:!!run.ended});})()`));
@@ -26,7 +26,8 @@ let fails = 0; const ok = (c, m) => { console.log((c ? 'ok   ' : 'FAIL ') + m); 
   ok(!d1.open && !d1.on && d1.same, 'after job 1: no daily pop-up, no daily progress ' + JSON.stringify(d1));
   await EV(`(window.__HOLD=0,1)`); await p.waitForTimeout(400);
   let ui = await ids(); ok(!ui.includes('daily') && !ui.includes('weekly'), 'map hides daily and weekly early');
-  ok(ui.includes('node0') && !ui.includes('privok'), 'map shows jobs and no privacy card over job 1');
+  {const pv = JSON.parse(await EV(`JSON.stringify((()=>{const c=ui.find(u=>u.id==='privbg'),n=ui.find(u=>u.id==='node0');return {card:!!c,node:!!n,clear:!!(c&&n)&&(n.y+n.h<=c.y||n.y>=c.y+c.h)};})())`));
+  ok(pv.node && pv.card && pv.clear, 'first map visit: the play-data card at the top, job 1 clear below it ' + JSON.stringify(pv));}
   const d2 = JSON.parse(await EV(`(()=>{save.fbRuns=4;dailyOpen=false;save.dailySeen='';goMap();return JSON.stringify({open:dailyOpen,on:dailyOn(),ever:save.dailyEver});})()`));
   ok(d2.open === 'new' && d2.on && d2.ever, 'after job 4 the dailies arrive ' + JSON.stringify(d2));
   await EV(`(dailyOpen=false,1)`); await p.waitForTimeout(400); ui = await ids();
