@@ -14,7 +14,7 @@ rewarded ads, a silent cloud save and a few local reminders. No accounts, no ser
   Everything native lives in `app/` (this folder).
 - **Branches.** `main` is live (Vercel deploys it to snowplowrush.app), `next` is staging, `lab` is the
   prototype site lab.snowplowrush.app. **The app wraps `app/game/index.html`**: the live game plus the
-  app-only patches (p163, p165, p170, p171, p172, p174), rebuilt and committed by the cloud session. Start with
+  app-only patches (p163, p165, p170, p171, p172, p173, p174, p175, p176, p179), rebuilt and committed by the cloud session. Start with
   `app/CC_START.md`.
 - **Rules from Alex that apply here:** never spend money or credits without asking; never put keys,
   passwords or tokens in chat or in the repo (Alex types them into the tools himself); prices shown must be
@@ -47,6 +47,10 @@ rewarded ads, a silent cloud save and a few local reminders. No accounts, no ser
 | p170 | Launch prices, five gem packs, first gem purchase doubled, honest labels (worked out from the prices on show, so they hold in every store currency) | Lab, app build |
 | p171 | Lighter session recording in the apps (section 8) | Lab |
 | p172 | Event schedule fetched from the website in the apps | App build |
+| p173 | Shop v2: free gift on top, one hero offer (Starter Pack with a real 48-hour countdown, else Premium), one colour per way of paying (green money, purple gems, blue free), "need more gems" jump to the right pack, one layout grid, shop events | Lab, app build |
+| p175 | "YOU GOT" card after every purchase; the NEW WILD RIDE reveal for rides bought in the shop | Lab, app build |
+| p176 | Real-money values next to gem prices in the garage (outfits, skins, trails) | Lab, app build |
+| p179 | Tall phones: a snowy night sky behind the 9:16 game instead of plain bands (for full-screen apps and store screenshots) | Lab, app build |
 | p174 | Store prices in the pixel font: £ € ¥ ₩ ₹ ₺ ₪ ₱ are drawn, other currencies are rebuilt from amount + currency (`SAR 18.99`); the shop's TEST MODE line is web only | App build |
 | p161 | Automatic render scale on slow phones | Live |
 
@@ -130,8 +134,9 @@ store's own prices and rounded down; a claim the prices can't support is simply 
 | `wild_ride_pass` | Non-consumable | $7.99 | All five Wild Rides as they unlock | Yes |
 
 The first gem pack a player buys gives double gems: the game does that, no extra product.
-Coming next (lab first): `snow_bank` (consumable, $2.99: the gems saved up in the Snow Bank, 220 to 400) and
-`event_pass` (consumable, $2.99, one per weekend event, or 250 gems). Not needed for the first submission.
+In the lab since Nov 21 (p177, p178), waiting for Alex's OK: `snow_bank` (consumable, $2.99: the gems saved up
+in the Snow Bank, 220 to 400) and `event_pass` (consumable, $2.99, one per weekend event, or 250 gems). Create them in
+the stores only once they move into the app build. Not needed for the first submission.
 
 RevenueCat: one entitlement `premium` attached to `premium`; the rest are read from the customer's
 non-subscription purchases. Use StoreKit 2. Test with Sandbox testers (Apple) and license testers (Google).

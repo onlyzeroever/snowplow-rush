@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kiln Fire Games</title>
+<meta name="description" content="Kiln Fire Games is a small independent games studio. Our first game is Snowplow Rush.">
+<meta property="og:title" content="Kiln Fire Games">
+<meta property="og:description" content="A small independent games studio. Our first game: Snowplow Rush.">
+<meta property="og:image" content="snowplow-rush.png">
+<style>
+  :root{--coal:#17110d;--ash:#241a14;--ember:#ff7a1a;--flame:#ffb330;--glow:#ffd98a;--cream:#fff4e2;--muted:#c9b49c;--snow:#cfe3f8;--navy:#0b1838}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--coal);color:var(--cream);font:17px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  a{color:var(--glow)}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px}
+  header{position:relative;overflow:hidden;padding:72px 0 56px;text-align:center;
+    background:radial-gradient(120% 90% at 50% 120%,rgba(255,122,26,.42),rgba(255,122,26,.08) 55%,transparent 70%),var(--coal)}
+  .flame{width:72px;height:88px;image-rendering:pixelated;margin:0 auto 18px;display:block}
+  h1{margin:0;font-size:clamp(34px,7vw,60px);letter-spacing:.06em;line-height:1.05;font-weight:900;text-transform:uppercase;
+    background:linear-gradient(180deg,var(--glow),var(--flame) 45%,var(--ember));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .tag{margin:14px auto 0;max-width:560px;color:var(--muted);font-size:19px}
+  section{padding:46px 0;border-top:1px solid #2e2219}
+  h2{margin:0 0 18px;font-size:14px;letter-spacing:.2em;text-transform:uppercase;color:var(--flame)}
+  .game{display:grid;grid-template-columns:1.25fr 1fr;gap:28px;align-items:center}
+  .game img{width:100%;height:auto;border-radius:14px;display:block;box-shadow:0 10px 40px rgba(0,0,0,.45)}
+  .game h3{margin:0 0 8px;font-size:28px}
+  .game p{margin:0 0 18px;color:#e9dccb}
+  .btn{display:inline-block;padding:13px 22px;border-radius:10px;background:linear-gradient(180deg,var(--flame),var(--ember));color:#2a1405;font-weight:800;text-decoration:none;letter-spacing:.02em}
+  .btn:hover{filter:brightness(1.07)}
+  .soon{display:block;margin-top:10px;color:var(--muted);font-size:15px}
+  .cols{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .card{background:var(--ash);border:1px solid #33261c;border-radius:12px;padding:16px 18px}
+  .card b{display:block;margin-bottom:4px;color:var(--cream)}
+  .card a{word-break:break-all}
+  footer{padding:30px 0 46px;color:var(--muted);font-size:14px;border-top:1px solid #2e2219}
+  footer p{margin:4px 0}
+  mark{background:#5a3a12;color:var(--glow);padding:0 4px;border-radius:3px}
+  @media (max-width:700px){.game{grid-template-columns:1fr}.cols{grid-template-columns:1fr}header{padding:56px 0 40px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <svg class="flame" viewBox="0 0 18 22" aria-hidden="true" shape-rendering="crispEdges">
+      <g fill="#ff7a1a"><rect x="8" y="0" width="2" height="2"/><rect x="7" y="2" width="4" height="2"/><rect x="5" y="4" width="8" height="2"/><rect x="4" y="6" width="10" height="2"/><rect x="3" y="8" width="12" height="4"/><rect x="2" y="12" width="14" height="5"/><rect x="3" y="17" width="12" height="2"/></g>
+      <g fill="#ffb330"><rect x="8" y="6" width="2" height="2"/><rect x="7" y="8" width="4" height="2"/><rect x="6" y="10" width="6" height="3"/><rect x="5" y="13" width="8" height="4"/><rect x="6" y="17" width="6" height="1"/></g>
+      <g fill="#ffd98a"><rect x="8" y="11" width="2" height="2"/><rect x="7" y="13" width="4" height="3"/></g>
+      <g fill="#5a3a26"><rect x="1" y="19" width="16" height="3"/></g><g fill="#7a5038"><rect x="2" y="19" width="14" height="1"/></g>
+    </svg>
+    <h1>Kiln Fire Games</h1>
+    <p class="tag">A small, independent games studio making cosy, pick-up-and-play games.</p>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <h2>Our first game</h2>
+    <div class="game">
+      <a href="https://snowplowrush.app"><img src="snowplow-rush.png" width="1200" height="630" alt="Snowplow Rush: clear the snow, build your fleet. Pixel-art screenshots of the town map and a snowplow clearing a street."></a>
+      <div>
+        <h3>Snowplow Rush</h3>
+        <p>Clear snowy streets in a cosy pixel-art town. Upgrade your plow, collect Wild Rides, take on the weekly challenge and join weekend events.</p>
+        <a class="btn" href="https://snowplowrush.app">Play free in your browser</a>
+        <span class="soon">Coming soon to iPhone and Android.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Contact</h2>
+    <div class="cols">
+      <div class="card"><b>Say hello</b><a href="mailto:hello@kilnfiregames.com">hello@kilnfiregames.com</a></div>
+      <div class="card"><b>Player help</b><a href="mailto:support@kilnfiregames.com">support@kilnfiregames.com</a></div>
+      <div class="card"><b>Privacy</b><a href="mailto:privacy@kilnfiregames.com">privacy@kilnfiregames.com</a></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>&copy; 2026 Kiln Fire Games Ltd. Registered in <mark>England and Wales</mark>, company number <mark>to add</mark>.</p>
+    <p>Registered office: <mark>to add</mark>.</p>
+    <p><a href="https://snowplowrush.app/privacy">Privacy policy</a></p>
+  </div>
+</footer>
+</body>
+</html>
