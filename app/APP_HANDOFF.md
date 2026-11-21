@@ -13,8 +13,8 @@ rewarded ads, a silent cloud save and a few local reminders. No accounts, no ser
   `index.html`. Do not edit game code by hand on the Mac; ask for a patch instead, so the two never drift.
   Everything native lives in `app/` (this folder).
 - **Branches.** `main` is live (Vercel deploys it to snowplowrush.app), `next` is staging, `lab` is the
-  prototype site lab.snowplowrush.app. The app should be built from `main` once p162, p163 and p165 are
-  shipped there (see 3).
+  prototype site lab.snowplowrush.app. The app should be built from `main` once p163, p165, p171 and the
+  lab price patch p170 are shipped there (see 3). Until then, build the native shell against `lab`.
 - **Rules from Alex that apply here:** never spend money or credits without asking; never put keys,
   passwords or tokens in chat or in the repo (Alex types them into the tools himself); prices shown must be
   the real store prices; the privacy wording must never say "no ads"; not Christmas-themed.
@@ -23,8 +23,14 @@ rewarded ads, a silent cloud save and a few local reminders. No accounts, no ser
 
 | What | Value | Notes |
 | --- | --- | --- |
+| Legal seller (both stores) | Kiln Fire Games Ltd (new company Alex is setting up for the apps; his UGC Program Ltd stays separate) | Organisation accounts in the new company's name, with its own D-U-N-S number and business bank account. Its company number and registered office go in the privacy page and the website footer (UK trading disclosures). The new company must own the game: a short IP assignment from whoever owns it now. |
+| Developer name shown under the app | Kiln Fire Games | Apple sets it once, when the first app record is created, and only Apple support can change it later. Confirm the exact spelling with Alex before creating the record. Google's can be changed any time. |
 | Apple Developer Program | $99 a year | App Store Connect app record "Snowplow Rush" |
-| Google Play Console | $25 once | App record "Snowplow Rush" |
+| Apple Small Business Program | 15% instead of 30% | Enrol as soon as the account exists: accept the Paid Apps agreement (with bank and tax), then https://developer.apple.com/app-store/small-business-program/enroll/ . The rate starts 15 days after the end of the Apple fiscal month in which it is approved, so do it weeks before launch. |
+| Google Play Console | $25 once | App record "Snowplow Rush". UK/EU/US since Jun 30, 2026: 10% service fee on the first $1M plus a 5% billing fee. |
+| Contact addresses | hello@, support@, privacy@snowplowrush.app | Forwarded to Alex (ImprovMX). Use support@ in the store listings, privacy@ in the privacy policy. |
+| Developer website | kilnfiregames.com (studio page, once Alex buys the domain) or snowplowrush.app | Must serve `/app-ads.txt` with the AppLovin and AdMob lines before ads are approved; the store listing's developer website must be this domain. |
+| If the apps ever change company | app transfer | Both stores move apps between developer accounts and keep ratings, reviews and users; keep the bundle id; RevenueCat keeps its app config. On Google Play an app with in-app products is unpublished until it is republished in the new account. |
 | Bundle id / package name | `app.snowplowrush` | Same on both stores (reversed domain) |
 | RevenueCat | free tier | One project, iOS + Android apps, entitlement `premium` |
 | AppLovin MAX + AdMob | free | Rewarded ad unit per platform; AdMob as a network inside MAX |
@@ -34,9 +40,11 @@ rewarded ads, a silent cloud save and a few local reminders. No accounts, no ser
 
 | Patch | What it gives the app | Status |
 | --- | --- | --- |
-| p162 | Analytics that keep and retry unsent events (needed on flaky phone networks) | Lab; waits for Alex's OK |
+| p162 | Analytics that keep and retry unsent events (needed on flaky phone networks) | Live (Nov 21) |
 | p163 | `IAP`: every price and ad button goes through `window.SRNative`; Restore Purchases in Settings | Lab |
 | p165 | Save mirror to the phone, reminder plan, nudge card after the first three-star job | Lab |
+| p170 | Launch prices, five gem packs, first gem purchase doubled, honest labels (lab patch) | Lab |
+| p171 | Lighter session recording in the apps (section 8) | Lab |
 | p161 | Automatic render scale on slow phones | Live |
 
 When Alex OKs them, the cloud session moves them to `main`. The release build (`tools/release.py`, see 9)
@@ -84,6 +92,8 @@ game's script runs, then call `window.srNativeReady()` once purchases and ads ar
 | `showAd(placement)` | an ad button is tapped | Show a MAX rewarded ad. Resolve `{ok:true}` only if the reward callback fired; `{ok:false, reason:'no_fill'\|'closed'\|'error'}` otherwise. The game suspends its own audio while it waits. |
 | `storeSave(key, json)` (sync) | after saves, at most every 5 s, and when the app goes to the background | Keep the latest JSON in `@capacitor/preferences` and, on iOS, in iCloud key-value storage (`NSUbiquitousKeyValueStore`, small local plugin). |
 | `window.SRNativeSave` (object, not a function) | read once at launch | `{key: json}` with the saved game, set at document start so the game finds it when the browser storage is empty (reinstall, new phone). On iOS a `WKUserScript` at document start; on Android `WebViewCompat.addDocumentStartJavaScript`. |
+| `network` (string, or a function returning one, sync) | before a session recording starts | `'wifi'`, `'cellular'` or `'none'`, kept current by the app (`@capacitor/network`). Anything else counts as not Wi-Fi. |
+| `recordOK()` (sync) | before a session recording starts | `false` when the player said no to analytics in the consent flow (section 7); otherwise `true`. |
 | `askReminders()` | the player says yes on the game's own nudge card | Ask for notification permission; resolve `true` if granted. Never ask before this. |
 | `scheduleReminders(list)` (sync) | every time the game goes to the background | Cancel all pending reminders and schedule this list: `[{id, at (ms), title, body}]`. Send at most one a day: drop any that fall within 20 hours of another, keep the earliest. No reminders between 21:00 and 09:00 local: move them to 09:00. |
 
@@ -93,25 +103,29 @@ the game handles that.
 
 ## 6. Products (create these in both stores, then in RevenueCat)
 
-Ids are fixed in the game (`IAP.ids` in p163). Prices are Alex's current test prices; he confirms them
-before submission.
+Ids are fixed in the game (`IAP.ids` in p163, the gem ladder in p170). Prices approved by Alex on
+Nov 21 (price doc: https://claude.ai/artifact/HAVajemhRomSd4CxGXcbHS). UK and euro stores: the same numbers
+in pounds and euros (£0.99, €0.99 and so on), set by hand per storefront.
 
 | Product id | Type | Price (USD tier) | Gives | Restorable |
 | --- | --- | --- | --- | --- |
-| `premium` | Non-consumable | $4.99 | x2 coins forever, rewards without ads, Gold Paint, 12 h helper shed, 25 runs of coins on purchase | Yes (not the coins) |
-| `starter_pack` | Non-consumable | $1.99 | 250 gems, 10 runs of coins, Explorer outfit; offered once | Yes (outfit only) |
+| `premium` | Non-consumable | $6.99 | x2 coins forever, rewards without ads, Gold Paint, 12 h helper shed, 25 runs of coins on purchase | Yes (not the coins) |
+| `starter_pack` | Non-consumable | $0.99 | 150 gems, 10 runs of coins, Explorer outfit; offered once, for 48 hours | Yes (outfit only) |
 | `gems_60` | Consumable | $0.99 | 60 gems | No |
-| `gems_330` | Consumable | $4.99 | 330 gems | No |
-| `gems_700` | Consumable | $9.99 | 700 gems | No |
+| `gems_135` | Consumable | $1.99 | 135 gems | No |
+| `gems_365` | Consumable | $4.99 | 365 gems | No |
+| `gems_800` | Consumable | $9.99 | 800 gems | No |
+| `gems_1850` | Consumable | $19.99 | 1,850 gems | No |
 | `ride_monster` | Non-consumable | $1.99 | Monster Truck Wild Ride | Yes |
-| `ride_jet` | Non-consumable | $2.49 | Jet Sled Wild Ride | Yes |
+| `ride_jet` | Non-consumable | $1.99 | Jet Sled Wild Ride | Yes |
 | `ride_mech` | Non-consumable | $2.99 | Mech Wild Ride | Yes |
-| `ride_dragon` | Non-consumable | $3.49 | Dragon Wild Ride | Yes |
+| `ride_dragon` | Non-consumable | $2.99 | Dragon Wild Ride | Yes |
 | `ride_ufo` | Non-consumable | $3.99 | UFO Wild Ride | Yes |
-| `wild_ride_pass` | Non-consumable | $9.99 | All five Wild Rides as they unlock | Yes |
+| `wild_ride_pass` | Non-consumable | $7.99 | All five Wild Rides as they unlock | Yes |
 
-Later (lab first): an Event Pass (about $2.99, Alex to decide gems or money or both) and a Snow Bank
-(piggy bank, $2.99). Not needed for the first submission.
+The first gem pack a player buys gives double gems: the game does that, no extra product.
+Coming next (lab first): `snow_bank` (consumable, $2.99: the gems saved up in the Snow Bank, 220 to 400) and
+`event_pass` (consumable, $2.99, one per weekend event, or 250 gems). Not needed for the first submission.
 
 RevenueCat: one entitlement `premium` attached to `premium`; the rest are read from the customer's
 non-subscription purchases. Use StoreKit 2. Test with Sandbox testers (Apple) and license testers (Google).
@@ -129,9 +143,10 @@ non-subscription purchases. Use StoreKit 2. Test with Sandbox testers (Apple) an
 ## 8. Analytics in the app
 
 The game's own PostHog code works inside the app unchanged (with p162 it survives bad connections).
-`platform` tells PostHog which app an event came from. Before the public launch Alex decides:
-session recording on or off in the apps (it needs to be in the consent text if on), and whether
-`iap_test` events become `purchase` events with the price (a small patch).
+`platform` tells PostHog which app an event came from. Session recording in the apps (decided Nov 21,
+p171): 1 in 4 new installs, first visit only, up to 10 minutes, 1 frame a second, only on Wi-Fi
+(`SRNative.network`), never when `SRNative.recordOK()` is false; it must be in the consent text. Still to
+decide before launch: whether `iap_test` events become `purchase` events with the price (a small patch).
 
 ## 9. Release build
 
@@ -142,6 +157,9 @@ session recording on or off in the apps (it needs to be in the consent text if o
 ## 10. Store submission checklist
 
 - [ ] Accounts open; bundle id `app.snowplowrush` registered on both stores
+- [ ] Apple Small Business Program enrolled (weeks before launch); Paid Apps agreement, bank and tax done
+- [ ] Developer name "Kiln Fire Games" confirmed with Alex before the first app record
+- [ ] `/app-ads.txt` live on the developer website listed in both stores
 - [ ] Products from 6 created in both stores and in RevenueCat; prices confirmed by Alex
 - [ ] MAX rewarded units created; AdMob linked inside MAX; consent flow on
 - [ ] `www/` built with `tools/release.py`; game boots offline; Restore Purchases works in Sandbox

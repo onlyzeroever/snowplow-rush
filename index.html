@@ -124,9 +124,9 @@ const UPG={
 // Jobs live on a world map. area: suburbs/farm/city/secret. from: jobs that open this one (any with 1+ star).
 // gate: tool you need to enter the area. toll: one-off road fee in coins (per winter). bonus: dead-end side job.
 const LEVELS=[
-  {id:'driveway',name:'DRIVEWAY',     area:'suburbs',h:260, time:90,value:1,   stars:[30,55,80],snowfall:40, presents:3, squall:0, from:[],               mx:90, my:1830},
-  {id:'gardens', name:'GARDENS',      area:'suburbs',h:360, time:65,value:1.15,stars:[35,60,85],snowfall:55, presents:3, squall:0, from:['driveway'],     mx:44, my:1770},
-  {id:'culdesac',name:'CUL-DE-SAC',   area:'suburbs',h:460, time:70,value:1.3, stars:[35,60,85],snowfall:70, presents:4, squall:0, from:['driveway'],     mx:136,my:1752},
+  {id:'driveway',name:'DRIVEWAY',     area:'suburbs',h:260, time:90,value:1,   stars:[25,50,70],snowfall:40, presents:3, squall:0, from:[],               mx:90, my:1830},
+  {id:'gardens', name:'GARDENS',      area:'suburbs',h:360, time:65,value:1.15,stars:[30,50,70],snowfall:55, presents:3, squall:0, from:['driveway'],     mx:44, my:1770},
+  {id:'culdesac',name:'CUL-DE-SAC',   area:'suburbs',h:460, time:70,value:1.3, stars:[30,50,70],snowfall:70, presents:4, squall:0, from:['driveway'],     mx:136,my:1752},
   {id:'park',    name:'THE PARK',     area:'suburbs',h:560, time:70,value:1.45,stars:[35,60,85],snowfall:80, presents:5, squall:0, from:['gardens'],      mx:30, my:1680,bonus:true},
   {id:'school',  name:'SCHOOL YARD',  area:'suburbs',h:620, time:75,value:1.5, stars:[35,60,85],snowfall:90, presents:5, squall:0, from:['culdesac'],     mx:140,my:1668},
   {id:'maple',   name:'MAPLE STREET', area:'suburbs',h:720, time:75,value:1.6, stars:[35,60,85],snowfall:100,presents:5, squall:0, from:['gardens','school'],mx:90,my:1600},
@@ -2799,7 +2799,7 @@ function updatePlay(dt){
   updateHazards(dt,tid);
   const target=clamp(P.y-VIEW_H*0.55,0,Math.max(0,G.ph-VIEW_H));camY+=(target-camY)*Math.min(1,dt*6);if(shake>0)shake-=dt;
   updateFx(dt);flushLevel(G);
-  if(!(DEV_MODE&&DEV.freeze))run.time-=dt;const pct=G.cleared/G.clearable*100;leftScan(dt,pct);if(pct>=FINISH_AT)startSweep();else if(run.time<=0){run.time=0;const st=G.def.stars.filter(q=>pct>=q).length;
+  if(!(DEV_MODE&&DEV.freeze)&&(run.moved||!FTUE_NEW))run.time-=dt;const pct=G.cleared/G.clearable*100;leftScan(dt,pct);if(pct>=FINISH_AT)startSweep();else if(run.time<=0){run.time=0;const st=G.def.stars.filter(q=>pct>=q).length;
     if(!run.contUsed&&!run.challenge&&st<3&&(save.fbRuns||0)>=3){run.contUsed=true;run.offer=true;joy=null;dpad=null;stopLoops();musicDuck(0.4);}else endRound(false);}}
 function clearCell(i,acc){if(G.type[i]===T_BLOCK)return;const d=G.depth[i];if(d>0.03){acc.got+=d;if(d>0.3)acc.cnt++;if(d>0.6)acc.fresh++;setDepth(G,i,0);}}
 function groundTypeNear(x,y,w,h){for(const [px,py] of [[x+w/2,y+h+3],[x+w/2,y-3],[x-3,y+h/2],[x+w+3,y+h/2]]){const cx=px>>1,cy=py>>1;if(cx>=0&&cy>=0&&cx<G.cols&&cy<G.rows){const t=G.type[cy*G.cols+cx];if(t!==T_BLOCK)return t;}}return T_ASPH;}
@@ -4194,12 +4194,23 @@ function drawJobList(dt){const VY=MAP_VY,VH=NAV_Y-26-VY;R(b,0,VY,W,NAV_Y-2-VY,'#
     y+=h;}
   b.restore();clipUI(uiFrom,VY,VY+VH);scrollBar(W-5,VY+2,VH-4,'jlist',content);}
 // ---- header + bottom row ----
+// first job: a fingertip next to the plow presses, slides up 38 px and lets go, every 1.6 s, until the first move
+// ?oldftue switches the whole first-job pack off, to compare with the game before Nov 21
+const FTUE_NEW=!/[?&]oldftue/.test(location.search);
+if(!FTUE_NEW){for(const [id,st] of [['driveway',[30,55,80]],['culdesac',[35,60,85]],['gardens',[35,60,85]]]){const L=LEVELS.find(l=>l.id===id);if(L)L.stars=st;}}
+const HAND=['....OO......','...OWWO.....','...OWWO.....','...OWWO.....','...OWWOOO...','...OWWOWWOO.','.OOOWWOWWOWO','OWWOWWWWWOWO','OWWWWWWWWWWO','OWWWWWWWWWWO','.OWWWWWWWWWO','..OWWWWWWWO.','...OWWWWWO..','...OOOOOOO..'];
+function ftueFinger(){const T=(tNow%1.6)/1.6,sx=Math.round(P.x)+20,sy0=Math.round(P.y-camY+VIEW_Y)+24,u=Math.min(1,Math.max(0,(T-0.22)/0.5)),dy=Math.round((1-Math.pow(1-u,2))*38),sy=sy0-dy;
+  if(T<0.3){const r=3+Math.round(T/0.3*8);b.globalAlpha=1-T/0.3;for(let a=0;a<28;a++){const an=a/28*Math.PI*2;R(b,Math.round(sx+Math.cos(an)*r),Math.round(sy0+Math.sin(an)*r),1,1,'#ffffff');}b.globalAlpha=1;}
+  for(let k=5;k<dy-2;k+=5)R(b,sx-1,sy0-k,2,2,'rgba(255,255,255,0.7)');
+  if(T<0.88){b.globalAlpha=T>0.76?(0.88-T)/0.12:1;const x0=sx-5,y0=sy-1;HAND.forEach((row,j)=>{for(let i=0;i<row.length;i++){const ch=row[i];if(ch!=='.')R(b,x0+i,y0+j,1,1,ch==='O'?'#13306b':'#ffffff');}});b.globalAlpha=1;}}
+function unlockMsg(what){const n=Math.max(1,4-(save.fbRuns||0));return what+' UNLOCK IN '+n+' JOB'+(n>1?'S':'');}
 function drawMapChrome(){
   R(b,0,0,W,22,'#0b1838');R(b,0,22,W,1,'#4f8fdc');drawHeaderCoins(2,2,60);const ts=totalStars(),need=starsNeeded();
   if(ts>=need){const pulse=!save.winterSeen&&Math.floor(tNow*3)%2;button('winter',64,2,46,17,pulse?'gold':'orange','WINTER',()=>{winterOpen=true;sfx('click');});}
   else{panel(64,2,46,17);b.drawImage(SPR.star,67,8);text(b,ts+'/'+need,75,8,'#ffffff');btn('winfo',64,2,46,17,()=>{winterOpen=true;sfx('click');});}
   const dn=dailyReadyCount(),dNew=dailyNew(),hop=(dn||dNew)&&Math.floor(tNow*4)%4===0?1:0;
   if(dailyOn()){button('daily',114,2-hop,20,17,'red',null,()=>{ensureDaily();dailyOpen=true;sfx('click');});b.drawImage(SPR.cal,119,6-hop);if(dn)badge(127,0,''+dn);else if(dNew)badge(127,0,'!');}
+  else{button('dailyLock',114,2,20,17,'grey',null,()=>{sfx('deny');showToast(unlockMsg('DAILY JOBS'),'#9fd8ff');});b.globalAlpha=0.4;b.drawImage(SPR.cal,119,6);b.globalAlpha=1;b.drawImage(SPR.lock,126,9);}
   button('trophies',137,2,20,17,'gold',null,()=>{checkTrophyProg();trophiesOpen=true;trophyTab=0;sfx('click');});b.drawImage(SPR.trophy,142,6);
   button('gear',W-20,2,18,17,'blue',null,()=>{settingsOpen=true;sfx('click');});b.drawImage(SPR.gear,W-15,6);
   drawEvBanner();
@@ -4211,6 +4222,7 @@ function drawMapChrome(){
     const t='NEW TREASURE!',tw=textW(t)+6;R(b,3,by-20-bob,tw,9,K);R(b,4,by-19-bob,tw-2,7,'#e0397a');text(b,t,6,by-18-bob,'#ffffff',{outline:null});}
   else if(tc)text(b,''+tc,24,by+10,'#ffd23f');
   const ww=LIST_TOGGLE?44:62,sx=LIST_TOGGLE?121:95,sw=LIST_TOGGLE?40:66;
+  if(!LIST_TOGGLE&&!dailyOn()){button('weeklyLock',29,by,ww,18,'grey','WEEKLY',()=>{sfx('deny');showToast(unlockMsg('WEEKLY CHALLENGES'),'#9fd8ff');});b.drawImage(SPR.lock,29+ww-12,by+5);}
   if(dailyOn()){button('weekly',29,by,ww,18,'gold','WEEKLY',()=>{weeklyOpen=true;weeklyTab=0;save.weeklySeen=weekNo();sfx('click');persist();});if(!weeklyState().claimed&&save.weeklySeen!==weekNo()){R(b,29+ww-5,by-2,6,6,K);R(b,29+ww-4,by-1,4,4,'#e8283f');}}
   button('shopb',sx,by,sw,18,'green','SHOP',()=>{shopTab=0;save.offers=save.offers||{};save.offers.seenShop=true;openShop();});
   if(dailyOn()&&!save.starter&&!(save.offers&&save.offers.seenShop)){R(b,156,by-2,6,6,K);R(b,157,by-1,4,4,'#e8283f');}
@@ -4753,15 +4765,17 @@ function drawPlay(){
   if(run.challenge&&!run.ended)text(b,'WEEKLY',4,VIEW_Y+VIEW_H-20,'#ffd23f');
   if(run.combo>=2&&!run.ended){const CYO=achQueue.length?28:0,m=(1+0.1*run.combo).toFixed(1);const bounce=Math.max(0,3-Math.floor((0.6-run.comboT)*20));
     const crk=run.crackT>0,blink=crk&&Math.floor(tNow*8)%2===0;text(b,'x'+m+' COMBO!',W/2,VIEW_Y+10+CYO-Math.min(2,bounce),blink?'#ffffff':crk?'#ff4a5a':run.combo>=10?'#ffd23f':'#ff4fa3',{align:'center',scale:2});{const k=clamp(run.comboT/COMBO_KEEP,0,1),bw2=60;R(b,W/2-bw2/2-1,VIEW_Y+24+CYO,bw2+2,4,K);R(b,W/2-bw2/2,VIEW_Y+25+CYO,Math.round(bw2*k),2,blink?'#ffffff':crk?'#ff4a5a':k<0.35?'#ff6a7a':run.combo>=10?'#ffd23f':'#ff4fa3');if(crk){for(const [cx2,cy2] of [[-9,0],[-8,1],[-7,0],[6,1],[7,0],[8,1]])R(b,W/2+cx2,VIEW_Y+25+CYO+cy2,1,1,K);text(b,'CAREFUL!',W/2,VIEW_Y+31+CYO,blink?'#ffffff':'#ff8a98',{align:'center'});}}}
-  if(!run.moved&&!run.ended){const kb=!('ontouchstart' in window)&&!navigator.maxTouchPoints;panel(20,VIEW_Y+VIEW_H-110,140,kb?46:36,'#13306b','#ffd23f');
-    text(b,save.ctrl==='joy'?'DRAG ANYWHERE':'USE THE D-PAD',W/2,VIEW_Y+VIEW_H-103,'#ffffff',{align:'center',scale:2});text(b,'TO PUSH THE SNOW',W/2,VIEW_Y+VIEW_H-88,'#ffd23f',{align:'center'});if(!('ontouchstart' in window)&&!navigator.maxTouchPoints)text(b,'OR USE ARROW KEYS / WASD',W/2,VIEW_Y+VIEW_H-76,'#9fd8ff',{align:'center'});}
+  if(!run.moved&&!run.ended){const kb=!('ontouchstart' in window)&&!navigator.maxTouchPoints,first=!save.tut&&FTUE_NEW,hy=first?VIEW_Y+VIEW_H-(kb?52:42):VIEW_Y+VIEW_H-110;
+    if(first&&save.ctrl==='joy')ftueFinger();
+    panel(20,hy,140,kb?46:36,'#13306b','#ffd23f');
+    text(b,save.ctrl==='joy'?'DRAG ANYWHERE':'USE THE D-PAD',W/2,hy+7,'#ffffff',{align:'center',scale:2});text(b,'TO PUSH THE SNOW',W/2,hy+22,'#ffd23f',{align:'center'});if(kb)text(b,'OR USE ARROW KEYS / WASD',W/2,hy+34,'#9fd8ff',{align:'center'});}
   if(joy){const ox=Math.round(joy.ox),oy=Math.round(joy.oy);b.fillStyle='rgba(255,255,255,0.35)';for(let a=0;a<24;a++){const an=a/24*Math.PI*2;b.fillRect(Math.round(ox+Math.cos(an)*16),Math.round(oy+Math.sin(an)*16),1,1);}R(b,Math.round(joy.x)-3,Math.round(joy.y)-3,7,7,'rgba(255,255,255,0.45)');}
   if(save.ctrl!=='joy'&&!run.ended)drawDpad();
   drawBlizzard();drawChaserArrows();drawLeftArrow();drawHUD();drawBottomBar();drawCoinFly();
   if(run.offer&&!run.ended){b.fillStyle='rgba(11,24,56,0.72)';b.fillRect(0,0,W,H);panel(18,90,144,120,'#13306b','#ffd23f');text(b,"TIME'S UP!",W/2,100,'#ffffff',{align:'center',scale:2});
     const pc=Math.floor(G.cleared/G.clearable*100),nx=G.def.stars.find(q=>pc<q);text(b,'SO CLOSE! NEXT STAR AT '+nx+'%',W/2,120,'#ffd23f',{align:'center',outline:null});text(b,'YOU HAVE '+pc+'%',W/2,130,'#9fc0e8',{align:'center',outline:null});
     const go=()=>{run.time=15;run.offer=false;musicDuck(1);addFloat(P.x,P.y-22,'+15 SECONDS!','#9fd8ff',1.4);sfx('time');};
-    button('cont',30,146,120,20,save.pro?'gold':'purple',save.pro?'PREMIUM: +15 SECONDS':'WATCH AD: +15 SECONDS',()=>{if(save.pro)go();else adScreen={t:2.5,reward:0,onDone:go};sfx('click');});
+    {const fr=FTUE_NEW&&!save.pro&&(save.freeCont||0)<2;button('cont',30,146,120,20,save.pro?'gold':fr?'green':'purple',save.pro?'PREMIUM: +15 SECONDS':fr?'FREE: +15 SECONDS':'WATCH AD: +15 SECONDS',()=>{if(save.pro)go();else if(fr){save.freeCont=(save.freeCont||0)+1;persist();go();}else adScreen={t:2.5,reward:0,onDone:go};sfx('click');});}
     button('nocont',50,176,80,18,'grey','NO THANKS',()=>{run.offer=false;endRound(false);});}
   if(paused&&!run.ended&&!settingsOpen)drawPause();
   if(run.ended&&run.res)drawResults();}

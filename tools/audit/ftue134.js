@@ -14,11 +14,11 @@ let fails = 0; const ok = (c, m) => { console.log((c ? 'ok   ' : 'FAIL ') + m); 
   ok(s1.st === 'play' && s1.job === 'driveway', 'first tap goes straight into the driveway ' + JSON.stringify(s1));
   ok(s1.t >= 88 && s1.t <= 90, 'driveway has 90 seconds');
   ok(s1.priv === true, 'tapping play marks the title notice as seen');
-  ok((await EV(`JSON.stringify(LEVELS[0].stars)`)) === '[30,55,80]', 'driveway stars at 30/55/80%');
+  ok((await EV(`JSON.stringify(LEVELS[0].stars)`)) === '[25,50,70]', 'driveway stars at 25/50/70% (p168, Nov 21)');
   // no +15 s pop-up in the first 3 jobs
-  const o1 = JSON.parse(await EV(`(()=>{window.__HOLD=1;save.fbRuns=0;G.cleared=Math.round(G.clearable*0.4);run.time=0.01;update(0.05);return JSON.stringify({offer:!!run.offer,ended:!!run.ended});})()`));
+  const o1 = JSON.parse(await EV(`(()=>{window.__HOLD=1;save.fbRuns=0;G.cleared=Math.round(G.clearable*0.4);run.moved=true;run.time=0.01;update(0.05);return JSON.stringify({offer:!!run.offer,ended:!!run.ended});})()`));
   ok(!o1.offer && o1.ended, 'job 1 ends without the ad pop-up ' + JSON.stringify(o1));
-  const o2 = JSON.parse(await EV(`(()=>{save.fbRuns=3;startLevel(0);G.cleared=Math.round(G.clearable*0.4);run.time=0.01;update(0.05);return JSON.stringify({offer:!!run.offer,ended:!!run.ended});})()`));
+  const o2 = JSON.parse(await EV(`(()=>{save.fbRuns=3;startLevel(0);G.cleared=Math.round(G.clearable*0.4);run.moved=true;run.time=0.01;update(0.05);return JSON.stringify({offer:!!run.offer,ended:!!run.ended});})()`));
   ok(o2.offer && !o2.ended, 'from job 4 the +15 s offer is back ' + JSON.stringify(o2));
   // dailies wait
   const d1 = JSON.parse(await EV(`(()=>{save.fbRuns=1;save.dailyEver=false;save.best=save.best.map(()=>0);save.best[0]=60;save.stars[0]=2;save.dailySeen='';save.story={suburbs:true};goMap();
