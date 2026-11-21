@@ -2607,11 +2607,11 @@ function drawBlizzard(){const z=run.bz;if(!z||!G||!G.def.gust)return;const blow=
     text(b,'GUST!',W/2,HUD_H+46,'#ffffff',{align:'center',scale:3});}}
 function overlayOpen(){return !!(ridePeek||rideReveal||settingsOpen||trophiesOpen||dailyOpen||winterOpen||adScreen||shopOpen||jobInfo>=0||skinFor||outfitsOpen||trailsOpen||bookOpen||weeklyOpen||(storyOpen&&state==='map')||(offerOpen&&state==='map')||(evOpen&&state==='map'));}
 let privT=0;
-function drawPrivacyCard(dt){privT=Math.min(1,privT+(dt||0.016)*3.5);const e=1-Math.pow(1-privT,3),x=6,w=W-12,h=58,y=Math.round(MAP_VY+16-(1-e)*10);b.globalAlpha=Math.min(1,0.15+e);
-  btn('privbg',x,y,w,h,()=>{});panel(x,y,w,h,'#13306b','#ffd23f');b.drawImage(SPR.frost,x+6,y+5);text(b,'ANONYMOUS PLAY DATA',x+18,y+6,'#ffd23f',{outline:null});
-  text(b,'WE COUNT PLOWS, NOT PEOPLE.',W/2,y+17,'#ffffff',{align:'center',outline:null});text(b,'WE MAY RECORD YOUR FIRST PLAYS,',W/2,y+26,'#9fc0e8',{align:'center',outline:null});text(b,'ANONYMOUSLY. WE NEVER SELL IT.',W/2,y+34,'#9fc0e8',{align:'center',outline:null});
-  button('privok',x+w/2-56,y+42,52,13,'green','GOT IT',()=>{save.privSeen=true;track('privacy_notice',{choice:'got_it'});persist();sfx('click');});
-  button('privset',x+w/2+4,y+42,52,13,'navy','SETTINGS',()=>{save.privSeen=true;track('privacy_notice',{choice:'settings'});persist();settingsOpen=true;sfx('click');});b.globalAlpha=1;}
+function drawPrivacyCard(dt){privT=Math.min(1,privT+(dt||0.016)*3.5);const e=1-Math.pow(1-privT,3),x=6,w=W-12,h=60,y=Math.round(MAP_VY+16-(1-e)*10);b.globalAlpha=Math.min(1,0.15+e);
+  btn('privbg',x,y,w,h,()=>{});panel(x,y,w,h,'#13306b','#ffd23f');b.drawImage(SPR.frost,x+8,y+4);text(b,'ANONYMOUS PLAY DATA',x+21,y+6,'#ffd23f',{outline:null});
+  text(b,'WE COUNT PLOWS, NOT PEOPLE.',x+21,y+17,'#ffffff',{outline:null});text(b,'WE MAY RECORD YOUR FIRST PLAYS,',x+21,y+25,'#9fc0e8',{outline:null});text(b,'ANONYMOUSLY. WE NEVER SELL IT.',x+21,y+33,'#9fc0e8',{outline:null});
+  button('privok',x+w-60,y+h-18,52,13,'green','GOT IT',()=>{save.privSeen=true;track('privacy_notice',{choice:'got_it'});persist();sfx('click');});
+  button('privset',x+w-116,y+h-18,52,13,'navy','SETTINGS',()=>{save.privSeen=true;track('privacy_notice',{choice:'settings'});persist();settingsOpen=true;sfx('click');});b.globalAlpha=1;}
 function funAskDue(){if(TEST_MODE&&!save.funTest)return false;if(!save.privSeen)return false;const today=new Date().toDateString();if(!save.day0){save.day0=today;persist();}
   if(!save.funAsk1&&(save.fbRuns||0)>=5)return 'job5';if(save.funAsk1&&!save.funAsk2&&save.day0!==today&&(save.funAsk1Day||'')!==today)return 'day2';return false;}
 let funT=0;function drawFunCard(dt,ask){funT=Math.min(1,funT+(dt||0.016)*3.5);const e=1-Math.pow(1-funT,3),x=6,w=W-12,h=60,y=Math.round(NAV_Y-h-6+(1-e)*70);

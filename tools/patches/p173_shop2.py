@@ -54,9 +54,15 @@ rep("text(b,'ONE PER PLAYER. A THANK-YOU',W/2,y+92,'#9fc0e8',{align:'center',out
     "text(b,'ONE PER PLAYER. IN THE SHOP',W/2,y+92,'#9fc0e8',{align:'center',outline:null});text(b,'FOR THE NEXT 48 HOURS',W/2,y+101,'#9fc0e8',{align:'center',outline:null});")
 rep("row(SPR.trophy,'EVERY REWARD, NO AD',y+44);row(SPR.coin,'x2 COINS FOREVER',y+58,'#ffd23f');row(SPR.star,'GOLD PAINT, ALL MACHINES',y+72);row(null,'+ 12H HELPER SHED, COIN PACK',y+86,'#9fc0e8');\n"
     "    text(b,'PAY ONCE, KEEP IT FOR GOOD',W/2,y+101,'#9fc0e8',{align:'center',outline:null});",
-    "row(SPR.coin,'x2 COINS FOREVER',y+42,'#ffd23f');row(SPR.trophy,'REWARDS WITHOUT ADS',y+54);row(SPR.star,'GOLD PAINT, ALL MACHINES',y+66);row(SPR.helper,'12H HELPER SHED (WAS 6H)',y+78);row(SPR.coinS,'+ 25 RUNS OF COINS NOW',y+90,'#ffd23f');\n"
-    "    text(b,'PAY ONCE, KEEP IT FOR GOOD',W/2,y+103,'#9fc0e8',{align:'center',outline:null});")
-rep("button('ofbuy',x+26,y+116,w-52,20,'gold',SHOP.premium.price,","button('ofbuy',x+26,y+116,w-52,20,'green',SHOP.premium.price,")
+    "premGold(W/2-16,y+38,32);row(SPR.coin,'x2 COINS FOREVER',y+78,'#ffd23f');row(SPR.trophy,'REWARDS WITHOUT ADS',y+90);row(SPR.star,'GOLD PAINT, ALL MACHINES',y+102);row(SPR.helper,'12H HELPER SHED (WAS 6H)',y+114);row(SPR.coinS,'+ '+fmt(runPay()*SHOP.premium.coinRuns)+' COINS NOW',y+126,'#ffd23f');\n"
+    "    text(b,'PAY ONCE, KEEP IT FOR GOOD',W/2,y+139,'#9fc0e8',{align:'center',outline:null});")
+rep("button('ofbuy',x+26,y+116,w-52,20,'gold',SHOP.premium.price,","button('ofbuy',x+26,y+152,w-52,20,'green',SHOP.premium.price,")
+# the Premium pop-up is taller (your machine in gold on top); both pop-ups sit in the middle; NOT NOW keeps its gap to the bottom
+rep("function drawOffer(){const k=offerOpen,x=14,y=70,w=152,h=168;","function drawOffer(){const k=offerOpen,x=14,w=152,h=k==='starter'?168:204,y=Math.round(156-h/2);")
+rep("button('ofno',x+46,y+142,w-92,16,'navy','NOT NOW',later);}","button('ofno',x+46,y+h-26,w-92,16,'navy','NOT NOW',later);}")
+# your own machine in Premium's gold paint, on a warm tile, with a glint
+rep("function drawShop(){","function premGold(x,y,sz){const t0=(TOOLS[save.tool||0]||TOOLS[0]).id,tid=isKidTool(t0)?'truck':t0;R(b,x-1,y-1,sz+2,sz+2,'#e8c25a');R(b,x,y,sz,sz,'#fff1c4');R(b,x,y,sz,1,'#fffbe6');\n"
+    "  try{drawToolIconTo(b,tid,x,y,sz,5);}catch(e){}const ph=(tNow*1.2)%1;if(ph<0.45){const k=Math.sin(ph/0.45*Math.PI),sx=x+sz-6,sy=y+5;R(b,sx,sy-Math.round(2*k),1,1+Math.round(4*k),'#ffffff');R(b,sx-Math.round(2*k),sy,1+Math.round(4*k),1,'#ffffff');}}\nfunction drawShop(){")
 
 # --- tabs and DONE clear a pending "need gems"
 rep("button('stab1',92,52,76,14,shopTab===1?'gold':'navy','COINS + RIDES',()=>{shopTab=1;","button('stab1',92,52,76,14,shopTab===1?'gold':'navy','COINS + RIDES',()=>{shopTab=1;shopNeed=null;")
@@ -80,12 +86,12 @@ s=s[:a]+(
 "      button('sst',118,y+13,46,16,'green',SHOP.starter.price,shopBuyStarter);\n"
 "      text(b,'ENDS IN '+fmtLeft(stL),17,y+31,'#e8283f',{outline:null});text(b,'ONE PER PLAYER',164,y+31,'#4f6fa0',{align:'right',outline:null});y+=42;\n"
 "      if(!save.pro){card(12,y,156,45,'#fffaf0','#ffd23f');b.drawImage(SPR.trophy,17,y+3);text(b,'PREMIUM',29,y+5,'#a8740a',{outline:null});\n"
-"        ['x2 COINS FOREVER','REWARDS WITHOUT ADS','GOLD PAINT + 12H HELPER SHED','+ 25 RUNS OF COINS NOW'].forEach((q,k)=>perk(q,y+15+k*7));\n"
+"        R(b,17,y+16,3,3,'#ffd23f');text(b,'x2 COINS FOREVER',23,y+15,'#a8740a',{outline:null});['REWARDS WITHOUT ADS','GOLD PAINT + 12H HELPER SHED','+ '+fmt(runPay()*SHOP.premium.coinRuns)+' COINS NOW'].forEach((q,k)=>perk(q,y+22+k*7));\n"
 "        button('spro',118,y+3,46,16,'green',SHOP.premium.price,shopBuyPremium);text(b,'PAY ONCE',141,y+21,'#a8740a',{align:'center',outline:null});y+=47;}}\n"
 # hero: premium in full
-"    else if(!save.pro){card(12,y,156,52,'#fffaf0','#ffd23f');b.drawImage(SPR.trophy,17,y+3);text(b,'PREMIUM',29,y+5,'#a8740a',{outline:null});\n"
-"      ['x2 COINS FOREVER','REWARDS WITHOUT ADS','GOLD PAINT, ALL MACHINES','12H HELPER SHED (WAS 6H)','+ '+SHOP.premium.coinRuns+' RUNS OF COINS NOW'].forEach((q,k)=>perk(q,y+15+k*7));\n"
-"      button('spro',118,y+3,46,16,'green',SHOP.premium.price,shopBuyPremium);text(b,'PAY ONCE',141,y+21,'#a8740a',{align:'center',outline:null});y+=54;}\n"
+"    else if(!save.pro){card(12,y,156,62,'#fffaf0','#ffd23f');b.drawImage(SPR.trophy,17,y+3);text(b,'PREMIUM',29,y+5,'#a8740a',{outline:null});\n"
+"      R(b,17,y+16,3,3,'#ffd23f');text(b,'x2 COINS FOREVER',23,y+15,'#a8740a',{outline:null});['REWARDS WITHOUT ADS','ALL MACHINES IN GOLD','12H HELPER SHED','+ '+fmt(runPay()*SHOP.premium.coinRuns)+' COINS NOW'].forEach((q,k)=>perk(q,y+23+k*8));\n"
+"      button('spro',118,y+3,46,16,'green',SHOP.premium.price,shopBuyPremium);text(b,'PAY ONCE',141,y+21,'#a8740a',{align:'center',outline:null});premGold(128,y+30,26);y+=64;}\n"
 "    else{card(12,y,156,31,'#fff6d8','#ffd23f');b.drawImage(SPR.trophy,17,y+3);text(b,'PREMIUM IS ON. THANK YOU!',29,y+5,'#a8740a',{outline:null});\n"
 "      text(b,'x2 COINS, REWARDS WITHOUT ADS,',17,y+15,'#13306b',{outline:null});text(b,'GOLD PAINT AND THE 12H SHED',17,y+22,'#13306b',{outline:null});y+=33;}\n"
 # gem packs

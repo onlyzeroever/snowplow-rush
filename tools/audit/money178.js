@@ -31,10 +31,10 @@ const res = []; const ok = (n, pass, info) => { res.push(pass); console.log((pas
   await EV(base(`save.fbRuns=10`)); await p.waitForTimeout(400);
   let u = await ui(); ok('a jar on the map from the 10th job', u.includes('bankjar'));
   await shot('map_jar_new');
-  // a real job fills it: +4, +1 a star
+  // a real job fills it: a 50-gem start, +5, +2 a star
   await EV(`(()=>{window.__HOLD=1;startLevel(0,{});G.cleared=Math.round(G.clearable*0.95);run.contUsed=true;run.moved=true;run.time=0.01;update(0.05);window.__HOLD=0;return '1';})()`); await p.waitForTimeout(200);
   const j1 = await EV(`JSON.stringify({g:bankG(),ended:!!(run&&run.ended),stars:run&&run.res?run.res.stars:null})`);
-  ok('a finished job puts 4 gems + 1 a star in the jar', j1.ended && j1.g === 4 + (j1.stars || 0), j1);
+  ok('the first finished job starts the jar with 50 gems, then +5 a job and +2 a star (Nov 22)', j1.ended && j1.g === 50 + 5 + 2 * (j1.stars || 0), j1);
   await EV(base(`save.fbRuns=12;save.bank={g:397}`)); await EV(`(()=>{window.__HOLD=1;startLevel(0,{});G.cleared=Math.round(G.clearable*0.95);run.contUsed=true;run.moved=true;run.time=0.01;update(0.05);window.__HOLD=0;return '1';})()`); await p.waitForTimeout(200);
   ok('it stops at 400', (await EV(`JSON.stringify(bankG())`)) === 400);
   // the card
@@ -47,7 +47,7 @@ const res = []; const ok = (n, pass, info) => { res.push(pass); console.log((pas
   c = await EV(`(()=>{draw();const g0=save.gems;ui.find(x=>x.id==='bankbuy').fn();draw();return JSON.stringify({gems:save.gems-g0,bank:bankG(),got:!!gotCard,open:bankOpen,broken:save.bank.broken});})()`);
   ok('from 220: buying it gives you every gem inside and empties the jar', c.gems === 250 && c.bank === 0 && c.got && !c.open && c.broken === 1, c);
   await p.waitForTimeout(200); await shot('bank_got'); await layout('YOU GOT after the Snow Bank');
-  const v = await EV(`(()=>{const a=bankValue();const keep=SHOP.bank.price;SHOP.bank.price='$3.99';const b2=bankValue();SHOP.bank.price='3,29 €';const g0=SHOP.gems[0].price;SHOP.gems[0].price='0,99 €';const c2=bankValue();SHOP.bank.price=keep;SHOP.gems[0].price=g0;return JSON.stringify({usd:+a.toFixed(3),at399:+b2.toFixed(3),eur:+c2.toFixed(3)});})()`);
+  const v = await EV(`(()=>{save.bank={g:0,seen:true,intro:true};const a=bankValue();const keep=SHOP.bank.price;SHOP.bank.price='$3.99';const b2=bankValue();SHOP.bank.price='3,29 €';const g0=SHOP.gems[0].price;SHOP.gems[0].price='0,99 €';const c2=bankValue();SHOP.bank.price=keep;SHOP.gems[0].price=g0;return JSON.stringify({usd:+a.toFixed(3),at399:+b2.toFixed(3),eur:+c2.toFixed(3)});})()`);
   ok('UP TO 2X VALUE holds at $2.99 (400 gems = $6.60) and in euros; it would not at $3.99', v.usd >= 2 && v.eur >= 2 && v.at399 < 2, v);
   await EV(base(`save.fbRuns=12;save.bank={g:400,seen:true}`)); await p.waitForTimeout(400); await shot('map_jar_full');
 

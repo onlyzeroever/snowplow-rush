@@ -14,7 +14,7 @@ rewarded ads, a silent cloud save and a few local reminders. No accounts, no ser
   Everything native lives in `app/` (this folder).
 - **Branches.** `main` is live (Vercel deploys it to snowplowrush.app), `next` is staging, `lab` is the
   prototype site lab.snowplowrush.app. **The app wraps `app/game/index.html`**: the live game plus the
-  app-only patches (p163, p165, p170, p171, p172, p173, p174, p175, p176, p179, p181, p182), rebuilt and committed by the cloud session. Start with
+  app-only patches (p163, p165, p170, p171, p172, p173, p174, p175, p176, p179, p181, p182, p183), rebuilt and committed by the cloud session. Start with
   `app/CC_START.md`.
 - **Rules from Alex that apply here:** never spend money or credits without asking; never put keys,
   passwords or tokens in chat or in the repo (Alex types them into the tools himself); prices shown must be
@@ -53,8 +53,9 @@ rewarded ads, a silent cloud save and a few local reminders. No accounts, no ser
 | p179 | Tall phones: a snowy night sky behind the 9:16 game instead of plain bands (for full-screen apps and store screenshots) | Lab, app build |
 | p174 | Store prices in the pixel font: £ € ¥ ₩ ₹ ₺ ₪ ₱ are drawn, other currencies are rebuilt from amount + currency (`SAR 18.99`); the shop's TEST MODE line is web only | App build |
 | p180 | Title screen without the small print; the anonymous play-data note shows at the top of the map after job 1 (never over a job) | Live (Nov 22) |
-| p181 | Snow Bank: a gem jar on the map from the 10th job (+4 gems a job, +1 a star, up to 400); opens for `snow_bank` from 220 | App build |
+| p181 | Snow Bank: a gem jar on the map from the 10th job; starts with 50 gems, +5 a job, +2 a star, up to 400 (ready around job 30); opens for `snow_bank` from 220 | App build |
 | p182 | Event Pass for the weekend event on now: flakes x2 (the ones already earned too) and that event's paint for every machine, kept; `event_pass` or 250 gems | App build |
+| p183 | Full screen on every shape: taller game on tall phones (top bar at the top, buttons at the bottom), the safe areas filled, the world carried on either side on wide screens (iPhone Duo open, iPad), cards centred, re-fits on every resize | App build |
 | p161 | Automatic render scale on slow phones | Live |
 
 When Alex OKs them, the cloud session moves them to `main`. The release build (`tools/release.py`, see 9)
@@ -82,12 +83,13 @@ app/
   plugin around the MAX SDK that does only rewarded ads (load, show, a promise that says rewarded or not).
 - Portrait only, full screen, status bar hidden, no zoom (`viewport` already set in the page), dark blue
   splash (`#13306b`) with the logo. App icon from the logo at 1024x1024, no transparency on iOS.
-- Screen shapes (Nov 22). The web view fills the whole window on every device; the game fits itself to any
-  shape and re-fits on every resize, so do no scaling or letterboxing natively. Build with the iOS 27.1 SDK
-  (Xcode 27.1) or later: on iPhone Duo, apps built with older SDKs open as a smaller window in the middle of
-  the inner display. Unfold and fold during a job in Xcode 27.1's iPhone Duo simulator: the run must carry on
-  without a restart. Today the 9:16 game sits between a snowy sky on tall phones and on the Duo's open screen
-  (p179); a full-screen layout for tall phones is waiting for Alex's OK and will come as a patch.
+- Screen shapes (Nov 22, p183). The game fills the screen itself, so the web view must fill the whole window, edge
+  to edge, under the status bar, notch, Dynamic Island, home bar and Android cutouts and gesture bar; do no scaling,
+  letterboxing or safe-area padding natively. The page already has `viewport-fit=cover` and reads the insets from CSS
+  `env(safe-area-inset-*)`: check on a notch iPhone and a punch-hole Android that those report the real insets (the
+  top bar must sit below the notch, the bottom buttons above the home bar). Build with the iOS 27.1 SDK (Xcode 27.1)
+  or later: on iPhone Duo, apps built with older SDKs open as a smaller window in the middle of the inner display.
+  Unfold and fold during a job in Xcode 27.1's iPhone Duo simulator: the run must carry on without a restart.
 - Load the game from the bundled `www/` (works offline). In the app build the game fetches the weekend-event
   schedule from `https://snowplowrush.app/events.json` (p172; the site allows it with a CORS header), so events
   can be scheduled without an app update.
@@ -149,6 +151,10 @@ In the app build since Nov 22 (p181, p182; Alex said yes on Nov 21): create thes
 | --- | --- | --- | --- | --- |
 | `snow_bank` | Consumable | $2.99 | The gems saved in the Snow Bank (220 to 400); the jar starts again | No |
 | `event_pass` | Consumable | $2.99 | Event Pass for the weekend event on now (one per event; 250 gems is the other way to get it) | No (the paint it gives is in the save, which the phone mirrors) |
+
+In the lab since Nov 22, waiting for Alex's OK (create them only once they move into the app build):
+`snow_bank_big` (consumable, $4.99: the big jar a player gets after opening the first one, 440 to 800 gems) and
+`event_pass_plus` (consumable, $4.99: the Event Pass plus 300 flakes at once).
 
 RevenueCat: one entitlement `premium` attached to `premium`; the rest are read from the customer's
 non-subscription purchases. Use StoreKit 2. Test with Sandbox testers (Apple) and license testers (Google).
