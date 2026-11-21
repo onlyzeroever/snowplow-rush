@@ -1,7 +1,7 @@
-# Lab only (Alex, Nov 22: "however the pros would do it ... open to including what the pros add later"):
-#  - a BIG Snow Bank after the first one is opened: 800 gems, opens at 440, fills twice as fast, $4.99 (store id snow_bank_big).
-#    Pros raise the piggy bank's price after the first purchase; only buyers ever see this jar. UP TO 2X VALUE stays computed.
-#  - previews: ?review=all&bank2 (big jar with 500 gems inside)
+# The BIG Snow Bank (Alex, Nov 22 01:49: "yes agree" to launching with it). After a player opens their first Snow Bank,
+# a bigger jar takes its place: 800 gems, opens at 440, fills twice as fast (+10 a job, +4 a star), $4.99 (store id
+# snow_bank_big). Pros raise the piggy bank's price after the first purchase; only buyers ever see this jar; UP TO 2X
+# VALUE stays computed from the prices on show. HELD from the live web game; in the app. Preview: ?review=all&bank2.
 import sys
 f=sys.argv[1];s=open(f,encoding='utf-8').read()
 def rep(a,b_,cnt=1):
@@ -24,4 +24,4 @@ rep("youGot('SNOW BANK',[[SPR.gem,'+'+n+' GEMS','#ff8fc8'],[null,'THE JAR STARTS
 rep("text(b,'SNOW BANK',W/2,y+8,'#ffd23f',{align:'center',scale:2});text(b,'GEMS PILE UP AS YOU PLAY',W/2,y+24,",
     "text(b,SHOP.bank.big?'BIG SNOW BANK':'SNOW BANK',W/2,y+8,'#ffd23f',{align:'center',scale:2});text(b,SHOP.bank.big?'IT FILLS TWICE AS FAST':'GEMS PILE UP AS YOU PLAY',W/2,y+24,")
 open(f,'w',encoding='utf-8').write(s)
-print('p185 lab: big Snow Bank after the first ($4.99, 800 gems)')
+print('p187 big Snow Bank after the first ($4.99, 800 gems, opens at 440)')

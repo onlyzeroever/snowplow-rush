@@ -4641,8 +4641,10 @@ function drawGot(dt){const G=gotCard;G.t+=dt||0.016;const n=G.rows.length,x=14,w
   button('gotok',x+36,y+h-26,w-72,18,'orange','NICE!',()=>{gotCard=null;sfx('click');});}
 function gemMoney(price,x,y,align,col){if(!price||price.g==null)return;const t='='+gemCash(price.g);if(t.length>1)text(b,t,x,y,col||'#9fc0e8',{align:align||'left',outline:null});}
 SHOP.bank={price:'$2.99',open:220,max:400,perJob:5,perStar:2,from:10,seed:50};let bankOpen=false,bankFx=null;
-const BANK_PREVIEW=REVIEW_MODE&&/[?&]bank\b/.test(location.search);
-function bankOn(){if(BANK_PREVIEW&&!save.bank)save.bank={g:250};return (save.fbRuns||0)>=SHOP.bank.from||BANK_PREVIEW;}
+const BANK_PREVIEW=REVIEW_MODE&&/[?&]bank2?\b/.test(location.search),BANK2_PREVIEW=REVIEW_MODE&&/[?&]bank2\b/.test(location.search);
+const BANK1=SHOP.bank,BANK2={price:'$4.99',open:440,max:800,perJob:10,perStar:4,from:10,seed:0,big:true};
+Object.defineProperty(SHOP,'bank',{get(){return save&&save.bank&&(save.bank.broken||0)>=1?BANK2:BANK1;},set(v){},configurable:true});
+function bankOn(){if(BANK2_PREVIEW&&!save.bank)save.bank={g:500,broken:1,seen:true,intro:true};if(BANK_PREVIEW&&!save.bank)save.bank={g:250};return (save.fbRuns||0)>=SHOP.bank.from||BANK_PREVIEW;}
 function bankG(){return (save.bank&&save.bank.g)||0;}
 function bankValue(){const p=priceParse(SHOP.bank.price),g0=SHOP.gems[0],p0=priceParse(g0.price);return p&&p0&&p.n>0?SHOP.bank.max*p0.n/g0.gems/p.n:0;}
 // the jar: frosted glass, a blue lid with snow on it, real gem pieces piling up inside (map icon and card sizes)
@@ -4675,12 +4677,12 @@ function drawBankIntro(dt){const x=6,w=W-12,h=52,y=MAP_VY+16;btn('bankintrobg',x
   text(b,'NEW: THE SNOW BANK',x+21,y+6,'#ffd23f',{outline:null});text(b,'EVERY JOB ADDS GEMS TO THE JAR',x+21,y+17,'#ffffff',{outline:null});text(b,'AT THE BOTTOM LEFT. OPENS AT '+SHOP.bank.open+'.',x+21,y+25,'#9fc0e8',{outline:null});
   button('bankintrook',x+w-116,y+h-18,52,13,'navy','GOT IT',()=>{save.bank=save.bank||{g:SHOP.bank.seed};save.bank.intro=true;persist();sfx('click');});
   button('bankintroopen',x+w-60,y+h-18,52,13,'blue','LOOK',()=>{save.bank=save.bank||{g:SHOP.bank.seed};save.bank.intro=true;save.bank.seen=true;bankOpen=true;persist();sfx('click');});}
-function bankBuy(){if(bankG()<SHOP.bank.open){sfx('deny');return;}
-  IAP.buy('bank',()=>{const n=bankG();if(n<SHOP.bank.open)return;save.gems=(save.gems||0)+n;save.bank.g=0;save.bank.broken=(save.bank.broken||0)+1;track('iap_test',{item:'snow_bank',gems:n,price:SHOP.bank.price});
-    bankOpen=false;sfx('fanfare');buzz(30);youGot('SNOW BANK',[[SPR.gem,'+'+n+' GEMS','#ff8fc8'],[null,'THE JAR STARTS AGAIN','#9fc0e8']]);persist();});}
+function bankBuy(){const B0=SHOP.bank;if(bankG()<B0.open){sfx('deny');return;}
+  IAP.buy(B0.big?'bank2':'bank',()=>{const n=bankG();if(n<B0.open)return;save.gems=(save.gems||0)+n;save.bank.g=0;save.bank.broken=(save.bank.broken||0)+1;track('iap_test',{item:B0.big?'snow_bank_big':'snow_bank',gems:n,price:B0.price});
+    bankOpen=false;sfx('fanfare');buzz(30);youGot(B0.big?'BIG SNOW BANK':'SNOW BANK',[[SPR.gem,'+'+n+' GEMS','#ff8fc8'],[null,B0.big?'THE BIG JAR STARTS AGAIN':'NEXT: A BIG JAR, 800 GEMS','#9fc0e8']]);persist();});}
 function drawBank(){const x=14,w=152,h=200,y=56,B=SHOP.bank,g=bankG(),ok=g>=B.open,full=g>=B.max,v=Math.floor(bankValue()+1e-9);
   b.fillStyle='rgba(11,24,56,0.84)';b.fillRect(0,0,W,H);btn('bankbg',0,0,W,H,()=>{});panel(x,y,w,h,'#13306b','#ffd23f');
-  text(b,'SNOW BANK',W/2,y+8,'#ffd23f',{align:'center',scale:2});text(b,'GEMS PILE UP AS YOU PLAY',W/2,y+24,'#9fc0e8',{align:'center',outline:null});
+  text(b,SHOP.bank.big?'BIG SNOW BANK':'SNOW BANK',W/2,y+8,'#ffd23f',{align:'center',scale:2});text(b,SHOP.bank.big?'IT FILLS TWICE AS FAST':'GEMS PILE UP AS YOU PLAY',W/2,y+24,'#9fc0e8',{align:'center',outline:null});
   const jx=W/2-17,jy=y+34;drawJarArt(jx,jy,34,46,g/B.max,true);
   if(ok){const ph=(tNow*1.6)%1,sp=(px,py)=>{R(b,px,py-2,1,5,'#ffd23f');R(b,px-2,py,5,1,'#ffd23f');};if(ph<0.4)sp(jx-6,jy+16);else if(ph>0.5&&ph<0.9)sp(jx-4,jy+38);}
   if(v>=2){const t2=v+'X VALUE',sw=textW(t2)+6,sx2=jx+29,sy2=jy+12;R(b,sx2+1,sy2,sw-2,17,K);R(b,sx2,sy2+1,sw,15,K);R(b,sx2+1,sy2+1,sw-2,15,'#e8283f');R(b,sx2+2,sy2+1,sw-4,1,'#ff6b7d');R(b,sx2+1,sy2+15,sw-2,1,'#a81c2e');
@@ -5307,13 +5309,13 @@ var IAP={busy:0,kind:null,
   syncOwned(){const N=this.native();if(!N||typeof N.owned!=='function')return;Promise.resolve().then(()=>N.owned()).then(list=>{if(list&&list.length&&this.applyOwned(list))persist();}).catch(()=>{});},
   prices(){const N=this.native();if(!N||typeof N.prices!=='function')return;Promise.resolve().then(()=>N.prices()).then(p=>{if(!p)return;const P=k=>fontPrice(p[this.ids[k]]);
     if(P('premium'))SHOP.premium.price=P('premium');if(P('starter'))SHOP.starter.price=P('starter');for(const g of SHOP.gems)if(P(g.id))g.price=P(g.id);
-    for(const k in SHOP.rides)if(P('ride_'+k))SHOP.rides[k][0]=P('ride_'+k);if(P('ride_pass'))SHOP.ridePass.price=P('ride_pass');if(P('bank'))SHOP.bank.price=P('bank');if(P('evpass'))SHOP.evPass.price=P('evpass');if(P('evplus'))SHOP.evPassPlus.price=P('evplus');}).catch(()=>{});}};
+    for(const k in SHOP.rides)if(P('ride_'+k))SHOP.rides[k][0]=P('ride_'+k);if(P('ride_pass'))SHOP.ridePass.price=P('ride_pass');if(P('bank'))BANK1.price=P('bank');if(P('bank2'))BANK2.price=P('bank2');if(P('evpass'))SHOP.evPass.price=P('evpass');if(P('evplus'))SHOP.evPassPlus.price=P('evplus');}).catch(()=>{});}};
 {const g=shopBuyPremium;shopBuyPremium=function(){if(save.pro)return;return IAP.buy('premium',()=>g());};}
 {const g=shopBuyStarter;shopBuyStarter=function(){if(save.starter)return;return IAP.buy('starter',()=>g());};}
 {const g=buyRidePass;buyRidePass=function(){if(save.ridePass)return;return IAP.buy('ride_pass',()=>g());};}
 {const g=buyRide;buyRide=function(i,gems){if(gems||!TOOLS[i]||!IAP.native())return g(i,gems);
   IAP.buy('ride_'+TOOLS[i].id,()=>{if(g(i,false)){if(shopOpen){shopOpen=false;rideReveal={tid:TOOLS[i].id,t:0};}ridePeek=null;try{if(run)run.offerShut=true;}catch(e){}}});return false;};}
-IAP.ids.bank='snow_bank';IAP.consumable.bank=1;
+IAP.ids.bank='snow_bank';IAP.consumable.bank=1;IAP.ids.bank2='snow_bank_big';IAP.consumable.bank2=1;
 IAP.ids.evpass='event_pass';IAP.consumable.evpass=1;IAP.ids.evplus='event_pass_plus';IAP.consumable.evplus=1;
 window.srNativeReady=()=>{IAP.prices();IAP.syncOwned();};if(window.SRNative)setTimeout(window.srNativeReady,0);
 {const o=startNewWinter;startNewWinter=function(){const r=o.apply(this,arguments);try{track('new_winter',{winter_now:winterNo()});}catch(e){}return r;};}
