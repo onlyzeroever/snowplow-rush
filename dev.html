@@ -5129,7 +5129,7 @@ function gemRate(g){const p=priceParse(g&&g.price);return p&&p.n>0?g.gems/p.n:0;
 function gemBonus(i){const r0=gemRate(SHOP.gems[0]),r=gemRate(SHOP.gems[i]);if(!i||!r0||!r)return '';const pc=Math.floor((r/r0-1)*10+1e-9)*10;return pc>0?'+'+pc+'%':'';}
 function gemBest(){let bi=-1,br=0;SHOP.gems.forEach((g,i)=>{const r=gemRate(g);if(r>br*1.001){br=r;bi=i;}});return bi>0?bi:-1;}
 const STARTER_MS=48*3600e3;let shopNeed=null;
-function starterLeft(){if(save.starter)return 0;const o=save.offers||{};if(!o.starter)return 0;if(!save.starterT){save.starterT=Date.now();persist();}return Math.max(0,STARTER_MS-(Date.now()-save.starterT));}
+function starterLeft(){if(save.starter)return 0;const o=save.offers||{};if(!o.starter&&REVIEW_MODE&&/[?&]starter\b/.test(location.search)){save.offers=o;o.starter=true;}if(!o.starter)return 0;if(!save.starterT){save.starterT=Date.now();persist();}return Math.max(0,STARTER_MS-(Date.now()-save.starterT));}
 function fmtLeft(ms){const m=Math.ceil(ms/60000);return m>=60?Math.floor(m/60)+'H '+String(m%60).padStart(2,'0')+'M':m+'M';}
 function shopFreeGems(){const k=todayKey();if(!save.adGems||save.adGems.date!==k)save.adGems={date:k,n:0};save.adGems.n++;
   if(save.pro){save.gems=(save.gems||0)+SHOP.adGems;showToast('+'+SHOP.adGems+' GEMS (PREMIUM: NO AD)','#ff8fc8');sfx('buy');}else{IAP.ad('free_gems',{t:2.5,reward:SHOP.adGems,gems:true,onFail:()=>{if(save.adGems)save.adGems.n=Math.max(0,save.adGems.n-1);persist();}});sfx('click');}persist();}

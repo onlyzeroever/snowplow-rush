@@ -9,6 +9,7 @@
 #  - not enough gems for a coin bag or a Wild Ride: the shop jumps to the gem packs and outlines the smallest pack
 #    that covers the gap ("NEED 210 MORE GEMS"); it clears once the gems are there
 #  - tighter gem rows (same prices, labels and first-buy double as p170)
+#  - preview: ?review=all&starter shows the Starter Pack as if just offered (review saves only; ?review is off in app builds)
 import sys
 f=sys.argv[1];s=open(f,encoding='utf-8').read()
 def rep(a,b_,cnt=1):
@@ -16,7 +17,7 @@ def rep(a,b_,cnt=1):
 # --- helpers
 rep("function drawShop(){",
     "const STARTER_MS=48*3600e3;let shopNeed=null;\n"
-    "function starterLeft(){if(save.starter)return 0;const o=save.offers||{};if(!o.starter)return 0;if(!save.starterT){save.starterT=Date.now();persist();}return Math.max(0,STARTER_MS-(Date.now()-save.starterT));}\n"
+    "function starterLeft(){if(save.starter)return 0;const o=save.offers||{};if(!o.starter&&REVIEW_MODE&&/[?&]starter\\b/.test(location.search)){save.offers=o;o.starter=true;}if(!o.starter)return 0;if(!save.starterT){save.starterT=Date.now();persist();}return Math.max(0,STARTER_MS-(Date.now()-save.starterT));}\n"
     "function fmtLeft(ms){const m=Math.ceil(ms/60000);return m>=60?Math.floor(m/60)+'H '+String(m%60).padStart(2,'0')+'M':m+'M';}\n"
     "function shopFreeGems(){const k=todayKey();if(!save.adGems||save.adGems.date!==k)save.adGems={date:k,n:0};save.adGems.n++;\n"
     "  if(save.pro){save.gems=(save.gems||0)+SHOP.adGems;showToast('+'+SHOP.adGems+' GEMS (PREMIUM: NO AD)','#ff8fc8');sfx('buy');}else{IAP.ad('free_gems',{t:2.5,reward:SHOP.adGems,gems:true,onFail:()=>{if(save.adGems)save.adGems.n=Math.max(0,save.adGems.n-1);persist();}});sfx('click');}persist();}\n"
