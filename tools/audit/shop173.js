@@ -8,7 +8,7 @@ const res = []; const ok = (n, pass, info) => { res.push(pass); console.log((pas
   await p.goto('http://127.0.0.1:8766/' + (process.argv[2] || 'lab6.html') + '?test=1'); await p.waitForTimeout(900);
   const EV = c => p.evaluate(x => window.__EV(x), c).then(JSON.parse);
   const base = (extra) => `save.privSeen=true;save.tut=true;save.fbRuns=20;save.sess=3;save.gems=40;save.coins=5000;save.gemBuys=0;save.pro=false;save.starter=false;save.ridePass=false;save.offers={seenShop:true,last:todayKey()};save.starterT=null;save.adGems=null;save.shopDay=null;
-    for(let i=0;i<6;i++)save.best[i]=Math.max(save.best[i]||0,1);goMap();try{dailyOpen=false;storyOpen=null;offerOpen=null;weeklyOpen=false;}catch(e){};${extra || ''}`;
+    for(let i=0;i<6;i++)save.best[i]=Math.max(save.best[i]||0,1);goMap();try{dailyOpen=false;storyOpen=null;offerOpen=null;weeklyOpen=false;adScreen=null;IAP.busy=0;gotCard=null;}catch(e){};${extra || ''}`;
   const open = async (extra, tab) => { await EV(`(()=>{${base(extra)};shopTab=${tab || 0};openShop();draw();return '1';})()`); await p.waitForTimeout(350); return EV(`(()=>{draw();return JSON.stringify(ui.filter(u=>/^s|^of/.test(u.id)).map(u=>[u.id,u.x,u.y,u.w,u.h]));})()`); };
   const has = (u, id) => u.find(x => x[0] === id);
   const px = (x, y) => EV(`JSON.stringify(Array.from(b.getImageData(${x},${y},1,1).data).slice(0,3))`);
@@ -63,9 +63,22 @@ const res = []; const ok = (n, pass, info) => { res.push(pass); console.log((pas
   await EV(`(()=>{draw();ui.find(x=>x.id==='sclose').fn();return '1';})()`);
   ok('DONE clears it', await EV(`JSON.stringify(shopNeed===null&&!shopOpen)`));
 
+  // shop events (Alex OK, Nov 21 22:25)
+  await EV(`(()=>{window.__TR=[];const o=track;track=function(n,p){__TR.push([n,p||{}]);return o.apply(this,arguments);};return '1';})()`);
+  await EV(`(()=>{${base('')};shopOpen=false;draw();return '1';})()`); await p.waitForTimeout(400);
+  const E = await EV(`(()=>{__TR.length=0;draw();ui.find(x=>x.id==='shopb').fn();draw();const a=__TR.find(e=>e[0]==='shop_open');shopOpen=false;goMap();draw();
+    ui=[];drawHeaderGems(2,2,50);const gp=ui.find(x=>x.id==='gempanel');let g=null;if(gp){__TR.length=0;gp.fn();g=__TR.find(e=>e[0]==='shop_open');}
+    shopTab=0;openShop();draw();__TR.length=0;ui.find(x=>x.id==='sad').fn();const fg=__TR.find(e=>e[0]==='shop_free_gift');
+    save.gems=40;save.gemBuys=0;shopTab=1;draw();__TR.length=0;ui.find(x=>x.id==='sb2').fn();const ng=__TR.find(e=>e[0]==='shop_need_gems');
+    draw();__TR.length=0;ui.find(x=>x.id==='sg1').fn();const it=__TR.find(e=>e[0]==='iap_test');
+    return JSON.stringify({map:a&&a[1].from,gems:g&&g[1].from,fg:fg&&fg[1],ng:ng&&ng[1],it:it&&it[1]});})()`);
+  ok('shop_open says where from (map, gem counter)', E.map === 'map' && E.gems === 'gems', E);
+  ok('shop_free_gift fires on the free gift', !!E.fg && E.fg.pro === false, E.fg);
+  ok('shop_need_gems: item, how many and the pack suggested', !!E.ng && E.ng.item === 'bag_b3' && E.ng.need === 210 && E.ng.pack === 'gems_135', E.ng);
+  ok('a gem pack bought from that reminder is marked from_need', !!E.it && E.it.from_need === true, E.it);
   // map: FREE on the SHOP button until the shop has been opened today (only once the daily jobs are on)
   const badge = async (extra) => { await EV(`(()=>{${base(extra)};shopOpen=false;draw();return '1';})()`); await p.waitForTimeout(400);
-    return EV(`(()=>{draw();const s=ui.find(x=>x.id==='shopb');const d=b.getImageData(s.x+s.w-2,s.y-1,1,1).data;return JSON.stringify(d[0]===232&&d[1]===40&&d[2]===63);})()`); };
+    return EV(`(()=>{draw();const s=ui.find(x=>x.id==='shopb');const d=b.getImageData(s.x+s.w+1,s.y-2,1,1).data;return JSON.stringify(d[0]===232&&d[1]===40&&d[2]===63);})()`); };
   ok('map: FREE badge when the free gems are waiting', await badge(''));
   ok('map: no badge once the shop has been opened today', !(await badge(`save.shopDay=todayKey()`)));
   ok('map: no badge when the free gems are used up', !(await badge(`save.adGems={date:todayKey(),n:99}`)));
