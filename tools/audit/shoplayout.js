@@ -54,7 +54,9 @@ const res = []; const ok = (n, pass, info) => { res.push(pass); console.log((pas
       const T = L.filter(e => e.k === 't'), B = L.filter(e => e.k === 'b'), C = L.filter(e => e.k === 'c');
       const ov = (a, c) => a.x < c.x + c.w && c.x < a.x + a.w && a.y < c.y + c.h && c.y < a.y + a.h;
       const pop = name.startsWith('pop');
-      const inPanel = e => pop ? (e.x >= 15 && e.x + e.w <= 165 && e.y >= 71 && e.y + e.h <= 237) : (e.x >= 8 && e.x + e.w <= 172 && e.y >= 8 && e.y + e.h <= 310);
+      // the pop-ups differ in height (Premium shows your machine in gold, Nov 22): both centred on y=156
+      const ph = name === 'pop_premium' ? 204 : 168, py = Math.round(156 - ph / 2);
+      const inPanel = e => pop ? (e.x >= 15 && e.x + e.w <= 165 && e.y >= py + 1 && e.y + e.h <= py + ph - 2) : (e.x >= 8 && e.x + e.w <= 172 && e.y >= 8 && e.y + e.h <= 310);
       const shopT = T, shopB = B;
       const prob = [];
       for (let i = 0; i < shopT.length; i++) for (let j = i + 1; j < shopT.length; j++) { const a = shopT[i], c = shopT[j]; if (ov(a, c) && !(a.x === c.x && a.y === c.y && a.s === c.s)) prob.push('text/text "' + a.s + '" + "' + c.s + '"'); }

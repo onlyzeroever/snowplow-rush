@@ -15,7 +15,8 @@ rep("function drawShop(){",
     "  b.fillStyle='rgba(11,24,56,0.86)';b.fillRect(0,0,W,H);btn('gotbg',0,0,W,H,()=>{});panel(x,y,w,h,'#13306b','#ffd23f');\n"
     "  for(let q=0;q<12;q++){const a=q*0.52+G.t*1.4,r=46+((G.t*20+q*7)%16);const px=Math.round(W/2+Math.cos(a)*r),py=Math.round(y+16+Math.sin(a)*r*0.22);if(py>y+3&&py<y+30&&px>x+4&&px<x+w-6)R(b,px,py,2,2,['#ffd23f','#c4a0f5','#ff4fa3','#5fb4ff'][q%4]);}\n"
     "  text(b,'YOU GOT',W/2,y+9,'#ffd23f',{align:'center',scale:2});text(b,G.title,W/2,y+28,'#9fc0e8',{align:'center',outline:null});\n"
-    "  G.rows.forEach((r,i)=>{const yy=y+42+i*12,ic=r[0];if(ic)b.drawImage(ic,x+22+Math.floor((9-ic.width)/2),yy+3-Math.floor(ic.height/2));text(b,r[1],x+34,yy+1,r[2]||'#ffffff',{outline:null});});\n"
+    "  {const bw=12+Math.max(...G.rows.map(r=>textW(r[1]))),bx=Math.round(W/2-bw/2);/* the list is centred as one block: icons in one column, text in the next */\n"
+    "  G.rows.forEach((r,i)=>{const yy=y+42+i*12,ic=r[0];if(ic)b.drawImage(ic,bx+Math.floor((9-ic.width)/2),yy+3-Math.floor(ic.height/2));text(b,r[1],bx+12,yy+1,r[2]||'#ffffff',{outline:null});});}\n"
     "  if(test)text(b,'TEST MODE: NOTHING WAS CHARGED',W/2,y+h-37,'#7fe08a',{align:'center',outline:null});\n"
     "  button('gotok',x+36,y+h-26,w-72,18,'orange','NICE!',()=>{gotCard=null;sfx('click');});}\n"
     "function drawShop(){")

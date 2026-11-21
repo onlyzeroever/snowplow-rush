@@ -16,5 +16,13 @@ rep("function titleGo(){sfx('click');const fresh=!save.privSeen;if(fresh){save.p
 rep("const e=1-Math.pow(1-privT,3),x=6,w=W-12,h=58,y=Math.round(NAV_Y-h-6+(1-e)*70);","const e=1-Math.pow(1-privT,3),x=6,w=W-12,h=58,y=Math.round(MAP_VY+16-(1-e)*10);b.globalAlpha=Math.min(1,0.15+e);")
 # a short drop and fade under the top bar (it used to slide 90 px over the coin bar)
 rep("track('privacy_notice',{choice:'settings'});persist();settingsOpen=true;sfx('click');});}","track('privacy_notice',{choice:'settings'});persist();settingsOpen=true;sfx('click');});b.globalAlpha=1;}")
+# one grid for the notice cards (this one and the Snow Bank's): icon in a 9 px column, every line of text from x+21,
+# buttons right-aligned with the main one on the right
+rep("const e=1-Math.pow(1-privT,3),x=6,w=W-12,h=58,y=Math.round(MAP_VY+16-(1-e)*10);","const e=1-Math.pow(1-privT,3),x=6,w=W-12,h=60,y=Math.round(MAP_VY+16-(1-e)*10);")
+rep("b.drawImage(SPR.frost,x+6,y+5);text(b,'ANONYMOUS PLAY DATA',x+18,y+6,'#ffd23f',{outline:null});","b.drawImage(SPR.frost,x+8,y+4);text(b,'ANONYMOUS PLAY DATA',x+21,y+6,'#ffd23f',{outline:null});")
+rep("text(b,'WE COUNT PLOWS, NOT PEOPLE.',W/2,y+17,'#ffffff',{align:'center',outline:null});text(b,'WE MAY RECORD YOUR FIRST PLAYS,',W/2,y+26,'#9fc0e8',{align:'center',outline:null});text(b,'ANONYMOUSLY. WE NEVER SELL IT.',W/2,y+34,'#9fc0e8',{align:'center',outline:null});",
+    "text(b,'WE COUNT PLOWS, NOT PEOPLE.',x+21,y+17,'#ffffff',{outline:null});text(b,'WE MAY RECORD YOUR FIRST PLAYS,',x+21,y+25,'#9fc0e8',{outline:null});text(b,'ANONYMOUSLY. WE NEVER SELL IT.',x+21,y+33,'#9fc0e8',{outline:null});")
+rep("button('privok',x+w/2-56,y+42,52,13,'green','GOT IT',","button('privok',x+w-60,y+h-18,52,13,'green','GOT IT',")
+rep("button('privset',x+w/2+4,y+42,52,13,'navy','SETTINGS',","button('privset',x+w-116,y+h-18,52,13,'navy','SETTINGS',")
 open(f,'w',encoding='utf-8').write(s)
 print('p180 title screen without the privacy small print; the note comes as the card on the first map visit')
