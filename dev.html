@@ -3046,7 +3046,7 @@ let EVENTS=[],evOpen=false;
 (function evLoad(){if(NEWP)return;const q=new URLSearchParams(location.search).get('event');
   if(q&&EVENT_DEFS[q]){const t=Date.now();EVENTS.push({id:'test-'+q,kind:q,start:t-1000,end:t+72*3600e3,test:true});return;}
   try{fetch((window.SRNative&&SRNative.platform&&SRNative.platform!=='web'?'https://snowplowrush.app':'')+'/events.json?d='+new Date().toDateString().replace(/ /g,''),{cache:'no-store'}).then(r=>r.ok?r.json():[]).then(a=>{if(!Array.isArray(a))return;
-    for(const e of a){if(!e||!EVENT_DEFS[e.kind])continue;const st=new Date(e.start).getTime(),en=new Date(e.end).getTime();if(isFinite(st)&&isFinite(en)&&en>st)EVENTS.push({id:String(e.id||e.start),kind:e.kind,start:st,end:en});}}).catch(()=>{});}catch(e){}})();
+    for(const e of a){if(!e||!EVENT_DEFS[e.kind])continue;const st=new Date(e.start).getTime(),en=new Date(e.end).getTime();if(isFinite(st)&&isFinite(en)&&en>st)EVENTS.push({id:String(e.id||e.start),kind:e.kind,start:st,end:en,plus:e.plus!==false});}}).catch(()=>{});}catch(e){}})();
 if(PROTO){const t=Date.now();for(const k in EVENT_DEFS)EVENTS.push({id:'lab-'+k,kind:k,start:t-1000,end:t+72*3600e3,test:true,lab:true});}
 let labOpen=false,labPick=null,labKind=null,labReopen=false,labTab=0;
 function evNow(){if(PROTO)return EVENTS.find(e=>e.lab&&e.kind===labKind)||null;const t=Date.now();return EVENTS.find(e=>t>=e.start&&t<e.end)||null;}
@@ -5242,7 +5242,7 @@ function evPassBuy(gems,plus){const ev=evNow();if(!ev||passOwned(ev))return;
   if(gems){const c=SHOP.evPass.gems;if((save.gems||0)<c){passOpen=false;evOpen=false;shopTab=0;openShopFrom('event');needGems(c,'event_pass');return;}
     save.gems-=c;try{track('spend',{item:'event_pass',gems:c,event:ev.kind});}catch(e){}grant();}
   else IAP.buy(plus?'evplus':'evpass',()=>{track('iap_test',{item:plus?'event_pass_plus':'event_pass',price:plus?SHOP.evPassPlus.price:SHOP.evPass.price,event:ev.kind});grant();});}
-function drawPass(){const ev=evNow();if(!ev){passOpen=false;return;}const d=EVENT_DEFS[ev.kind],pn=EV_PAINT[ev.kind]||EV_PAINT.blizzard,PL=!!(SHOP.evPassPlus&&SHOP.evPassPlus.on),x=14,w=152,h=PL?228:196,y=Math.round(156-h/2),dy=PL?32:0;
+function drawPass(){const ev=evNow();if(!ev){passOpen=false;return;}const d=EVENT_DEFS[ev.kind],pn=EV_PAINT[ev.kind]||EV_PAINT.blizzard,PL=!!(SHOP.evPassPlus&&SHOP.evPassPlus.on&&ev.plus!==false),x=14,w=152,h=PL?228:196,y=Math.round(156-h/2),dy=PL?32:0;
   b.fillStyle='rgba(11,24,56,0.84)';b.fillRect(0,0,W,H);btn('passbg',0,0,W,H,()=>{});panel(x,y,w,h,'#13306b',d.col);
   text(b,'EVENT PASS',W/2,y+9,'#ffd23f',{align:'center',scale:2});text(b,d.name,W/2,y+27,d.col,{align:'center',outline:null});
   const row=(ic,t,yy,c)=>{if(ic)b.drawImage(ic,x+22+Math.floor((9-ic.width)/2),yy+3-Math.floor(ic.height/2));text(b,t,x+34,yy+1,c||'#ffffff',{outline:null});};
@@ -6248,14 +6248,14 @@ var IAP={busy:0,kind:null,
   syncOwned(){const N=this.native();if(!N||typeof N.owned!=='function')return;Promise.resolve().then(()=>N.owned()).then(list=>{if(list&&list.length&&this.applyOwned(list))persist();}).catch(()=>{});},
   prices(){const N=this.native();if(!N||typeof N.prices!=='function')return;Promise.resolve().then(()=>N.prices()).then(p=>{if(!p)return;const P=k=>fontPrice(p[this.ids[k]]);
     if(P('premium'))SHOP.premium.price=P('premium');if(P('starter'))SHOP.starter.price=P('starter');for(const g of SHOP.gems)if(P(g.id))g.price=P(g.id);
-    for(const k in SHOP.rides)if(P('ride_'+k))SHOP.rides[k][0]=P('ride_'+k);if(P('ride_pass'))SHOP.ridePass.price=P('ride_pass');if(P('bank'))BANK1.price=P('bank');if(P('bank2'))BANK2.price=P('bank2');if(P('evplus'))SHOP.evPassPlus.price=P('evplus');if(P('evpass'))SHOP.evPass.price=P('evpass');}).catch(()=>{});}};
+    for(const k in SHOP.rides)if(P('ride_'+k))SHOP.rides[k][0]=P('ride_'+k);if(P('ride_pass'))SHOP.ridePass.price=P('ride_pass');if(P('bank'))BANK1.price=P('bank');if(P('bank2'))BANK2.price=P('bank2');if(P('evpass'))SHOP.evPass.price=P('evpass');if(P('evplus'))SHOP.evPassPlus.price=P('evplus');}).catch(()=>{});}};
 {const g=shopBuyPremium;shopBuyPremium=function(){if(save.pro)return;return IAP.buy('premium',()=>g());};}
 {const g=shopBuyStarter;shopBuyStarter=function(){if(save.starter)return;return IAP.buy('starter',()=>g());};}
 {const g=buyRidePass;buyRidePass=function(){if(save.ridePass)return;return IAP.buy('ride_pass',()=>g());};}
 {const g=buyRide;buyRide=function(i,gems){if(gems||!TOOLS[i]||!IAP.native())return g(i,gems);
   IAP.buy('ride_'+TOOLS[i].id,()=>{if(g(i,false)){if(shopOpen){shopOpen=false;rideReveal={tid:TOOLS[i].id,t:0};}ridePeek=null;try{if(run)run.offerShut=true;}catch(e){}}});return false;};}
-IAP.ids.bank='snow_bank';IAP.consumable.bank=1;IAP.ids.bank2='snow_bank_big';IAP.consumable.bank2=1;IAP.ids.evplus='event_pass_plus';IAP.consumable.evplus=1;
-IAP.ids.evpass='event_pass';IAP.consumable.evpass=1;
+IAP.ids.bank='snow_bank';IAP.consumable.bank=1;IAP.ids.bank2='snow_bank_big';IAP.consumable.bank2=1;
+IAP.ids.evpass='event_pass';IAP.consumable.evpass=1;IAP.ids.evplus='event_pass_plus';IAP.consumable.evplus=1;
 window.srNativeReady=()=>{IAP.prices();IAP.syncOwned();};if(window.SRNative)setTimeout(window.srNativeReady,0);
 {const o=startNewWinter;startNewWinter=function(){const r=o.apply(this,arguments);try{track('new_winter',{winter_now:winterNo()});}catch(e){}return r;};}
 {const o=checkPart;checkPart=function(){const b4=JSON.stringify(save.parts||{});const r=o.apply(this,arguments);try{const a=save.parts||{};if(JSON.stringify(a)!==b4)for(const k in a)track('part_found',Object.assign(phJob(),{ride:k,parts:a[k]}));}catch(e){}return r;};}
