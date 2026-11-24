@@ -99,6 +99,7 @@ const PLAY = ([jobId, toolId, lv, seed, AVOID]) => {
     const maxSteps = Math.ceil((T0 + 20) * 30);
     while (steps < maxSteps && !run.ended) {
       fakeMs += 1000 / 30; window.__STEP(1, 1 / 30, 0); steps++;
+      if (window.__onStep) window.__onStep(steps); // tools/promo/capture.js saves each frame here (unset in tests)
       if (run.offer) { EV('(()=>{run.offer=false;endRound(false);return 1;})()'); break; }
       const pct = G.cleared / G.clearable * 100; t = steps / 30;
       for (let s = 0; s < 3; s++) if (tStar[s] === null && pct >= L.stars[s]) tStar[s] = +t.toFixed(1);
@@ -113,7 +114,8 @@ const PLAY = ([jobId, toolId, lv, seed, AVOID]) => {
   return out;
 };
 
-(async () => {
+module.exports = { PLAY, ARRIVE_LV, seedOf }; // reused by tools/promo/capture.js
+if (require.main === module) (async () => {
   const browser = await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox'] });
   // job list and machines per job, read from the game itself
   const p0 = await (await browser.newContext({ viewport: { width: 360, height: 640 } })).newPage();
