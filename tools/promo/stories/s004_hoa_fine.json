@@ -1,0 +1,22 @@
+{
+  "id": "s004",
+  "kind": "story-time (original fiction, malicious compliance)",
+  "title": "My HOA fined me $250 for plowing the sidewalks without \"written approval\"",
+  "voice": "af_heart", "speed": 1.12, "gap": 0.12, "hook_gap": 0.4,
+  "pauses": {"1": 0.3, "8": 0.3, "10": 0.3},
+  "lines": [
+    "My HOA fined me two hundred and fifty dollars for plowing the sidewalks without written approval.",
+    "So I stopped.",
+    "Every winter I clear our whole street with my old plow truck. Nobody asks. Nobody pays. I just like doing it.",
+    "Then a letter showed up. Unapproved snow removal. Fine attached.",
+    "Two nights later, we got two feet of snow.",
+    "I cleared my driveway. Only my driveway.",
+    "By eight a.m., the street looked like a glacier.",
+    "The HOA president couldn't get his car out. Neither could anyone coming to his meeting.",
+    "The meeting about my fine.",
+    "That afternoon, another letter appeared under my door.",
+    "Snow removal approved. Fine waived.",
+    "And underneath, in pen: please start with my driveway.",
+    "I did. Right after everyone else's."
+  ]
+}

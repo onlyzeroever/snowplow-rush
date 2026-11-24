@@ -1,0 +1,29 @@
+{
+ "story": "tools/promo/stories/s003_ship_in_culdesac.json",
+ "narration": "/home/claude/promo/work/s003",
+ "layout": "full",
+ "card": "headline",
+ "headline": "His testers said this ship is useless in the first levels",
+ "clips": [
+  {
+   "cap": "/home/claude/promo/work/v2_driveway_icebreaker",
+   "from": 268,
+   "to": 680,
+   "until_line": 4
+  },
+  {
+   "cap": "/home/claude/promo/work/v2_culdesac_icebreaker",
+   "from": 803,
+   "to": 1560
+  }
+ ],
+ "music_db": -25,
+ "sfx_db": -19,
+ "tail": 0.5,
+ "end_card": 2.8,
+ "end_lines": [
+  "PLAY FREE",
+  "snowplowrush.app"
+ ],
+ "out": "/home/claude/promo/out/s003_ship_in_culdesac.mp4"
+}

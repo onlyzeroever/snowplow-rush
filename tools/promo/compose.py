@@ -174,6 +174,9 @@ def main():
     os.makedirs(work, exist_ok=True)
 
     # gameplay frames in order: (capture dir, frame number); one audio segment per stretch of a clip
+    line_t0 = {}
+    for w in nar['words']:
+        line_t0.setdefault(w['line'], w['t0'])
     seq, segs, k = [], [], 0
     while len(seq) < N:
         c = cut['clips'][k % len(cut['clips'])]
@@ -181,10 +184,17 @@ def main():
         f0, f1 = c.get('from', 1), c.get('to')
         meta = json.load(open(os.path.join(c['cap'], 'meta.json')))
         f1 = min(f1 or meta['frames'], meta['frames'])
-        take = min(f1 - f0 + 1, N - len(seq))
         pos = json.load(open(os.path.join(c['cap'], 'pos.json')))
-        seq += [(c['cap'], f, pos[f - 1] if f - 1 < len(pos) else [90, 160], len(segs)) for f in range(f0, f0 + take)]
-        segs.append((c['cap'], f0, f0 + take - 1))
+        want = N - len(seq)
+        if 'until_line' in c and c['until_line'] in line_t0 and k <= len(cut['clips']):
+            want = max(1, min(want, int(round((lead + line_t0[c['until_line']]) * FPS)) - len(seq)))
+        while want > 0:  # a clip shorter than its beat plays again from its first frame
+            take = min(f1 - f0 + 1, want)
+            seq += [(c['cap'], f, pos[f - 1] if f - 1 < len(pos) else [90, 160], len(segs)) for f in range(f0, f0 + take)]
+            segs.append((c['cap'], f0, f0 + take - 1))
+            want -= take
+            if 'until_line' not in c:
+                break
 
     # ---- audio: narration + game sounds (rebuilt per clip) + music bed
     sfx_parts = []
@@ -224,7 +234,35 @@ def main():
 
     # ---- pictures
     card, cpad = story_card(story['title'], cut.get('channel', 'Snow Stories'), cut.get('byline', 'a Snowplow Rush channel'))
-    chunks = [c for c in caption_chunks(nar['words'], lead) if c['words'][0]['line'] > 0]
+    card_style = cut.get('card', 'story')
+    head = None
+    if card_style == 'headline':
+        hf = font('Inter-Black.otf', 68)
+        d0 = ImageDraw.Draw(Image.new('RGBA', (10, 10)))
+        hl = wrap(d0, cut.get('headline', story['title']).upper(), hf, 960)
+        head = Image.new('RGBA', (W, 520), (0, 0, 0, 0))
+        hd = ImageDraw.Draw(head)
+        for yy in range(520):  # soft shade behind the title so it reads over snow
+            a = int(150 * max(0, min(1, (yy - 40) / 120)) * max(0, min(1, (500 - yy) / 160)))
+            hd.line([(0, yy), (W, yy)], fill=(5, 12, 30, a))
+        y = 260 - len(hl) * 41
+        for ln in hl:
+            hd.text((W // 2, y), ln, font=hf, fill=WHITE, anchor='ma', stroke_width=8, stroke_fill=(0, 0, 0))
+            y += 82
+    popf = font('Inter-ExtraBold.otf', 50)
+    pop_imgs = []
+    for pp in cut.get('pops', []):
+        d0 = ImageDraw.Draw(Image.new('RGBA', (10, 10)))
+        tw = int(d0.textlength(pp['text'].upper(), font=popf))
+        im = rounded((tw + 130, 96), 26, (11, 24, 56, 225))
+        di = ImageDraw.Draw(im)
+        di.rounded_rectangle([22, 22, 74, 74], 10, fill=(64, 200, 96))
+        di.line([(34, 49), (45, 61), (64, 35)], fill=WHITE, width=8)
+        di.text((96, 48), pp['text'].upper(), font=popf, fill=WHITE, anchor='lm')
+        t_on = lead + line_t0.get(pp['line'], 0)
+        t_off = lead + line_t0[pp['until_line']] if pp.get('until_line') in line_t0 else narr_end
+        pop_imgs.append((t_on, t_off, im))
+    chunks = [c for c in caption_chunks(nar['words'], lead) if c['words'][0]['line'] > 0 or cut.get('card', 'story') != 'story']
     hook_end = lead + max(w['t1'] for w in nar['words'] if w['line'] == 0)
     wm = logo_from_og(250)
     wm_bg = rounded((wm.width + 24, wm.height + 16), 18, (11, 24, 56, 200))
@@ -280,7 +318,13 @@ def main():
         fr = frame.convert('RGBA')
         # story card: always on top in split; only during the hook in full
         endq = min(1, max(0, (t - narr_end - tail) / 0.35))
-        if layout != 'full' and endq < 1:
+        if head is not None:
+            if endq < 1:
+                h3 = head if endq == 0 else Image.blend(Image.new('RGBA', head.size, (0, 0, 0, 0)), head, 1 - endq)
+                fr.alpha_composite(h3, (0, 0))
+        elif card_style == 'none':
+            pass
+        elif layout != 'full' and endq < 1:
             c3 = card if endq == 0 else Image.blend(Image.new('RGBA', card.size, (0, 0, 0, 0)), card, 1 - endq)
             fr.alpha_composite(c3, (60 - cpad, 150 - cpad))
         elif t < hook_end + 0.6:
@@ -290,8 +334,16 @@ def main():
             c2 = card if pop >= 1 else card.resize((int(card.width * (0.9 + 0.1 * pop)), int(card.height * (0.9 + 0.1 * pop))))
             fr.alpha_composite(c2, (W // 2 - c2.width // 2, yy - cpad))
         # watermark on the gameplay
-        if t < narr_end + tail:
+        pops_up = any(a <= t < b for (a, b, _) in pop_imgs)
+        if t < narr_end + tail and not (pops_up and layout == 'full'):
             fr.alpha_composite(wm_bg, (22, 986 if layout != 'full' else 1330))
+        # checklist pops (stacked, slide in from the left)
+        slot = 0
+        for (t_on, t_off, im) in pop_imgs:
+            if t_on <= t < t_off and endq == 0:
+                sl = min(1, (t - t_on) / 0.15)
+                fr.alpha_composite(im, (int(-im.width + (60 + im.width) * sl), 1140 + slot * 112))
+                slot += 1
         # captions
         cy_cap = 720 if layout != 'full' else 690
         for ch in chunks:

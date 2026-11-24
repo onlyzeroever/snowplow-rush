@@ -1,0 +1,9 @@
+{"story": "tools/promo/stories/s005_who_clears.json", "narration": "/home/claude/promo/work/s005", "layout": "full", "card": "headline",
+ "headline": "Nobody has ever seen who clears these roads",
+ "clips": [{"cap": "/home/claude/promo/work/culdesac_super_2", "from": 1, "to": 400, "until_line": 1},
+           {"cap": "/home/claude/promo/work/v4_farmyard_tractor", "from": 60, "to": 900, "until_line": 2},
+           {"cap": "/home/claude/promo/work/v4_junkyard_monster", "from": 30, "to": 900, "until_line": 3},
+           {"cap": "/home/claude/promo/work/v4_castle_dragon", "from": 30, "to": 900, "until_line": 4},
+           {"cap": "/home/claude/promo/work/v4_ranch_ufo", "from": 60, "to": 900, "until_line": 5},
+           {"cap": "/home/claude/promo/work/maple_truck_1", "from": 1, "to": 700}],
+ "music_db": -23, "sfx_db": -20, "tail": 0.5, "end_card": 3.0, "end_lines": ["PLAY FREE", "snowplowrush.app"], "out": "/home/claude/promo/out/s005_who_clears.mp4"}

@@ -1,0 +1,25 @@
+{
+  "id": "s003",
+  "kind": "founder (true: tester note Nov 24; bot runs: driveway 100% in 23 s; cul-de-sac 87% at 30 s, then parked by the grandma to 52 s)",
+  "title": "His testers said this ship is useless in the first levels",
+  "voice": "af_bella",
+  "speed": 1.1,
+  "gap": 0.14,
+  "pauses": {
+    "0": 0.35,
+    "3": 0.35,
+    "5": 0.35,
+    "7": 0.3
+  },
+  "lines": [
+    "His testers said the biggest machine in his snowplow game is useless in the early levels.",
+    "To be fair, it's a ship. An icebreaker. Built for frozen seas.",
+    "So he dropped it into the very first driveway.",
+    "Twenty-three seconds. Spotless.",
+    "Then he tried a cul-de-sac.",
+    "Eighty-seven percent in thirty seconds.",
+    "And then it parked next to a grandma and refused to move.",
+    "The last thirteen percent is still out there.",
+    "So, the testers were half right. Think you could finish it?"
+  ]
+}

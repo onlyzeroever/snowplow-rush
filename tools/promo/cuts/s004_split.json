@@ -1,0 +1,4 @@
+{"story": "tools/promo/stories/s004_hoa_fine.json", "narration": "/home/claude/promo/work/s004", "layout": "split",
+ "clips": [{"cap": "/home/claude/promo/work/v3_gardens_truck", "from": 1, "to": 600}, {"cap": "/home/claude/promo/work/v3_school_truck", "from": 1, "to": 700}, {"cap": "/home/claude/promo/work/maple_truck_1", "from": 1, "to": 600}],
+ "channel": "Snow Stories", "byline": "a Snowplow Rush channel",
+ "music_db": -25, "sfx_db": -19, "tail": 0.5, "end_card": 2.8, "end_lines": ["PLAY FREE", "snowplowrush.app"], "out": "/home/claude/promo/out/s004_hoa_fine.mp4"}

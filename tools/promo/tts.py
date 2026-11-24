@@ -92,7 +92,7 @@ def main():
                 pos += d
         audio.append(x)
         t += len(x) / sr
-        pause = hook_gap if li == 0 else gap
+        pause = float(story.get('pauses', {}).get(str(li), hook_gap if li == 0 else gap))  # pause after this line
         audio.append(np.zeros(int(pause * sr), dtype=np.float32))
         t += pause
     y = np.concatenate(audio)

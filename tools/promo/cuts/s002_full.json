@@ -1,0 +1,6 @@
+{"story": "tools/promo/stories/s002_quit_35s.json", "narration": "/home/claude/promo/work/s002", "layout": "full", "card": "headline",
+ "headline": "4 of his first 12 players quit in 35 seconds",
+ "clips": [{"cap": "/home/claude/promo/work/v1_driveway_shovel", "from": 1, "to": 1260}],
+ "pops": [{"line": 5, "until_line": 9, "text": "Clock waits for you"}, {"line": 6, "until_line": 9, "text": "A hand shows the way"},
+          {"line": 7, "until_line": 9, "text": "Easier first stars"}, {"line": 8, "until_line": 9, "text": "2 free continues"}],
+ "music_db": -25, "sfx_db": -19, "tail": 0.5, "end_card": 2.8, "end_lines": ["PLAY FREE", "snowplowrush.app"], "out": "/home/claude/promo/out/s002_quit_35s.mp4"}

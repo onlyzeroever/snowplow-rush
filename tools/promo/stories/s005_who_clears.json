@@ -1,0 +1,17 @@
+{
+  "id": "s005",
+  "kind": "game lore (fiction; the game's own places and Wild Rides)",
+  "title": "Nobody has ever seen who clears these roads",
+  "voice": "bm_george", "speed": 1.0, "gap": 0.2,
+  "pauses": {"0": 0.4, "5": 0.45, "6": 0.6},
+  "lines": [
+    "In this town, every road is clear by five a.m. And nobody has ever seen who does it.",
+    "The farmer says her cows go quiet right before it passes.",
+    "The guy at the junkyard swears it was a monster truck.",
+    "Up at the old castle, they say it had wings.",
+    "Out at the ranch, people saw lights in the sky.",
+    "The mayor put up a reward. Nobody has ever claimed it.",
+    "Because the driver",
+    "is you."
+  ]
+}

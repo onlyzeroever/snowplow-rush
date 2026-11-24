@@ -1,0 +1,20 @@
+{
+  "id": "s002",
+  "kind": "founder (true facts only: PostHog Nov 15-21, p168 shipped Nov 21, first commit Nov 12)",
+  "title": "4 of his first 12 players quit in under 35 seconds",
+  "voice": "am_michael", "speed": 1.08, "gap": 0.14,
+  "pauses": {"0": 0.35, "4": 0.3, "8": 0.35, "9": 0.25},
+  "lines": [
+    "Four of the first twelve people who played his game quit in under thirty-five seconds.",
+    "He'd been making it for less than two weeks. A cozy snowplow game.",
+    "And a third of his first players were gone before the first driveway was clear.",
+    "So he went back through what they did, second by second.",
+    "The timer was running before they'd even touched the controls.",
+    "So now the clock waits for your first move.",
+    "A little hand shows you where to start.",
+    "The first three jobs hand out stars more easily.",
+    "And your first two continues are free.",
+    "Did it work? He doesn't know yet.",
+    "So here's the first driveway. Would you have quit?"
+  ]
+}
