@@ -14,7 +14,7 @@ rewarded ads, a silent cloud save and a few local reminders. No accounts, no ser
   Everything native lives in `app/` (this folder).
 - **Branches.** `main` is live (Vercel deploys it to snowplowrush.app), `next` is staging, `lab` is the
   prototype site lab.snowplowrush.app. **The app wraps `app/game/index.html`**: the live game plus the
-  app-only patches (p163, p165, p170, p171, p172, p173, p174, p175, p176, p179, p181, p182, p183, p186, p187), rebuilt and committed by the cloud session. Start with
+  app-only patches (p163, p165, p170, p171, p172, p173, p174, p175, p176, p179, p181, p182, p183, p186, p187, p188), rebuilt and committed by the cloud session. Start with
   `app/CC_START.md`.
 - **Rules from Alex that apply here:** never spend money or credits without asking; never put keys,
   passwords or tokens in chat or in the repo (Alex types them into the tools himself); prices shown must be
@@ -57,6 +57,8 @@ rewarded ads, a silent cloud save and a few local reminders. No accounts, no ser
 | p182 | Event Pass for the weekend event on now: flakes x2 (the ones already earned too) and that event's paint for every machine, kept; `event_pass` or 250 gems | App build |
 | p187 | The big Snow Bank: after a player opens their first Snow Bank, a bigger jar takes its place (800 gems, opens at 440, +10 a job, +4 a star; `snow_bank_big`) | App build |
 | p186 | EVENT PASS+: the Event Pass plus 300 flakes at once (`event_pass_plus`); an events.json entry with `"plus": false` hides it for that weekend | App build |
+| p188 | Starter Pack clock that ticks: the pop-up and the shop card show the real time left with seconds (ENDS IN 47:59:12); the offer ends 48 h after it first shows (tester review, Nov 26) | App build |
+| p189 | A limiter on the master audio output (stacked sounds no longer clip on phone speakers) and a slightly quieter coin (tester review) | Live (Nov 27) |
 | p183 | Full screen on every shape: taller game on tall phones (top bar at the top, buttons at the bottom), the safe areas filled, the world carried on either side on wide screens (iPhone Duo open, iPad), cards centred, re-fits on every resize | App build |
 | p161 | Automatic render scale on slow phones | Live |
 
