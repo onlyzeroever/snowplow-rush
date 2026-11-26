@@ -1109,12 +1109,12 @@ function edgeLight(){const c=mk(5,5),g=c.getContext('2d');R(g,1,1,3,3,K);R(g,2,2
 const MUSIC={menu:{f:'audio/music_lofi.mp3',a:0.5,b:47.33714,vol:0.58,lp:2200},job:{f:'audio/music_lofi.mp3',a:0.5,b:47.33714,vol:0.5,lp:20000}};let musicFilter=null;
 const SFX_FILES=['cfade','cend','click','deny','buy','coin','grab','combo','spill','bump','hit','gift','gold','time','tick','star1','star2','star3','fanfare','trophy','end','win','go','neighbour','daily','warn','squall','flump','throw','splat','whoosh','horn','moo','crunch','stomp','scrape_s','scrape_l','engine','jet','fire','beam'];
 const SFX_LOOPS={scrape_s:[1.2,2.4],scrape_l:[1.2,2.4],engine:[1,2],jet:[1,2],fire:[1.2,2.4],beam:[1,2]};
-const SFX_VOL={cfade:0.42,cend:0.5,click:0.5,deny:0.55,buy:0.7,coin:0.32,grab:0.4,combo:0.4,spill:0.6,bump:0.7,hit:0.8,gift:0.75,gold:0.8,time:0.7,tick:0.45,star1:0.8,star2:0.8,star3:0.85,
+const SFX_VOL={cfade:0.42,cend:0.5,click:0.5,deny:0.55,buy:0.7,coin:0.27,grab:0.4,combo:0.4,spill:0.6,bump:0.7,hit:0.8,gift:0.75,gold:0.8,time:0.7,tick:0.45,star1:0.8,star2:0.8,star3:0.85,
   fanfare:0.8,trophy:0.75,end:0.6,win:0.8,go:0.6,neighbour:0.7,daily:0.7,warn:0.5,squall:0.55,flump:0.6,throw:0.5,splat:0.55,whoosh:0.5,horn:0.45,moo:0.7,crunch:0.8,stomp:0.6};
 let AC=null,master=null,musicBus=null,sfxBus=null,noiseBuf=null;const BUF={};let audioLoading=false,curMusic=null,musicNode=null,musicGainNode=null,musicWant=null;
 const loopNodes={};
 function audioInit(){if(AC){if(AC.state!=='running')Promise.resolve(AC.resume()).catch(()=>{});return;}
-  try{AC=new (window.AudioContext||window.webkitAudioContext)();master=AC.createGain();master.gain.value=0.9;master.connect(AC.destination);
+  try{AC=new (window.AudioContext||window.webkitAudioContext)();master=AC.createGain();master.gain.value=0.9;try{const lim=AC.createDynamicsCompressor();lim.threshold.value=-9;lim.knee.value=6;lim.ratio.value=12;lim.attack.value=0.003;lim.release.value=0.2;master.connect(lim);lim.connect(AC.destination);}catch(e){master.connect(AC.destination);}
     musicBus=AC.createGain();musicBus.gain.value=save.musicOff?0:1;musicBus.connect(master);sfxBus=AC.createGain();sfxBus.gain.value=save.muted?0:1;sfxBus.connect(master);
     noiseBuf=AC.createBuffer(1,AC.sampleRate*0.5,AC.sampleRate);const d=noiseBuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;}catch(e){AC=null;return;}
   loadAudio();}
@@ -3016,7 +3016,7 @@ function drawOffer(){const k=offerOpen,x=14,w=152,h=k==='starter'?168:204,y=Math
   const row=(ic,t,yy,c)=>{if(ic)b.drawImage(ic,x+22+Math.floor((9-ic.width)/2),yy+3-Math.floor(ic.height/2));text(b,t,x+34,yy+1,c||'#ffffff',{outline:null});};
   if(k==='starter'){text(b,'STARTER PACK',W/2,y+9,'#ffd23f',{align:'center',scale:2});R(b,W/2-24,y+27,48,9,'#e8283f');text(b,'3X VALUE',W/2,y+28,'#ffffff',{align:'center',outline:null});
     row(SPR.gem,SHOP.starter.gems+' GEMS',y+46,'#ff8fc8');row(SPR.coin,fmt(runPay()*SHOP.starter.coinRuns)+' COINS ('+SHOP.starter.coinRuns+' RUNS)',y+60,'#ffd23f');row(SPR.star,'THE EXPLORER OUTFIT',y+74);
-    text(b,'ONE PER PLAYER. IN THE SHOP',W/2,y+92,'#9fc0e8',{align:'center',outline:null});text(b,'FOR THE NEXT 48 HOURS',W/2,y+101,'#9fc0e8',{align:'center',outline:null});
+    text(b,'ONE PER PLAYER. IN THE SHOP',W/2,y+92,'#9fc0e8',{align:'center',outline:null});text(b,'ENDS IN '+fmtClock(starterLeft()||STARTER_MS),W/2,y+101,'#ffd23f',{align:'center',outline:null});
     button('ofbuy',x+26,y+116,w-52,20,'green',SHOP.starter.price,()=>{track('offer_tap',{kind:k,choice:'buy'});offerOpen=null;shopBuyStarter();},{scale:2});}
   else{text(b,'PREMIUM',W/2,y+9,'#ffd23f',{align:'center',scale:2});text(b,'SKIP THE ADS, KEEP THE REWARDS',W/2,y+28,'#9fc0e8',{align:'center',outline:null});
     premGold(W/2-16,y+38,32);row(SPR.coin,'x2 COINS FOREVER',y+78,'#ffd23f');row(SPR.trophy,'REWARDS WITHOUT ADS',y+90);row(SPR.star,'GOLD PAINT, ALL MACHINES',y+102);row(SPR.helper,'12H HELPER SHED (WAS 6H)',y+114);row(SPR.coinS,'+ '+fmt(runPay()*SHOP.premium.coinRuns)+' COINS NOW',y+126,'#ffd23f');
@@ -5150,6 +5150,7 @@ function gemBest(){let bi=-1,br=0;SHOP.gems.forEach((g,i)=>{const r=gemRate(g);i
 const STARTER_MS=48*3600e3;let shopNeed=null,shopFrom=null;
 function starterLeft(){if(save.starter)return 0;const o=save.offers||{};if(!o.starter&&REVIEW_MODE&&/[?&]starter\b/.test(location.search)){save.offers=o;o.starter=true;}if(!o.starter)return 0;
   if(!save.starterT){save.starterT=Date.now();persist();}return Math.max(0,STARTER_MS-(Date.now()-save.starterT));}
+function fmtClock(ms){const t=Math.max(0,Math.ceil(ms/1000)),h=Math.floor(t/3600),m=Math.floor(t/60)%60,x=t%60;return (h?h+':'+String(m).padStart(2,'0'):m)+':'+String(x).padStart(2,'0');}
 function fmtLeft(ms){const m=Math.ceil(ms/60000);return m>=60?Math.floor(m/60)+'H '+String(m%60).padStart(2,'0')+'M':m+'M';}
 function needPack(n){const fx=!save.gemBuys;let k=SHOP.gems.findIndex(g=>g.gems*(fx?2:1)>=n);if(k<0)k=SHOP.gems.length-1;return k;}
 function needGems(cost,item){const n=cost-(save.gems||0);sfx('deny');showToast('NEED '+n+' MORE GEMS','#ff9aa8');if(!shopOpen)return;shopNeed={cost,t:tNow};shopTab=0;
@@ -5269,7 +5270,7 @@ function drawShop(){if(save.shopDay!==todayKey()){save.shopDay=todayKey();persis
       const tile=(tx,ic,t,c)=>{R(b,tx,y+13,30,16,'#d3f0d9');b.drawImage(ic,tx+15-Math.floor(ic.width/2),y+14+Math.floor((7-ic.height)/2));text(b,t,tx+15,y+22,c,{align:'center',outline:null});};
       tile(17,SPR.gem,''+SHOP.starter.gems,'#c2185b');tile(50,SPR.coin,fmt(runPay()*SHOP.starter.coinRuns),'#a8740a');tile(83,SPR.star,'OUTFIT','#13306b');
       button('sst',118,y+13,46,16,'green',SHOP.starter.price,shopBuyStarter);
-      text(b,'ENDS IN '+fmtLeft(stL),17,y+31,'#e8283f',{outline:null});text(b,'ONE PER PLAYER',164,y+31,'#4f6fa0',{align:'right',outline:null});y+=42;
+      text(b,'ENDS IN '+fmtClock(stL),17,y+31,'#e8283f',{outline:null});text(b,'ONE PER PLAYER',164,y+31,'#4f6fa0',{align:'right',outline:null});y+=42;
       if(!save.pro){card(12,y,156,45,'#fffaf0','#ffd23f');b.drawImage(SPR.trophy,17,y+3);text(b,'PREMIUM',29,y+5,'#a8740a',{outline:null});
         R(b,17,y+16,3,3,'#ffd23f');text(b,'x2 COINS FOREVER',23,y+15,'#a8740a',{outline:null});['REWARDS WITHOUT ADS','GOLD PAINT + 12H HELPER SHED','+ '+fmt(runPay()*SHOP.premium.coinRuns)+' COINS NOW'].forEach((q,k)=>perk(q,y+22+k*7));
         button('spro',118,y+3,46,16,'green',SHOP.premium.price,shopBuyPremium);text(b,'PAY ONCE',141,y+21,'#a8740a',{align:'center',outline:null});y+=47;}}
