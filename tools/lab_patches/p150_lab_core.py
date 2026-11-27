@@ -31,10 +31,12 @@ function twistJobs(a){if(TW_JOBS[a])return TW_JOBS[a].map(id=>LEVELS.findIndex(L
 function twistOf(idx){if(!PROTO||new URLSearchParams(location.search).has('notwist'))return null;const L=LEVELS[idx];return L&&TWISTS[L.area]&&twistJobs(L.area).includes(idx)?L.area:null;}""")
 
 # lab events: every kind available at once; the map banner shows the one you last picked
-rep("function evNow(){const t=Date.now();return EVENTS.find(e=>t>=e.start&&t<e.end)||null;}",
+rep("function evNow(){const t=Date.now();evAutoAdd(t);return EVENTS.find(e=>!e.auto&&t>=e.start&&t<e.end)||EVENTS.find(e=>e.auto&&t>=e.start&&t<e.end&&evLive(e))||null;}",
     "if(PROTO){const t=Date.now();for(const k in EVENT_DEFS)EVENTS.push({id:'lab-'+k,kind:k,start:t-1000,end:t+72*3600e3,test:true,lab:true});}\n"
     "let labOpen=false,labPick=null,labKind=null,labReopen=false,labTab=0;\n"
-    "function evNow(){if(PROTO)return EVENTS.find(e=>e.lab&&e.kind===labKind)||null;const t=Date.now();return EVENTS.find(e=>t>=e.start&&t<e.end)||null;}")
+    "function evNow(){if(PROTO)return EVENTS.find(e=>e.lab&&e.kind===labKind)||null;const t=Date.now();evAutoAdd(t);return EVENTS.find(e=>!e.auto&&t>=e.start&&t<e.end)||EVENTS.find(e=>e.auto&&t>=e.start&&t<e.end&&evLive(e))||null;}")
+# the weekend rotation (main p191) stays off in the lab: lab events are picked on the LAB screen
+rep("function evAutoOn(){return !EV_TEST&&", "function evAutoOn(){return !PROTO&&!EV_TEST&&")
 
 # build: events with a mode, and area twists
 rep("  LEVELS[idx]=c;try{return buildLevel(idx);}finally{LEVELS[idx]=L;}}",
